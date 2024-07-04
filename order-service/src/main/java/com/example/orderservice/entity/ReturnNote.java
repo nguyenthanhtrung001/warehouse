@@ -1,7 +1,9 @@
 package com.example.orderservice.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.time.LocalDate;
+import java.util.List;
 
 @Entity
 public class ReturnNote {
@@ -17,6 +19,18 @@ public class ReturnNote {
 
     @Column(name = "employee_id", nullable = false)
     private Long employeeId;
+
+    @JsonIgnore
+    @OneToMany
+    List<ReturnDetail> returnDetails;
+
+    public List<ReturnDetail> getReturnDetails() {
+        return returnDetails;
+    }
+
+    public void setReturnDetails(List<ReturnDetail> returnDetails) {
+        this.returnDetails = returnDetails;
+    }
 
     private Integer status; // 0-1 status
 

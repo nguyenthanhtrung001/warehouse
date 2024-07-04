@@ -1,4 +1,5 @@
 package com.example.orderservice.controller;
+import com.example.orderservice.dto.ReturnNoteRequest;
 import com.example.orderservice.entity.ReturnNote;
 
 import com.example.orderservice.service.IReturnNoteService;
@@ -16,9 +17,9 @@ public class ReturnNoteController {
     private IReturnNoteService returnNoteService;
 
     @PostMapping
-    public ResponseEntity<ReturnNote> createReturnNote(@RequestBody ReturnNote returnNote) {
-        ReturnNote createdReturnNote = returnNoteService.createReturnNote(returnNote);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdReturnNote);
+    public ResponseEntity<ReturnNote> createReturnNoteAndDetails(@RequestBody ReturnNoteRequest returnNoteRequest) {
+        ReturnNote returnNote = returnNoteService.createReturnNoteAndDetails(returnNoteRequest);
+        return ResponseEntity.ok(returnNote);
     }
 
     @GetMapping("/{id}")
