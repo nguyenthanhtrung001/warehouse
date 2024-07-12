@@ -128,10 +128,9 @@ public class implReceiptService implements IReceiptService {
            e.printStackTrace();
        }
 
-
         for (Import_Export_DetailRequest detailRequest : importExportRequest.getImport_Export_Details()) {
 
-        try{
+
             System.out.println("ID Name abc:"+detailRequest.getProduct_Id());
             Bath bathTmp =new Bath();
             bathTmp.setId(bath.getId());
@@ -141,11 +140,6 @@ public class implReceiptService implements IReceiptService {
             bathDetailRequest.setBatch(bathTmp);
             bathDetailRequest.setLocation(location);
             BathDetailRequest bathDetail = inventoryClient.createDetailBath(bathDetailRequest);
-            System.out.println(importExportRequest.getLocation());
-            System.out.println("ID bath:"+bathDetail.getId());
-        }catch (Exception e){
-            e.printStackTrace();
-        }
 
 
             ReceiptDetail detail = new ReceiptDetail();
@@ -153,6 +147,7 @@ public class implReceiptService implements IReceiptService {
 
             detail.setPurchasePrice(detailRequest.getPurchasePrice());
             detail.setQuantity(detailRequest.getQuantity());
+            detail.setBatchDetail_Id(bathDetail.getId());
 
             receiptDetailRepository.save(detail);
         }
