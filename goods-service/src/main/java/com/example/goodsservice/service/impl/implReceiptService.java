@@ -1,21 +1,26 @@
 package com.example.goodsservice.service.impl;
 
-import com.example.goodsservice.dto.Import_Export_DetailRequest;
-import com.example.goodsservice.dto.Import_Export_Request;
+import com.example.goodsservice.client.InventoryClient;
+import com.example.goodsservice.dto.*;
 import com.example.goodsservice.entity.DeliveryNote;
 import com.example.goodsservice.entity.Receipt;
 import com.example.goodsservice.entity.ReceiptDetail;
+import com.example.goodsservice.entity.Supplier;
+import com.example.goodsservice.mapper.BathDetailMapper;
+import com.example.goodsservice.mapper.BathMapper;
 import com.example.goodsservice.repository.ReceiptDetailRepository;
 import com.example.goodsservice.repository.ReceiptRepository;
 import com.example.goodsservice.service.IReceiptService;
 import jakarta.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+
 
 @Service
 public class implReceiptService implements IReceiptService {
@@ -23,7 +28,12 @@ public class implReceiptService implements IReceiptService {
     private ReceiptRepository receiptRepository;
     @Autowired
     private ReceiptDetailRepository receiptDetailRepository;
-
+    @Autowired
+    InventoryClient inventoryClient;
+    @Autowired
+    BathMapper bathMapper;
+    @Autowired
+    BathDetailMapper bathDetailMapper;
     @Override
     public Receipt createReceipt(Receipt receipt) {
         // Gọi api tạo lô hàng trước
@@ -92,26 +102,55 @@ public class implReceiptService implements IReceiptService {
 
     @Transactional
     public Receipt createReceiptWithDetails(Import_Export_Request importExportRequest) {
-        Receipt savedReceipt=null;
+
+        // gọi API tạo lô hàng và cập nhật số lượng cho lô hàng
+        BathRequest bathRequest = bathMapper.toBathRequest(importExportRequest);
+        bathRequest.setStatus(1);
+        BathRequest bath = inventoryClient.createBath(bathRequest);
+         /*   System.out.println("ID Name:"+bath.getBatchName());
+        System.out.println("ID bath:"+bath.getId());*/
+
+        Receipt savedReceipt = null;
+        Receipt receipt = new Receipt();
        try {
-           Receipt receipt = new Receipt();
-           receipt.setReceiptDate(LocalDate.now());
-           receipt.setSupplier(importExportRequest.getSupplier());
+           receipt.setReceiptDate(LocalDateTime.now());
+
+           Supplier supplier =new Supplier(importExportRequest.getSupplier());
+           receipt.setSupplier(supplier);
            receipt.setStatus(1);
            receipt.setPurchasePrice(importExportRequest.getPrice());
-           receipt.setEmployeeId(importExportRequest.getEmployeeId());
+           // API lấy thông tin đăng nhập để set ID Nhân viên
+            receipt.setEmployeeId(importExportRequest.getEmployeeId());
            savedReceipt = receiptRepository.save(receipt);
+
        }catch (Exception e)
        {
            e.printStackTrace();
        }
 
-        // gọi API tạo lô hàng và cập nhật số lượng cho lô hàng
 
         for (Import_Export_DetailRequest detailRequest : importExportRequest.getImport_Export_Details()) {
+
+        try{
+            System.out.println("ID Name abc:"+detailRequest.getProduct_Id());
+            Bath bathTmp =new Bath();
+            bathTmp.setId(bath.getId());
+            Location location = new Location();
+            location.setId(importExportRequest.getLocation());
+            BathDetailRequest bathDetailRequest = bathDetailMapper.toBathDetailRequest(detailRequest);
+            bathDetailRequest.setBatch(bathTmp);
+            bathDetailRequest.setLocation(location);
+            BathDetailRequest bathDetail = inventoryClient.createDetailBath(bathDetailRequest);
+            System.out.println(importExportRequest.getLocation());
+            System.out.println("ID bath:"+bathDetail.getId());
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+
             ReceiptDetail detail = new ReceiptDetail();
             detail.setReceipt(savedReceipt);
-            detail.setBatchDetail_Id(detailRequest.getBatchDetail_Id());
+
             detail.setPurchasePrice(detailRequest.getPurchasePrice());
             detail.setQuantity(detailRequest.getQuantity());
 

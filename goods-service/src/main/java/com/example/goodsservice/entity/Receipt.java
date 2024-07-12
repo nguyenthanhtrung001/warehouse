@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -13,8 +14,8 @@ public class Receipt {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Temporal(TemporalType.DATE)
-    private LocalDate receiptDate;
+    @Temporal(TemporalType.TIMESTAMP)
+    private LocalDateTime receiptDate;
 
     @ManyToOne
     private Supplier supplier;
@@ -51,6 +52,10 @@ public class Receipt {
     public Receipt() {
     }
 
+    public Receipt(Long id) {
+        this.id = id;
+    }
+
     public Long getPurchasePrice() {
         return purchasePrice;
     }
@@ -68,11 +73,11 @@ public class Receipt {
         this.id = id;
     }
 
-    public LocalDate getReceiptDate() {
+    public LocalDateTime getReceiptDate() {
         return receiptDate;
     }
 
-    public void setReceiptDate(LocalDate receiptDate) {
+    public void setReceiptDate(LocalDateTime receiptDate) {
         this.receiptDate = receiptDate;
     }
 

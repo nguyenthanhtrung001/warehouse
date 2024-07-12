@@ -4,6 +4,7 @@ import com.example.goodsservice.dto.Import_Export_DetailRequest;
 import com.example.goodsservice.dto.Import_Export_Request;
 import com.example.goodsservice.entity.DeliveryDetail;
 import com.example.goodsservice.entity.DeliveryNote;
+import com.example.goodsservice.entity.Receipt;
 import com.example.goodsservice.repository.DeliveryDetailRepository;
 import com.example.goodsservice.repository.DeliveryNoteRepository;
 import com.example.goodsservice.service.IDeliveryNoteService;
@@ -78,7 +79,8 @@ public class implDeliveryNoteService implements IDeliveryNoteService {
         try {
             DeliveryNote deliveryNote = new DeliveryNote();
             deliveryNote.setDeliveryDate(LocalDate.now());
-            deliveryNote.setReceipt(importExportRequest.getReceipt());
+            Receipt receipt = new Receipt(importExportRequest.getReceipt());
+            deliveryNote.setReceipt( receipt );
             deliveryNote.setStatus(1);
             deliveryNote.setType(1);// xuất trả nhà cung cấp
             deliveryNote.setPrice(importExportRequest.getPrice());
@@ -94,15 +96,17 @@ public class implDeliveryNoteService implements IDeliveryNoteService {
         return getDeliveryNote(importExportRequest, savedNote);
     }
 
+
     @Transactional
     public DeliveryNote createDeliveryNote_Delete_WithDetails(Import_Export_Request importExportRequest) {
         DeliveryNote savedNote=null;
         try {
             DeliveryNote deliveryNote = new DeliveryNote();
             deliveryNote.setDeliveryDate(LocalDate.now());
-            deliveryNote.setReceipt(importExportRequest.getReceipt());
+            Receipt receipt = new Receipt(importExportRequest.getReceipt());
+            deliveryNote.setReceipt(receipt);
             deliveryNote.setStatus(1);
-            deliveryNote.setType(2);// xuất trả nhà cung cấp
+            deliveryNote.setType(2);// xuất hủy hàng
             deliveryNote.setPrice(importExportRequest.getPrice());
             deliveryNote.setEmployeeId(importExportRequest.getEmployeeId());
             savedNote = deliveryNoteRepository.save(deliveryNote);
@@ -120,7 +124,7 @@ public class implDeliveryNoteService implements IDeliveryNoteService {
         for (Import_Export_DetailRequest detailRequest : importExportRequest.getImport_Export_Details()) {
             DeliveryDetail detail = new DeliveryDetail();
             detail.setDeliveryNote(savedNote);
-            detail.setBatchDetail_Id(detailRequest.getBatchDetail_Id());
+            detail.setBatchDetail_Id(detailRequest.getProduct_Id());
             detail.setQuantity(detailRequest.getQuantity());
 
             deliveryDetailRepository.save(detail);

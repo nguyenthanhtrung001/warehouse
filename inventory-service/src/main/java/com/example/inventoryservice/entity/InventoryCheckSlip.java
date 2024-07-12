@@ -25,7 +25,7 @@ public class InventoryCheckSlip {
     private Integer status;
 
     @Column(name = "total_discrepancy", nullable = false)
-    private Double totalDiscrepancy;
+    private Long totalDiscrepancy;
 
     @Column(name = "quantity_discrepancy_increase", nullable = false)
     private Integer quantityDiscrepancyIncrease;
@@ -79,11 +79,11 @@ public class InventoryCheckSlip {
         this.status = status;
     }
 
-    public Double getTotalDiscrepancy() {
+    public Long getTotalDiscrepancy() {
         return totalDiscrepancy;
     }
 
-    public void setTotalDiscrepancy(Double totalDiscrepancy) {
+    public void setTotalDiscrepancy(Long totalDiscrepancy) {
         this.totalDiscrepancy = totalDiscrepancy;
     }
 

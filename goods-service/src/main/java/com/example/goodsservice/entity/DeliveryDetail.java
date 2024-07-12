@@ -29,6 +29,16 @@ public class DeliveryDetail {
 
     private Integer quantity;
 
+    public Long getPrice() {
+        return Price;
+    }
+
+    public void setPrice(Long price) {
+        Price = price;
+    }
+
+    private Long Price;
+
     public DeliveryDetail() {
     }
 

@@ -8,7 +8,7 @@ public class InventoryCheckSlipRequest {
     private Date inventoryCheckTime;
     private Date inventoryBalancingDate;
     private Integer status;
-    private Double totalDiscrepancy;
+    private Long totalDiscrepancy;
     private Integer quantityDiscrepancyIncrease;
     private Integer quantityDiscrepancyDecrease;
     private String notes;
@@ -41,11 +41,11 @@ public class InventoryCheckSlipRequest {
         this.status = status;
     }
 
-    public Double getTotalDiscrepancy() {
+    public Long getTotalDiscrepancy() {
         return totalDiscrepancy;
     }
 
-    public void setTotalDiscrepancy(Double totalDiscrepancy) {
+    public void setTotalDiscrepancy(Long totalDiscrepancy) {
         this.totalDiscrepancy = totalDiscrepancy;
     }
 

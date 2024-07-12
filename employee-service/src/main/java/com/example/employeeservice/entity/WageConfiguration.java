@@ -18,17 +18,17 @@ public class WageConfiguration {
 
     private Double earlyPenalty; // Tiền bị về sớm
 
-    private  Long Hours;
+    private  Integer Hours;
 
     // Constructors, getters, setters
     public WageConfiguration() {
     }
 
-    public Long getHours() {
+    public Integer getHours() {
         return Hours;
     }
 
-    public void setHours(Long hours) {
+    public void setHours(Integer hours) {
         Hours = hours;
     }
 

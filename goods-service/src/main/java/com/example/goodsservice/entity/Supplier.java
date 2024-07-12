@@ -22,6 +22,10 @@ public class Supplier {
     public Supplier() {
     }
 
+    public Supplier(Long id) {
+        this.id = id;
+    }
+
     public List<Receipt> getReceipts() {
         return receipts;
     }
