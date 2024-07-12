@@ -1,12 +1,13 @@
 package com.example.inventoryservice.dto;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
 public class InventoryCheckSlipRequest {
 
-    private Date inventoryCheckTime;
-    private Date inventoryBalancingDate;
+    private LocalDateTime inventoryCheckTime;
+    private LocalDateTime inventoryBalancingDate;
     private Integer status;
     private Long totalDiscrepancy;
     private Integer quantityDiscrepancyIncrease;
@@ -17,19 +18,19 @@ public class InventoryCheckSlipRequest {
 
     // Getters and setters
 
-    public Date getInventoryCheckTime() {
+    public LocalDateTime getInventoryCheckTime() {
         return inventoryCheckTime;
     }
 
-    public void setInventoryCheckTime(Date inventoryCheckTime) {
+    public void setInventoryCheckTime(LocalDateTime inventoryCheckTime) {
         this.inventoryCheckTime = inventoryCheckTime;
     }
 
-    public Date getInventoryBalancingDate() {
+    public LocalDateTime getInventoryBalancingDate() {
         return inventoryBalancingDate;
     }
 
-    public void setInventoryBalancingDate(Date inventoryBalancingDate) {
+    public void setInventoryBalancingDate(LocalDateTime inventoryBalancingDate) {
         this.inventoryBalancingDate = inventoryBalancingDate;
     }
 

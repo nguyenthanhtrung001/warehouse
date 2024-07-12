@@ -18,6 +18,7 @@ public interface  IBatchDetailService {
 
     boolean updateBatchDetail(Long id, BatchDetail batchDetail);
     boolean updateQuantityDeliveryDetail(Long id, Integer quantity);
+    boolean updateQuantityForCheckInventory(Long id, Integer quantity);
 
     boolean deleteBatchDetail(Long id);
 }

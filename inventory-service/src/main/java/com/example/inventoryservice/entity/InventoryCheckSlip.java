@@ -2,6 +2,8 @@ package com.example.inventoryservice.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -15,11 +17,11 @@ public class InventoryCheckSlip {
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "inventory_check_time", nullable = false)
-    private Date inventoryCheckTime;
+    private LocalDateTime inventoryCheckTime;
 
-    @Temporal(TemporalType.DATE)
+    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "inventory_balancing_date")
-    private Date inventoryBalancingDate;
+    private LocalDateTime  inventoryBalancingDate;
 
     @Column(name = "status", nullable = false)
     private Integer status;
@@ -47,6 +49,10 @@ public class InventoryCheckSlip {
     public InventoryCheckSlip() {
     }
 
+    public InventoryCheckSlip(Long id) {
+        this.id = id;
+    }
+
     public Long getId() {
         return id;
     }
@@ -55,19 +61,19 @@ public class InventoryCheckSlip {
         this.id = id;
     }
 
-    public Date getInventoryCheckTime() {
+    public LocalDateTime getInventoryCheckTime() {
         return inventoryCheckTime;
     }
 
-    public void setInventoryCheckTime(Date inventoryCheckTime) {
+    public void setInventoryCheckTime(LocalDateTime inventoryCheckTime) {
         this.inventoryCheckTime = inventoryCheckTime;
     }
 
-    public Date getInventoryBalancingDate() {
+    public LocalDateTime getInventoryBalancingDate() {
         return inventoryBalancingDate;
     }
 
-    public void setInventoryBalancingDate(Date inventoryBalancingDate) {
+    public void setInventoryBalancingDate(LocalDateTime inventoryBalancingDate) {
         this.inventoryBalancingDate = inventoryBalancingDate;
     }
 

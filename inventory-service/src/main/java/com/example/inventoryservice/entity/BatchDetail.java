@@ -25,6 +25,10 @@ public class BatchDetail {
 
     public BatchDetail() {}
 
+    public BatchDetail(Long id) {
+        this.id = id;
+    }
+
     public Long getProductId() {
         return productId;
     }

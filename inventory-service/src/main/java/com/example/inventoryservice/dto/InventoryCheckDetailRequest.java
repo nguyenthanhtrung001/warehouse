@@ -4,7 +4,7 @@ import com.example.inventoryservice.entity.BatchDetail;
 
 public class InventoryCheckDetailRequest {
 
-    private BatchDetail batchDetail;
+    private Long batchDetail;
     private Integer inventory;
     private Integer actualQuantity;
     private Integer quantityDiscrepancy;
@@ -12,11 +12,11 @@ public class InventoryCheckDetailRequest {
     // Getters and setters
 
 
-    public BatchDetail getBatchDetail() {
+    public Long getBatchDetail() {
         return batchDetail;
     }
 
-    public void setBatchDetail(BatchDetail batchDetail) {
+    public void setBatchDetail(Long batchDetail) {
         this.batchDetail = batchDetail;
     }
 

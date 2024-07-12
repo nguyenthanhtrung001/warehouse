@@ -1,10 +1,15 @@
 package com.example.inventoryservice.service.impl;
 
+import com.example.inventoryservice.dto.InventoryCheckDetailRequest;
 import com.example.inventoryservice.dto.InventoryCheckSlipRequest;
+import com.example.inventoryservice.entity.BatchDetail;
 import com.example.inventoryservice.entity.InventoryCheckDetail;
 import com.example.inventoryservice.entity.InventoryCheckSlip;
+import com.example.inventoryservice.mapper.CheckSlipMapper;
+import com.example.inventoryservice.repository.BatchDetailRepository;
 import com.example.inventoryservice.repository.InventoryCheckDetailRepository;
 import com.example.inventoryservice.repository.InventoryCheckSlipRepository;
+import com.example.inventoryservice.service.IBatchDetailService;
 import com.example.inventoryservice.service.IInventoryCheckSlipService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,48 +28,49 @@ public class implInventoryCheckSlipService implements IInventoryCheckSlipService
 
     @Autowired
     private InventoryCheckDetailRepository inventoryCheckDetailRepository;
+    @Autowired
+    private IBatchDetailService batchDetailService;
+
 
     @Transactional
     public InventoryCheckSlip createInventoryCheckSlip(InventoryCheckSlipRequest inventoryCheckSlipRequest) {
         InventoryCheckSlip inventoryCheckSlip = new InventoryCheckSlip();
+
         // Lấy ngày giờ hiện tại
         LocalDateTime currentDateTime = LocalDateTime.now();
-        // Chuyển đổi thành Date
-        Date currentDate = Date.from(currentDateTime.atZone(ZoneId.systemDefault()).toInstant());
-
-        // Đặt ngày giờ hiện tại cho thuộc tính inventoryCheckTime của inventoryCheckSlip
-        inventoryCheckSlip.setInventoryCheckTime(currentDate);
+        inventoryCheckSlip.setInventoryCheckTime(currentDateTime);
         inventoryCheckSlip.setStatus(1);
+
         // gọi api để cân bằng kho, cập nhật kho
-        // kiểm tra nếu ngày cân bằng khác null
-       // inventoryCheckSlip.setInventoryBalancingDate(inventoryCheckSlipRequest.getInventoryBalancingDate());
 
         inventoryCheckSlip.setTotalDiscrepancy(inventoryCheckSlipRequest.getTotalDiscrepancy());
         inventoryCheckSlip.setQuantityDiscrepancyIncrease(inventoryCheckSlipRequest.getQuantityDiscrepancyIncrease());
         inventoryCheckSlip.setQuantityDiscrepancyDecrease(inventoryCheckSlipRequest.getQuantityDiscrepancyDecrease());
         inventoryCheckSlip.setNotes(inventoryCheckSlipRequest.getNotes());
         inventoryCheckSlip.setEmployeeId(inventoryCheckSlipRequest.getEmployeeId());
-        try {
-            inventoryCheckSlipRepository.save(inventoryCheckSlip);
 
-        }catch (Exception e){
-            e.printStackTrace();
-        }
         InventoryCheckSlip savedSlip = inventoryCheckSlipRepository.save(inventoryCheckSlip);
 
-        for (var detailRequest : inventoryCheckSlipRequest.getInventoryCheckDetails()) {
+        for (InventoryCheckDetailRequest detailRequest : inventoryCheckSlipRequest.getInventoryCheckDetails()) {
             InventoryCheckDetail detail = new InventoryCheckDetail();
 
             detail.setInventoryCheckSlip(savedSlip);
-            detail.setBatchDetail(detailRequest.getBatchDetail());
+
+            BatchDetail batchDetail = new BatchDetail(detailRequest.getBatchDetail());
+            detail.setBatchDetail(batchDetail);
+
             detail.setInventory(detailRequest.getInventory());
             detail.setActualQuantity(detailRequest.getActualQuantity());
             detail.setQuantityDiscrepancy(detailRequest.getQuantityDiscrepancy());
+
+
+            batchDetailService.updateQuantityForCheckInventory(detailRequest.getBatchDetail(), detail.getQuantityDiscrepancy());
+
             inventoryCheckDetailRepository.save(detail);
 
-
-
         }
+
+         inventoryCheckSlip.setInventoryBalancingDate(LocalDateTime.now());
 
         return savedSlip;
     }
@@ -96,10 +102,10 @@ public class implInventoryCheckSlipService implements IInventoryCheckSlipService
 
             inventoryCheckDetailRepository.deleteAllByInventoryCheckSlipId(id);
 
-            for (var detailRequest : inventoryCheckSlipRequest.getInventoryCheckDetails()) {
+            for (InventoryCheckDetailRequest detailRequest : inventoryCheckSlipRequest.getInventoryCheckDetails()) {
                 InventoryCheckDetail detail = new InventoryCheckDetail();
                 detail.setInventoryCheckSlip(inventoryCheckSlip);
-                detail.setBatchDetail(detailRequest.getBatchDetail());
+              /*  detail.setBatchDetail(detailRequest.getBatchDetail());*/
                 detail.setInventory(detailRequest.getInventory());
                 detail.setActualQuantity(detailRequest.getActualQuantity());
                 detail.setQuantityDiscrepancy(detailRequest.getQuantityDiscrepancy());
