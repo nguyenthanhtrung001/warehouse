@@ -46,6 +46,15 @@ public class BatchDetailController {
             return ResponseEntity.notFound().build();
         }
     }
+    @PutMapping("/quantity/{id}")
+    public ResponseEntity<String> updateQuantityBatchDetail(@PathVariable Long id, @RequestParam Integer quantity) {
+        boolean updated = batchDetailService.updateQuantityDeliveryDetail(id, quantity);
+        if (updated) {
+            return ResponseEntity.ok("Cập nhật thành công");
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteBatchDetail(@PathVariable Long id) {

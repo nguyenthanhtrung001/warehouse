@@ -3,6 +3,7 @@ package com.example.goodsservice.entity;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Entity
@@ -12,8 +13,8 @@ public class DeliveryNote {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Temporal(TemporalType.DATE)
-    private LocalDate deliveryDate;
+    @Temporal(TemporalType.TIMESTAMP)
+    private LocalDateTime deliveryDate;
 
     @ManyToOne
     @JoinColumn(name = "receipt_id", nullable = false)
@@ -66,11 +67,11 @@ public class DeliveryNote {
         this.id = id;
     }
 
-    public LocalDate getDeliveryDate() {
+    public LocalDateTime getDeliveryDate() {
         return deliveryDate;
     }
 
-    public void setDeliveryDate(LocalDate deliveryDate) {
+    public void setDeliveryDate(LocalDateTime deliveryDate) {
         this.deliveryDate = deliveryDate;
     }
 

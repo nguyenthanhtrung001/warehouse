@@ -63,6 +63,21 @@ public class implBatchDetailService implements IBatchDetailService {
     }
 
     @Override
+    public boolean updateQuantityDeliveryDetail(Long id, Integer quantity) {
+        BatchDetail detail= batchDetailRepository.findById(id).orElse(null);
+        if (detail != null) {
+            int quantityBath = detail.getQuantity();
+            if(quantity>quantityBath) return false;
+            int result = quantityBath - quantity;
+            detail.setQuantity(result);
+            batchDetailRepository.save(detail);
+            return true;
+        }
+        return false;
+    }
+
+
+    @Override
     public boolean deleteBatchDetail(Long id) {
         if (batchDetailRepository.existsById(id)) {
             batchDetailRepository.deleteById(id);

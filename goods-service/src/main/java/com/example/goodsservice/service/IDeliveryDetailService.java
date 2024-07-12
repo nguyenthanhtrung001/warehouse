@@ -15,5 +15,6 @@ public interface IDeliveryDetailService {
 
     boolean updateDeliveryDetail(Long id, DeliveryDetail deliveryDetail);
 
+
     boolean deleteDeliveryDetail(Long id);
 }

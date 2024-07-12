@@ -27,6 +27,15 @@ public class DeliveryNoteController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
+    @PostMapping("/cancel")
+    public ResponseEntity<DeliveryNote> createDeliveryNote_Delete_WithDetails(@RequestBody Import_Export_Request importExportRequest) {
+        try {
+            DeliveryNote creatednote = deliveryNoteService.createDeliveryNote_Delete_WithDetails(importExportRequest);
+            return ResponseEntity.status(HttpStatus.CREATED).body(creatednote);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
 
     @GetMapping("/{id}")
     public ResponseEntity<DeliveryNote> getDeliveryNoteById(@PathVariable Long id) {
