@@ -21,6 +21,11 @@ public class Brand {
     public List<Product> getProducts() {
         return products;
     }
+    public Brand() {}
+
+    public Brand(Long id) {
+        this.id = id;
+    }
 
     public void setProducts(List<Product> products) {
         this.products = products;

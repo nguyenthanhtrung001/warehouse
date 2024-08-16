@@ -5,17 +5,17 @@ import com.example.goodsservice.dto.*;
 import com.example.goodsservice.entity.DeliveryDetail;
 import com.example.goodsservice.entity.DeliveryNote;
 import com.example.goodsservice.entity.Receipt;
-import com.example.goodsservice.entity.ReceiptDetail;
 import com.example.goodsservice.repository.DeliveryDetailRepository;
 import com.example.goodsservice.repository.DeliveryNoteRepository;
-import com.example.goodsservice.repository.ReceiptDetailRepository;
+import com.example.goodsservice.service.IDeliveryDetailService;
 import com.example.goodsservice.service.IDeliveryNoteService;
+import com.example.goodsservice.service.IReceiptDetailService;
+import com.example.goodsservice.service.IReceiptService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -24,12 +24,18 @@ import java.util.Optional;
 public class implDeliveryNoteService implements IDeliveryNoteService {
     @Autowired
     private DeliveryNoteRepository deliveryNoteRepository;
-    @Autowired
-    private ReceiptDetailRepository receiptDetailRepository;
+
     @Autowired
     private DeliveryDetailRepository deliveryDetailRepository;
     @Autowired
     InventoryClient inventoryClient;
+    @Autowired
+    IReceiptService receiptService;
+    @Autowired
+    private IReceiptDetailService receiptDetailService;
+    @Autowired
+    private IDeliveryDetailService deliveryDetailService;
+
 
 
     @Override
@@ -45,7 +51,11 @@ public class implDeliveryNoteService implements IDeliveryNoteService {
 
     @Override
     public List<DeliveryNote> getAllDeliveryNotes() {
-        return deliveryNoteRepository.findAll();
+        return deliveryNoteRepository.findAllByType(1);
+    }
+    @Override
+    public List<DeliveryNote> getAllDeliveryNotesCancel() {
+        return deliveryNoteRepository.findAllByType(2);
     }
 
     @Override
@@ -62,13 +72,17 @@ public class implDeliveryNoteService implements IDeliveryNoteService {
         return false;
     }
 
-    @Override
+    @Transactional
     public boolean deleteDeliveryNote(Long id) {
-        if (deliveryNoteRepository.existsById(id)) {
-            deliveryNoteRepository.deleteById(id);
-            return true;
+        DeliveryNote deliveryNote = deliveryNoteRepository.findById(id).orElse(null);
+        if (deliveryNote.getStatus() != 1) return false;
+        List<DeliveryDetail> deliveryDetails = deliveryDetailRepository.findByDeliveryNoteId(id);
+        for (DeliveryDetail detail : deliveryDetails) {
+            inventoryClient.updateQuantityForDeleteDelivery(detail.getBatchDetail_Id(),detail.getQuantity());
+            deliveryDetailRepository.deleteById(detail.getId());
         }
-        return false;
+        deliveryNoteRepository.deleteById(id);
+        return true;
     }
 
     @Override
@@ -90,6 +104,7 @@ public class implDeliveryNoteService implements IDeliveryNoteService {
             DeliveryNote deliveryNote = new DeliveryNote();
             deliveryNote.setDeliveryDate(LocalDateTime.now());
             Receipt receipt = new Receipt(importExportRequest.getReceipt());
+            receiptService.updateReceiptStatus(receipt.getId(),2);
             deliveryNote.setReceipt( receipt );
             deliveryNote.setStatus(1);
             deliveryNote.setType(1);// xuất trả nhà cung cấp
@@ -105,7 +120,14 @@ public class implDeliveryNoteService implements IDeliveryNoteService {
 
         // gọi API tạo lô hàng và cập nhật số lượng cho lô hàng
         // getDeliveryNote: Tạo chi tiết phiếu xuất
-        return getDeliveryNote( importExportRequest, savedNote);
+        DeliveryNote result= getDeliveryNote( importExportRequest, savedNote);
+        Integer quantityReceipt = receiptDetailService.getTotalQuantityByReceiptId(result.getReceipt().getId());
+        Integer quantityNote = deliveryDetailService.getTotalQuantityByReceiptId(result.getReceipt().getId());
+        if (quantityNote == quantityReceipt)
+        {
+            receiptService.updateReceiptStatus(result.getReceipt().getId(),3);
+        }
+        return result;
     }
 
 
@@ -116,12 +138,8 @@ public class implDeliveryNoteService implements IDeliveryNoteService {
         try {
             DeliveryNote deliveryNote = new DeliveryNote();
             deliveryNote.setDeliveryDate(LocalDateTime.now());
-            Receipt receipt = new Receipt(importExportRequest.getReceipt());
-            deliveryNote.setReceipt(receipt);
             deliveryNote.setStatus(1);
             deliveryNote.setType(2);// xuất hủy hàng
-            System.out.println(deliveryNote.getType());
-            deliveryNote.setPrice(importExportRequest.getPrice());
             deliveryNote.setEmployeeId(importExportRequest.getEmployeeId());
             savedNote = deliveryNoteRepository.save(deliveryNote);
         }catch (Exception e)
@@ -136,28 +154,27 @@ public class implDeliveryNoteService implements IDeliveryNoteService {
 
     private DeliveryNote getDeliveryNote(Import_Export_Request importExportRequest, DeliveryNote savedNote) {
 
-
-
         for (Import_Export_DetailRequest detailRequest : importExportRequest.getImport_Export_Details()) {
-
-
            try {
-               ResponseEntity<String> response = inventoryClient.updateDetailBath(detailRequest.getBatchDetail_Id(), detailRequest.getQuantity() );
-
+               ResponseEntity<String> response = inventoryClient.updateDetailBathForDelivery(detailRequest.getBatchDetail_Id(), detailRequest.getQuantity() );
+                System.out.println("Sl:"+detailRequest.getQuantity() );
            } catch (Exception e)
            {
                e.printStackTrace();
            }
-
             DeliveryDetail detail = new DeliveryDetail();
             detail.setDeliveryNote(savedNote);
-            detail.setBatchDetail_Id(detailRequest.getProduct_Id());
+            detail.setBatchDetail_Id(detailRequest.getBatchDetail_Id());
+            detail.setProductId(detailRequest.getProduct_Id());
             detail.setQuantity(detailRequest.getQuantity());
+            detail.setPrice(detailRequest.getPurchasePrice());
+            System.out.println("Giá:"+detailRequest.getPurchasePrice() );
             deliveryDetailRepository.save(detail);
 
         }
 
         return savedNote;
     }
+
 
 }

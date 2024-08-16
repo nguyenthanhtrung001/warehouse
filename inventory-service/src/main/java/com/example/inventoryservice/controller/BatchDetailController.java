@@ -1,5 +1,8 @@
 package com.example.inventoryservice.controller;
 
+import com.example.inventoryservice.dto.response.OrderQuantity;
+import com.example.inventoryservice.dto.response.ProductQuantity;
+import com.example.inventoryservice.entity.Batch;
 import com.example.inventoryservice.entity.BatchDetail;
 import com.example.inventoryservice.entity.Location;
 import com.example.inventoryservice.service.IBatchDetailService;
@@ -16,8 +19,6 @@ public class BatchDetailController {
 
     @Autowired
     private  IBatchDetailService batchDetailService;
-
-
 
     @PostMapping
     public ResponseEntity<BatchDetail> createBatchDetail(@RequestBody BatchDetail batchDetail) {
@@ -47,12 +48,32 @@ public class BatchDetailController {
         }
     }
     @PutMapping("/quantity/{id}")
-    public ResponseEntity<String> updateQuantityBatchDetail(@PathVariable Long id, @RequestParam Integer quantity) {
+    public ResponseEntity<String> updateQuantityForExport(@PathVariable Long id, @RequestParam Integer quantity) {
         boolean updated = batchDetailService.updateQuantityDeliveryDetail(id, quantity);
         if (updated) {
             return ResponseEntity.ok("Cập nhật thành công");
         } else {
             return ResponseEntity.notFound().build();
+        }
+    }
+    @PutMapping("/quantity/product/{id}")
+    public ResponseEntity<List<OrderQuantity>> updateQuantityForOrder(@PathVariable Long id, @RequestParam Integer quantity) {
+        List<OrderQuantity> updated = batchDetailService.updateQuantityForOrder(id, quantity);
+        if (updated != null) {
+            return ResponseEntity.ok(updated);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+    @PutMapping("/update-quantity-return-order/{id}")
+    public ResponseEntity<String> updateQuantityForReturnOrder(
+            @PathVariable("id") Long id,
+            @RequestParam("quantity") Integer quantity) {
+        boolean isUpdated = batchDetailService.updateQuantityForReturnOrder(id, quantity);
+        if (isUpdated) {
+            return ResponseEntity.ok("Quantity updated successfully.");
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Batch detail not found.");
         }
     }
 
@@ -66,7 +87,7 @@ public class BatchDetailController {
         }
     }
     @GetMapping("/quantity/{productId}")
-    public Long getQuantityByIdProductId(@PathVariable Long productId) {
+    public Integer getQuantityByIdProductId(@PathVariable Long productId) {
         return batchDetailService.getQuantityByIdProductId(productId);
     }
     @GetMapping("/locations/{productId}")
@@ -85,5 +106,27 @@ public class BatchDetailController {
     @GetMapping("/products/{batchId}")
     public List<Long> getProductByBatchId(@PathVariable Long batchId) {
         return batchDetailService.getProductByBatchId(batchId);
+    }
+    @GetMapping("/idproduct/{id}")
+    public String getProductByBatchDetailId(@PathVariable Long id) {
+       System.out.println("Đã vào đây");
+       return batchDetailService.getProductByBatchDetailById(id);
+    }
+    @GetMapping("/{id}/batch")
+    public Batch getBatchByBatchDetailById(@PathVariable Long id) {
+        return batchDetailService.getBatchByBatchDetailById(id);
+    }
+    @GetMapping("/product/{productId}")
+    public List<BatchDetail> getBatchDetailsByProductId(@PathVariable Long productId) {
+        return batchDetailService.getBatchDetailsByProductId(productId);
+    }
+    @GetMapping("/top-lowest-quantity")
+    public List<ProductQuantity> getTopLowestQuantity(@RequestParam int limit) {
+        return batchDetailService.getTopNLowestQuantity(limit);
+    }
+    @DeleteMapping("/delete")
+    public ResponseEntity<Boolean> deleteBatchDetailReturnBatchID(@RequestBody List<Long> listID) {
+        boolean isDeleted = batchDetailService.deleteBatchDetailReturnBathID(listID);
+        return ResponseEntity.ok(isDeleted);
     }
 }

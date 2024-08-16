@@ -1,7 +1,9 @@
 package com.example.orderservice.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -13,14 +15,12 @@ public class Invoice {
     private Long id;
 
     @Column(name = "print_date")
-    private Date printDate;
+//    @Temporal(TemporalType.TIMESTAMP)
+    @Convert(converter = Jsr310JpaConverters.LocalDateTimeConverter.class) // Sử dụng converter
+    private LocalDateTime printDate;
 
-    private long price;
-
-
-   /* @Column(name = "employee_id")
-    private Long employeeId;*/
-    // Status: 0 - Temporary, 1 - Success, 2 - Cancelled
+    private Long price;
+    private Long employeeId;
     private Integer status;
 
     @ManyToOne
@@ -29,6 +29,37 @@ public class Invoice {
     @JsonIgnore
     @OneToMany(mappedBy = "invoice")
     private List<ReturnNote> returnNotes;
+
+    private String note;
+
+    public Invoice(Long id) {
+        this.id = id;
+    }
+
+    public String getNote() {
+        return note;
+    }
+
+    public void setNote(String note) {
+        this.note = note;
+    }
+
+    public Long getEmployeeId() {
+        return employeeId;
+    }
+
+    public void setEmployeeId(Long employeeId) {
+        this.employeeId = employeeId;
+    }
+
+    public List<ReturnNote> getReturnNotes() {
+        return returnNotes;
+    }
+
+    public void setReturnNotes(List<ReturnNote> returnNotes) {
+        this.returnNotes = returnNotes;
+    }
+
 
     public Invoice() {
     }
@@ -41,19 +72,19 @@ public class Invoice {
         this.id = id;
     }
 
-    public Date getPrintDate() {
+    public LocalDateTime getPrintDate() {
         return printDate;
     }
 
-    public void setPrintDate(Date printDate) {
+    public void setPrintDate(LocalDateTime printDate) {
         this.printDate = printDate;
     }
 
-    public long getPrice() {
+    public Long getPrice() {
         return price;
     }
 
-    public void setPrice(long price) {
+    public void setPrice(Long price) {
         this.price = price;
     }
 

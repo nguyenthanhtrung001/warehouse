@@ -1,8 +1,12 @@
 package com.example.goodsservice.controller;
 
 import com.example.goodsservice.dto.Import_Export_Request;
+import com.example.goodsservice.dto.response.NoteDetailResponse;
+import com.example.goodsservice.dto.response.ProductQuantity;
+import com.example.goodsservice.dto.response.ReceiptDetailResponse;
 import com.example.goodsservice.entity.DeliveryNote;
 import com.example.goodsservice.entity.Receipt;
+import com.example.goodsservice.service.IDeliveryDetailService;
 import com.example.goodsservice.service.IDeliveryNoteService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,6 +21,8 @@ public class DeliveryNoteController {
 
     @Autowired
     private IDeliveryNoteService deliveryNoteService;
+    @Autowired
+    private IDeliveryDetailService deliveryDetailService;
 
     @PostMapping
     public ResponseEntity<DeliveryNote> createReceiptWithDetails(@RequestBody Import_Export_Request importExportRequest) {
@@ -51,6 +57,11 @@ public class DeliveryNoteController {
         List<DeliveryNote> deliveryNotes = deliveryNoteService.getAllDeliveryNotes();
         return ResponseEntity.ok(deliveryNotes);
     }
+    @GetMapping("/cancel")
+    public ResponseEntity<List<DeliveryNote>> getAllDeliveryNotesCancel() {
+        List<DeliveryNote> deliveryNotes = deliveryNoteService.getAllDeliveryNotesCancel();
+        return ResponseEntity.ok(deliveryNotes);
+    }
 
     @PutMapping("/{id}")
     public ResponseEntity<DeliveryNote> updateDeliveryNote(@PathVariable Long id, @RequestBody DeliveryNote deliveryNoteDetails) {
@@ -77,5 +88,34 @@ public class DeliveryNoteController {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.notFound().build();
+    }
+    @GetMapping("/{noteId}/details")
+    public ResponseEntity<List<NoteDetailResponse>> getNoteDetails(@PathVariable Long noteId) {
+        List<NoteDetailResponse> noteDetails = deliveryDetailService.getNoteDetails(noteId);
+        return ResponseEntity.ok(noteDetails);
+    }
+    @GetMapping("/products/quantities/current-month/type")
+    public List<ProductQuantity> getProductQuantitiesForCurrentMonthAndType(@RequestParam int type) {
+        return deliveryDetailService.getProductQuantitiesForCurrentMonthAndType(type);
+    }
+
+    @GetMapping("/products/quantities/by-month-year/type")
+    public List<ProductQuantity> getProductQuantitiesForMonthYearAndType(@RequestParam int month,
+                                                                         @RequestParam int year,
+                                                                         @RequestParam int type) {
+        return deliveryDetailService.getProductQuantitiesForMonthYearAndType(month, year, type);
+    }
+    @GetMapping("/total-quantity")
+    public ResponseEntity<Integer> getTotalQuantity(
+            @RequestParam Long receiptId,
+            @RequestParam Long batchDetailId) {
+
+        Integer totalQuantity = deliveryDetailService.getTotalQuantity(receiptId, batchDetailId);
+
+        if (totalQuantity != null) {
+            return ResponseEntity.ok(totalQuantity);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 }

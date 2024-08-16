@@ -19,6 +19,10 @@ public class ProductGroup {
     public ProductGroup() {
     }
 
+    public ProductGroup(Long id) {
+        this.id = id;
+    }
+
     public Long getId() {
         return id;
     }

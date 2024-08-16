@@ -6,7 +6,16 @@ public class ReturnNoteRequest {
     private Long invoiceId;
     private Long employeeId;
     private Integer status;
+    private Long price;
     private List<ReturnDetailRequest> returnDetails;
+
+    public Long getPrice() {
+        return price;
+    }
+
+    public void setPrice(Long price) {
+        this.price = price;
+    }
 
     // Getters and setters
     public Long getInvoiceId() {

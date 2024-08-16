@@ -17,7 +17,7 @@ public class DeliveryNote {
     private LocalDateTime deliveryDate;
 
     @ManyToOne
-    @JoinColumn(name = "receipt_id", nullable = false)
+    @JoinColumn(name = "receipt_id", nullable = true)
     private Receipt receipt;
 
   /*  @ManyToOne

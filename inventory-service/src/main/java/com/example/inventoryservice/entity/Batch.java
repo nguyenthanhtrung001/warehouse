@@ -1,31 +1,29 @@
 package com.example.inventoryservice.entity;
 import jakarta.persistence.*;
-
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 import java.util.Date;
 
 @Entity
 @Table(name = "batches")
+@NoArgsConstructor
+@AllArgsConstructor
+@DynamicInsert
+@DynamicUpdate
 public class Batch {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private String batchName;
-
-
     @Temporal(TemporalType.DATE)
     private Date expiryDate;
-
     private String note;
-
     private Integer status;
-
-    // Constructors, getters and setters
-
-    public Batch() {}
-
-
 
     public Long getId() {
         return id;
@@ -42,8 +40,6 @@ public class Batch {
     public void setBatchName(String batchName) {
         this.batchName = batchName;
     }
-
-
 
     public Date getExpiryDate() {
         return expiryDate;

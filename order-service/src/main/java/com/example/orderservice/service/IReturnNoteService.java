@@ -16,4 +16,8 @@ public interface  IReturnNoteService {
     boolean updateReturnNote(Long id, ReturnNote returnNote);
 
     boolean deleteReturnNote(Long id);
+    public long getTotalPriceForCurrentWeek();
+    public long getTotalPriceForCurrentMonth();
+    public long countReturnNotesForCurrentMonth();
+    public long calculateRevenueForCurrentMonth();
 }

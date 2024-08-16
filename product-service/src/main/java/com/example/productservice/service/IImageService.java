@@ -10,6 +10,8 @@ public interface  IImageService {
     Image  createImage(Image image);
     boolean updateImage(Image image, long id);
     boolean deleteImage(Long id);
+    public List<String> getImagesByProductId(Long productId);
+    public void deleteImagesByProductId(Long productId);
 
 
 }

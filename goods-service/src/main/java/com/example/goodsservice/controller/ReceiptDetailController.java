@@ -1,5 +1,7 @@
 package com.example.goodsservice.controller;
 
+import com.example.goodsservice.dto.response.ProductQuantity;
+import com.example.goodsservice.dto.response.ReceiptDetailResponse;
 import com.example.goodsservice.entity.ReceiptDetail;
 import com.example.goodsservice.service.IReceiptDetailService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,10 +65,32 @@ public class ReceiptDetailController {
     }
 
     @GetMapping("/{receiptId}/details")
-    public ResponseEntity<List<ReceiptDetail>> getReceiptDetails(@PathVariable Long receiptId) {
-        List<ReceiptDetail> receiptDetails = receiptDetailService.getReceiptDetails(receiptId);
+    public ResponseEntity<List<ReceiptDetailResponse>> getReceiptDetails(@PathVariable Long receiptId) {
+        List<ReceiptDetailResponse> receiptDetails = receiptDetailService.getReceiptDetails(receiptId);
         return ResponseEntity.ok(receiptDetails);
     }
 
+    @GetMapping("/{receiptId}/details-return")
+    public ResponseEntity<List<ReceiptDetailResponse>> getReceiptDetailsUpdateQuantityReturn(@PathVariable Long receiptId) {
+        List<ReceiptDetailResponse> receiptDetails = receiptDetailService.getReceiptDetailsWithUpdateQuantity(receiptId);
+        return ResponseEntity.ok(receiptDetails);
+    }
+    @GetMapping("/products/quantities/current-month")
+    public List<ProductQuantity> getProductQuantitiesForCurrentMonth() {
+        return receiptDetailService.getProductQuantitiesForCurrentMonth();
+    }
+    @GetMapping("/products/quantities/by-month-year")
+    public List<ProductQuantity> getProductQuantitiesForMonthYear(@RequestParam int month, @RequestParam int year) {
+        return receiptDetailService.getProductQuantitiesForMonthYear(month, year);
+    }
+    @GetMapping("/exists/{productId}")
+    public Boolean checkProductIdExists(@PathVariable Long productId) {
+        boolean exists = receiptDetailService.existsByProductId(productId);
+        if (exists) {
+            return (true);
+        } else {
+            return false;
+        }
+    }
 
 }

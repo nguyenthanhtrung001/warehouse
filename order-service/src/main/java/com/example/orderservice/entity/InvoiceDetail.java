@@ -10,12 +10,31 @@ public class InvoiceDetail {
     @Column(name = "product_id")
     private Long productId;
 
-    @Column(name = "invoice_id")
-    private Long invoiceId;
+    @ManyToOne
+    @JoinColumn(name = "invoice_id")
+    private Invoice invoiceId;
 
     private Integer quantity;
+    private Long purchasePrice;
+    private String note_return;
+
+    public String getNote_return() {
+        return note_return;
+    }
+
+    public void setNote_return(String note_return) {
+        this.note_return = note_return;
+    }
 
     public InvoiceDetail() {
+    }
+
+    public Long getPurchasePrice() {
+        return purchasePrice;
+    }
+
+    public void setPurchasePrice(Long purchasePrice) {
+        this.purchasePrice = purchasePrice;
     }
 
     public Long getId() {
@@ -34,11 +53,11 @@ public class InvoiceDetail {
         this.productId = productId;
     }
 
-    public Long getInvoiceId() {
+    public Invoice getInvoiceId() {
         return invoiceId;
     }
 
-    public void setInvoiceId(Long invoiceId) {
+    public void setInvoiceId(Invoice invoiceId) {
         this.invoiceId = invoiceId;
     }
 

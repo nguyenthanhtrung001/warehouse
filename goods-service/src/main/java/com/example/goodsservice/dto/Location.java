@@ -2,6 +2,15 @@ package com.example.goodsservice.dto;
 
 public class Location {
     Long id;
+    String nameLocation;
+
+    public String getNameLocation() {
+        return nameLocation;
+    }
+
+    public void setNameLocation(String nameLocation) {
+        this.nameLocation = nameLocation;
+    }
 
     public Location() {
     }

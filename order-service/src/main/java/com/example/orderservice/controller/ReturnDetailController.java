@@ -1,5 +1,7 @@
 package com.example.orderservice.controller;
 
+import com.example.orderservice.dto.response.InvoiceDetailResponse;
+import com.example.orderservice.dto.response.ProductQuantity;
 import com.example.orderservice.entity.ReturnDetail;
 import com.example.orderservice.service.IReturnDetailService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,5 +57,19 @@ public class ReturnDetailController {
         } else {
             return ResponseEntity.notFound().build();
         }
+    }
+    @GetMapping("/products/quantities/current-month")
+    public List<ProductQuantity> getProductQuantitiesForCurrentMonth() {
+        return returnDetailService.getProductQuantitiesForCurrentMonth();
+    }
+
+    @GetMapping("/products/quantities/by-month-year")
+    public List<ProductQuantity> getProductQuantitiesForMonthYear(@RequestParam int month,
+                                                                  @RequestParam int year) {
+        return returnDetailService.getProductQuantitiesForMonthYear(month, year);
+    }
+    @GetMapping("/return-order/{invoiceId}")
+    public List<InvoiceDetailResponse> getInvoiceDetailsByInvoiceId(@PathVariable Long invoiceId) {
+        return returnDetailService.getReturnDetailsByInvoiceId(invoiceId);
     }
 }

@@ -15,8 +15,17 @@ public class ReturnDetail {
     private Long productId;
 
     private Integer quantity;
+    private Long purchasePrice;
 
     public ReturnDetail() {
+    }
+
+    public Long getPurchasePrice() {
+        return purchasePrice;
+    }
+
+    public void setPurchasePrice(Long purchasePrice) {
+        this.purchasePrice = purchasePrice;
     }
 
     public Long getReturnNote() {

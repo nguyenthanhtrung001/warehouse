@@ -1,5 +1,6 @@
 package com.example.inventoryservice.controller;
 
+import com.example.inventoryservice.dto.response.BatchLocation;
 import com.example.inventoryservice.entity.Batch;
 import com.example.inventoryservice.service.IBatchService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,5 +53,20 @@ public class BatchController {
         } else {
             return ResponseEntity.notFound().build();
         }
+    }
+    @GetMapping("/batch-location/{productId}")
+    public BatchLocation getBatchLocationForProduct(@PathVariable Long productId) {
+        return batchService.getBatchLocatonForProduct(productId);
+    }
+    // Controller để lấy danh sách productId đã hết hạn
+    @GetMapping("/expired")
+    public List<Long> getExpiredProductIds() {
+        return batchService.getExpiredProductIds();
+    }
+
+    // Controller để lấy danh sách productId sắp hết hạn trong 7 ngày
+    @GetMapping("/expiring-in-7-days")
+    public List<Long> getExpiringProductIdsIn7Days() {
+        return batchService.getProductIdsWithBatchesExpiringIn7Days();
     }
 }

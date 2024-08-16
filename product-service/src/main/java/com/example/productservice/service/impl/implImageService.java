@@ -4,6 +4,7 @@ import com.example.productservice.entity.Brand;
 import com.example.productservice.entity.Image;
 import com.example.productservice.repository.ImageRepository;
 import com.example.productservice.service.IImageService;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -34,13 +35,13 @@ public class implImageService implements IImageService {
 
     @Override
     public boolean updateImage(Image image, long id) {
-        Optional<Image> imageOption= imageRepository.findByProductId(id);
+       /* Optional<Image> imageOption= imageRepository.findByProductId(id);
         if(imageOption.isPresent()){
             Image brandUpdate= imageOption.get();
             brandUpdate.setLink(image.getLink());
             imageRepository.save(brandUpdate);
             return true;
-        }else return false;
+        }else*/ return false;
     }
 
     @Override
@@ -51,5 +52,15 @@ public class implImageService implements IImageService {
         } else {
             return false;
         }
+    }
+
+    @Override
+    public List<String> getImagesByProductId(Long productId) {
+        return imageRepository.findLinksByProductId(productId);
+    }
+
+    @Transactional
+    public void deleteImagesByProductId(Long productId) {
+        imageRepository.deleteByProduct_Id(productId);
     }
 }

@@ -15,10 +15,20 @@ public class ReceiptDetail {
     private Long batchDetail_Id;
 
     @Column(name = "purchase_price", nullable = false)
-    private Double purchasePrice;
+    private Long purchasePrice;
 
-    @Column(name = "quantity", nullable = false)
+    @Column(name = "quantity", nullable = true)
     private Integer quantity;
+    @Column(name = "ProductId", nullable = true)
+    private Long ProductId;
+
+    public Long getProductId() {
+        return ProductId;
+    }
+
+    public void setProductId(Long productId) {
+        ProductId = productId;
+    }
 
     public ReceiptDetail() {
     }
@@ -47,11 +57,11 @@ public class ReceiptDetail {
         this.batchDetail_Id = batchDetail_Id;
     }
 
-    public Double getPurchasePrice() {
+    public Long getPurchasePrice() {
         return purchasePrice;
     }
 
-    public void setPurchasePrice(Double purchasePrice) {
+    public void setPurchasePrice(Long purchasePrice) {
         this.purchasePrice = purchasePrice;
     }
 

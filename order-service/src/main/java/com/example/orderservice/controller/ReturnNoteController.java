@@ -57,4 +57,13 @@ public class ReturnNoteController {
             return ResponseEntity.notFound().build();
         }
     }
+
+    @GetMapping("/revenue/monthly")
+    public long getMonthlyRevenue() {
+        return returnNoteService.calculateRevenueForCurrentMonth();
+    }
+    @GetMapping("/count/current-month")
+    public long getReturnNoteCountForCurrentMonth() {
+        return returnNoteService.countReturnNotesForCurrentMonth();
+    }
 }

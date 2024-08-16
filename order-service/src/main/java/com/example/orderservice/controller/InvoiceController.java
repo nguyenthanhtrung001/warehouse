@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/invoices")
@@ -41,6 +42,11 @@ public class InvoiceController {
         List<Invoice> invoices = invoiceService.getAllInvoices();
         return ResponseEntity.ok(invoices);
     }
+    @GetMapping("/status")
+    public ResponseEntity<List<Invoice>> getInvoicesByStatus(@RequestParam Integer status) {
+        List<Invoice> invoices = invoiceService.getAllInvoicesWithStatus(status);
+        return ResponseEntity.ok(invoices);
+    }
 
     @PutMapping("/{id}")
     public ResponseEntity<Invoice> updateInvoice(@PathVariable Long id, @RequestBody Invoice invoice) {
@@ -54,11 +60,25 @@ public class InvoiceController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteInvoice(@PathVariable Long id) {
-        boolean deleted = invoiceService.deleteInvoice(id);
+        boolean deleted = invoiceService.deleteInvoiceWithStatus_1(id);
         if (deleted) {
             return ResponseEntity.noContent().build();
         } else {
             return ResponseEntity.notFound().build();
         }
     }
+    @PutMapping("/{invoiceId}/status")
+    public ResponseEntity<String> updateInvoiceStatus(@PathVariable("invoiceId") Long invoiceId){
+        boolean isUpdated = invoiceService.updateInvoiceStatus(invoiceId, 2);
+        if (isUpdated) {
+            return new ResponseEntity<>("Hóa đơn đã được cập nhật trạng thái thành công.", HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>("Hóa đơn không tồn tại.", HttpStatus.NOT_FOUND);
+        }
+    }
+    @GetMapping("/api/product-summary")
+    public Map<String, Object> getProductSummary( @RequestParam int year) {
+        return invoiceService.getProductSalesSummary( year);
+    }
+
 }

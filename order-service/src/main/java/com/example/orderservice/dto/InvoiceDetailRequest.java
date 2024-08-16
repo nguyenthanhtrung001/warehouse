@@ -1,25 +1,27 @@
 package com.example.orderservice.dto;
 
 public class InvoiceDetailRequest {
-    private Long productId;
+    private Long product_Id;
+    private Long purchasePrice;
     private Integer quantity;
-    private Long price;
 
-
-    public Long getPrice() {
-        return price;
+    public InvoiceDetailRequest() {
     }
 
-    public void setPrice(Long price) {
-        this.price = price;
+    public Long getProduct_Id() {
+        return product_Id;
     }
 
-    public Long getProductId() {
-        return productId;
+    public void setProduct_Id(Long product_Id) {
+        this.product_Id = product_Id;
     }
 
-    public void setProductId(Long productId) {
-        this.productId = productId;
+    public Long getPurchasePrice() {
+        return purchasePrice;
+    }
+
+    public void setPurchasePrice(Long purchasePrice) {
+        this.purchasePrice = purchasePrice;
     }
 
     public Integer getQuantity() {

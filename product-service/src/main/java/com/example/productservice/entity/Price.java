@@ -17,6 +17,14 @@ public class Price {
     @Column(name = "employee_id", nullable = false)
     private Long employeeId;
 
+    public Long getEmployeeId() {
+        return employeeId;
+    }
+
+    public void setEmployeeId(Long employeeId) {
+        this.employeeId = employeeId;
+    }
+
     public Price() {
     }
 

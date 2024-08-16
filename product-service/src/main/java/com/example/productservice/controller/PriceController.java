@@ -1,5 +1,6 @@
 package com.example.productservice.controller;
 
+import com.example.productservice.dao.request.PriceRequest;
 import com.example.productservice.entity.Price;
 import com.example.productservice.entity.Product;
 import com.example.productservice.service.IPriceService;
@@ -24,11 +25,9 @@ public class PriceController {
     private IProductService productService;
 
     @PostMapping
-    public ResponseEntity<Map<String, Object>> createPrice(@RequestBody Price price, @RequestParam Long productId) {
+    public ResponseEntity<Map<String, Object>> createPrice(@RequestBody PriceRequest price) {
         Map<String, Object> response = new HashMap<>();
         try {
-            Product product = productService.getProductById(productId);
-            price.setProduct(product);
             Price createdPrice = priceService.createPrice(price);
 
             response.put("result", 1);

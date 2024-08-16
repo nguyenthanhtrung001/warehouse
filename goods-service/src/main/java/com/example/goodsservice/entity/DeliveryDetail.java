@@ -14,6 +14,16 @@ public class DeliveryDetail {
     private DeliveryNote deliveryNote;
 
     private Long batchDetail_Id;
+    @Column(name = "ProductId", nullable = true)
+    private Long ProductId;
+
+    public Long getProductId() {
+        return ProductId;
+    }
+
+    public void setProductId(Long productId) {
+        ProductId = productId;
+    }
 
     public Long getBatchDetail_Id() {
         return batchDetail_Id;

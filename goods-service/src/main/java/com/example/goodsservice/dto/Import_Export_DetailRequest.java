@@ -2,7 +2,7 @@ package com.example.goodsservice.dto;
 
 public class Import_Export_DetailRequest {
     private Long product_Id;
-    private Double purchasePrice;
+    private Long purchasePrice;
     private Integer quantity;
     private Long batchDetail_Id;
 
@@ -25,11 +25,11 @@ public class Import_Export_DetailRequest {
         this.product_Id = product_Id;
     }
 
-    public Double getPurchasePrice() {
+    public Long getPurchasePrice() {
         return purchasePrice;
     }
 
-    public void setPurchasePrice(Double purchasePrice) {
+    public void setPurchasePrice(Long purchasePrice) {
         this.purchasePrice = purchasePrice;
     }
 

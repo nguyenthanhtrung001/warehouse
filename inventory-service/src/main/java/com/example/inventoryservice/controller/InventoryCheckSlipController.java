@@ -2,6 +2,8 @@ package com.example.inventoryservice.controller;
 
 
 import com.example.inventoryservice.dto.InventoryCheckSlipRequest;
+import com.example.inventoryservice.dto.response.ProductQuantity;
+import com.example.inventoryservice.entity.InventoryCheckDetail;
 import com.example.inventoryservice.entity.InventoryCheckSlip;
 import com.example.inventoryservice.service.IInventoryCheckSlipService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,11 +14,12 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/inventory-check-slips")
+@RequestMapping("/api/inventory-check-slips")
 public class InventoryCheckSlipController {
 
     @Autowired
     private IInventoryCheckSlipService inventoryCheckSlipService;
+
 
     @PostMapping
     public ResponseEntity<InventoryCheckSlip> createInventoryCheckSlip(@RequestBody InventoryCheckSlipRequest inventoryCheckSlipRequest) {
@@ -66,6 +69,31 @@ public class InventoryCheckSlipController {
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
+    }
+    @GetMapping("/details/{id}")
+    public List<InventoryCheckDetail> getDetailCheckSlipById(@PathVariable Long id) {
+        return inventoryCheckSlipService.getDetailCheckSlipById(id);
+    }
+    @GetMapping("/products/discrepancies/current-month")
+    public List<ProductQuantity> getProductDiscrepanciesForCurrentMonth() {
+        return inventoryCheckSlipService.getProductDiscrepanciesForCurrentMonth();
+    }
+
+    @GetMapping("/products/discrepancies/by-month-year")
+    public List<ProductQuantity> getProductDiscrepanciesForMonthYear(@RequestParam int month,
+                                                                        @RequestParam int year) {
+        return inventoryCheckSlipService.getProductDiscrepanciesForMonthYear(month, year);
+    }
+
+    @GetMapping("/products/discrepancies-less/current-month")
+    public List<ProductQuantity> getProductDiscrepanciesLessForCurrentMonth() {
+        return inventoryCheckSlipService.getProductDiscrepanciesLessForCurrentMonth();
+    }
+
+    @GetMapping("/products/discrepancies-less/by-month-year")
+    public List<ProductQuantity> getProductDiscrepanciesLessForMonthYear(@RequestParam int month,
+                                                                     @RequestParam int year) {
+        return inventoryCheckSlipService.getProductDiscrepanciesLessForMonthYear(month, year);
     }
 }
 

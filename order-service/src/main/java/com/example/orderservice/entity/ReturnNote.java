@@ -23,6 +23,15 @@ public class ReturnNote {
     @JsonIgnore
     @OneToMany
     List<ReturnDetail> returnDetails;
+    private Long price;
+
+    public Long getPrice() {
+        return price;
+    }
+
+    public void setPrice(Long price) {
+        this.price = price;
+    }
 
     public List<ReturnDetail> getReturnDetails() {
         return returnDetails;

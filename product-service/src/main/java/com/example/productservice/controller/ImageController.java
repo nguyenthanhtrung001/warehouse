@@ -58,4 +58,8 @@ public class ImageController {
             return ResponseEntity.notFound().build();
         }
     }
+    @GetMapping("/product/{productId}")
+    public List<String> getImagesByProductId(@PathVariable Long productId) {
+        return imageService.getImagesByProductId(productId);
+    }
 }
