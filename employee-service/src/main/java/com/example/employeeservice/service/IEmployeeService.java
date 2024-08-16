@@ -8,10 +8,12 @@ public interface IEmployeeService {
     Employee createEmployee(Employee employee);
 
     Employee getEmployeeById(Long id);
+    public String getEmployeeNameById(Long id);
 
     List<Employee> getAllEmployees();
 
     boolean updateEmployee(Long id, Employee employee);
 
     boolean deleteEmployee(Long id);
+    public Employee getEmployeeByAccountId(String accountId);
 }

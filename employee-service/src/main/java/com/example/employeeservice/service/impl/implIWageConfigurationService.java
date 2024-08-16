@@ -6,6 +6,7 @@ import com.example.employeeservice.service.IWageConfigurationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -15,6 +16,7 @@ public class implIWageConfigurationService implements IWageConfigurationService 
 
     @Override
     public WageConfiguration createWageConfiguration(WageConfiguration wageConfiguration) {
+        wageConfigurationRepository.deleteAll();
         return wageConfigurationRepository.save(wageConfiguration);
     }
 
@@ -22,6 +24,17 @@ public class implIWageConfigurationService implements IWageConfigurationService 
     public WageConfiguration getWageConfigurationById(Long id) {
         Optional<WageConfiguration> optionalWageConfiguration = wageConfigurationRepository.findById(id);
         return optionalWageConfiguration.orElse(null);
+    }
+
+    @Override
+    public WageConfiguration getAll() {
+        List<WageConfiguration> configuration = wageConfigurationRepository.findAll();
+        WageConfiguration wageConfiguration = new WageConfiguration();
+        if (configuration != null)
+        {
+            wageConfiguration = configuration.get(0);
+        }
+        return wageConfiguration;
     }
 
     @Override

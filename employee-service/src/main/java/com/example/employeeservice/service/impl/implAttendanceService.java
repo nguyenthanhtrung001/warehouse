@@ -1,5 +1,6 @@
 package com.example.employeeservice.service.impl;
 
+import com.example.employeeservice.dto.request.WorkShiftRequest;
 import com.example.employeeservice.entity.Attendance;
 import com.example.employeeservice.entity.Employee;
 import com.example.employeeservice.entity.WorkShift;
@@ -13,6 +14,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.YearMonth;
 import java.time.temporal.TemporalAdjusters;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -45,7 +47,7 @@ public class implAttendanceService implements IAttendanceService {
         LocalDate lastDayOfMonth = now.with(TemporalAdjusters.lastDayOfMonth());
 
         // Lấy danh sách các Attendance của Employee có workDate trong tháng hiện tại và status=1
-        List<Attendance> attendances = attendanceRepository.findByEmployeeIdAndWorkDateBetweenAndStatus(employeeID, firstDayOfMonth, lastDayOfMonth, 1);
+        List<Attendance> attendances = attendanceRepository.findByEmployeeIdAndWorkDateBetweenAndStatus(employeeID, firstDayOfMonth, lastDayOfMonth, 2);
 
         // Tính tổng số giờ làm việc của Employee trong tháng
         System.out.println("so ca:"+attendances.size());
@@ -79,15 +81,18 @@ public class implAttendanceService implements IAttendanceService {
         LocalDate endOfMonth = currentMonth.atEndOfMonth();
 
         // Truy vấn tất cả các Attendance của Employee có workDate trong tháng hiện tại với status=1
-        List<Attendance> attendances = attendanceRepository.findByEmployeeIdAndWorkDateBetweenAndStatus(employeeID, startOfMonth, endOfMonth, 1);
+        List<Attendance> attendances = attendanceRepository.findByEmployeeIdAndWorkDateBetweenAndStatus(employeeID, startOfMonth, endOfMonth, 2);
 
+        for ( Attendance attendance : attendances){
+            System.out.println("tre tre:: "+ attendance.getLateTime());
+        }
 
         // Tính tổng thời gian trễ
         long totalLateHours = attendances.stream()
                 .filter(attendance -> attendance.getLateTime() != null && attendance.getLateTime() < 0)
                 .mapToLong(Attendance::getLateTime)
                 .sum();
-
+        System.out.println("So tre la:"+totalLateHours);
         return totalLateHours;
     }
 
@@ -98,7 +103,7 @@ public class implAttendanceService implements IAttendanceService {
         LocalDate endOfMonth = currentMonth.atEndOfMonth();
 
 
-        List<Attendance> attendances = attendanceRepository.findByEmployeeIdAndWorkDateBetweenAndStatus(employeeID, startOfMonth, endOfMonth, 1);
+        List<Attendance> attendances = attendanceRepository.findByEmployeeIdAndWorkDateBetweenAndStatus(employeeID, startOfMonth, endOfMonth, 2);
 
 
         // Tính tổng thời gian trễ
@@ -106,19 +111,32 @@ public class implAttendanceService implements IAttendanceService {
                 .filter(attendance -> attendance.getEarlyTime() != null && attendance.getEarlyTime() < 0)
                 .mapToLong(Attendance::getEarlyTime)
                 .sum();
-
+        System.out.println("Về som la:"+totalEarlyHours);
         return totalEarlyHours;
     }
 
 
     @Override
-    public Attendance createAttendance(Employee employee, WorkShift workShift) {
-        Attendance attendance = new Attendance();
-        attendance.setEmployee(employee);
-        attendance.setWorkShift(workShift);
-        attendance.setWorkDate(LocalDate.now());
-        attendance.setStatus(0);
-        return attendanceRepository.save(attendance);
+    public List<Attendance> createAttendance(WorkShiftRequest workShiftRequest) {
+
+        List< Attendance> attendances = new ArrayList<>();
+        for ( Long id : workShiftRequest.getWorkShiftId())
+        {
+            Attendance attendance = new Attendance();
+            Employee employee = new Employee();
+            employee.setId(workShiftRequest.getEmployeeId());
+            WorkShift workShift = new WorkShift();
+            workShift.setId(id);
+            attendance.setEmployee(employee);
+            attendance.setWorkShift(workShift);
+            attendance.setWorkDate(workShiftRequest.getWorkDate());
+            attendance.setStatus(1);
+            attendances.add(attendance);
+        }
+
+
+
+        return attendanceRepository.saveAll(attendances);
     }
 
     @Override
@@ -150,9 +168,10 @@ public class implAttendanceService implements IAttendanceService {
         if (existingAttendanceOpt.isPresent()) {
             Attendance existingAttendance = existingAttendanceOpt.get();
 
-            existingAttendance.setWorkShift(attendanceDetails.getWorkShift());
-            existingAttendance.setWorkDate(attendanceDetails.getWorkDate());
-            existingAttendance.setStatus(attendanceDetails.getStatus());
+//            existingAttendance.setWorkShift(attendanceDetails.getWorkShift());
+//            existingAttendance.setWorkDate(attendanceDetails.getWorkDate());
+//
+            existingAttendance.setStatus(2);
             existingAttendance.setNote(attendanceDetails.getNote());
             existingAttendance.setStartTime(attendanceDetails.getStartTime());
             existingAttendance.setEndTime(attendanceDetails.getEndTime());
@@ -202,5 +221,40 @@ public class implAttendanceService implements IAttendanceService {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public List<Attendance> getAttendancesByEmployeeId(Long employeeId) {
+        return attendanceRepository.findByEmployeeId(employeeId);
+    }
+
+    @Override
+    public List<Attendance> getAttendancesByEmployeeIdForCurrentMonth(Long employeeId) {
+        LocalDate now = LocalDate.now();
+        LocalDate startOfMonth = now.with(TemporalAdjusters.firstDayOfMonth());
+        LocalDate endOfMonth = now.with(TemporalAdjusters.lastDayOfMonth());
+
+        return attendanceRepository.findByEmployeeIdAndWorkDateBetween(employeeId, startOfMonth, endOfMonth);
+
+    }
+
+    @Override
+    public List<Attendance> getAttendancesByEmployeeIdForCurrentWeek(Long employeeId) {
+        LocalDate now = LocalDate.now();
+        LocalDate startOfWeek = now.with(TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY));
+        LocalDate endOfWeek = now.with(TemporalAdjusters.nextOrSame(java.time.DayOfWeek.SUNDAY));
+
+        return attendanceRepository.findByEmployeeIdAndWorkDateBetween(employeeId, startOfWeek, endOfWeek);
+
+    }
+
+    @Override
+    public List<Attendance> getAttendancesForCurrentMonth() {
+        LocalDate now = LocalDate.now();
+        LocalDate startOfMonth = now.with(TemporalAdjusters.firstDayOfMonth());
+        LocalDate endOfMonth = now.with(TemporalAdjusters.lastDayOfMonth());
+
+        return attendanceRepository.findAllByWorkDateBetween(startOfMonth, endOfMonth);
+
     }
 }

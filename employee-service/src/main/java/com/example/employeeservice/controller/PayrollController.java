@@ -1,5 +1,6 @@
 package com.example.employeeservice.controller;
 
+import com.example.employeeservice.dto.response.PayrollSummaryResponse;
 import com.example.employeeservice.entity.Payroll;
 import com.example.employeeservice.service.IPayrollService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,11 @@ public class PayrollController {
     @PostMapping
     public ResponseEntity<Payroll> createPayroll(@RequestBody Payroll payroll) {
         Payroll createdPayroll = payrollService.createPayroll(payroll);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdPayroll);
+    }
+    @PostMapping("/create-all")
+    public ResponseEntity<List<Payroll>> createPayrollForAllEmployee() {
+        List<Payroll> createdPayroll = payrollService.createPayrollForAllEmployee();
         return ResponseEntity.status(HttpStatus.CREATED).body(createdPayroll);
     }
 
@@ -48,6 +54,7 @@ public class PayrollController {
         }
     }
 
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePayroll(@PathVariable Long id) {
         boolean deleted = payrollService.deletePayroll(id);
@@ -62,4 +69,13 @@ public class PayrollController {
         Payroll payroll = payrollService.createPayrollByEmployee(employeeId);
         return new ResponseEntity<>(payroll, HttpStatus.CREATED);
     }
+    @GetMapping("/working-period")
+    public List<Payroll> getPayrollsByWorkingPeriod(@RequestParam String workingPeriod) {
+        return payrollService.getPayrollsByWorkingPeriod(workingPeriod);
+    }
+    @GetMapping("/group-by-working-period-status")
+    public List<PayrollSummaryResponse> getPayrollGroupByWorkingPeriodAndStatus() {
+        return payrollService.getPayrollGroupByWorkingPeriodAndStatus();
+    }
+
 }

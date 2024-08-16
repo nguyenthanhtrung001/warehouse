@@ -1,5 +1,6 @@
 package com.example.employeeservice.controller;
 
+import com.example.employeeservice.dto.request.WorkShiftRequest;
 import com.example.employeeservice.entity.Attendance;
 import com.example.employeeservice.entity.Employee;
 import com.example.employeeservice.entity.WorkShift;
@@ -18,29 +19,10 @@ public class AttendanceController {
     @Autowired
     private  IAttendanceService attendanceService;
 
-
-
- /*   public ResponseEntity<Attendance> createAttendance(@RequestBody Attendance attendance) {
-        Attendance createdAttendance = attendanceService.createAttendance(attendance);
-        return new ResponseEntity<>(createdAttendance, HttpStatus.CREATED);
-    }*/
-
-    @PostMapping("/create")
-    public ResponseEntity<Attendance> createAttendanceByEmployeeAndWorkShift(
-            @RequestParam("employeeId") Long employeeId,
-            @RequestParam("workShiftId") Long workShiftId) {
-        // Tạo đối tượng Employee và WorkShift
-        Employee employee = new Employee();
-        employee.setId(employeeId);
-
-        WorkShift workShift = new WorkShift();
-        workShift.setId(workShiftId);
-
-        // Tạo Attendance bằng cách sử dụng phương thức của service
-        Attendance createdAttendance = attendanceService.createAttendance(employee, workShift);
-
-        // Trả về ResponseEntity chứa Attendance vừa tạo và HTTP status CREATED
-        return new ResponseEntity<>(createdAttendance, HttpStatus.CREATED);
+    @PostMapping
+    public ResponseEntity<List<Attendance>> createAttendance(@RequestBody WorkShiftRequest workShiftRequest) {
+        List<Attendance> attendance = attendanceService.createAttendance(workShiftRequest);
+        return ResponseEntity.ok(attendance);
     }
 
     @PatchMapping("/{id}/status")
@@ -99,5 +81,25 @@ public class AttendanceController {
     public ResponseEntity<Long> countLateHoursByEmployee(@PathVariable Long employeeId) {
         Long lateHours = attendanceService.countHoursLateAttendanceByEmployee(employeeId);
         return ResponseEntity.ok(lateHours);
+    }
+    @GetMapping("/employee/{employeeId}")
+    public ResponseEntity<List<Attendance>> getAttendancesByEmployeeId(@PathVariable Long employeeId) {
+        List<Attendance> attendances = attendanceService.getAttendancesByEmployeeId(employeeId);
+        return ResponseEntity.ok(attendances);
+    }
+    @GetMapping("/employee/{employeeId}/current-month")
+    public ResponseEntity<List<Attendance>> getAttendancesByEmployeeIdForCurrentMonth(@PathVariable Long employeeId) {
+        List<Attendance> attendances = attendanceService.getAttendancesByEmployeeIdForCurrentMonth(employeeId);
+        return ResponseEntity.ok(attendances);
+    }
+    @GetMapping("/employee/{employeeId}/current-week")
+    public ResponseEntity<List<Attendance>> getAttendancesByEmployeeIdForCurrentWeek(@PathVariable Long employeeId) {
+        List<Attendance> attendances = attendanceService.getAttendancesByEmployeeIdForCurrentWeek(employeeId);
+        return ResponseEntity.ok(attendances);
+    }
+    @GetMapping("/current-month")
+    public ResponseEntity<List<Attendance>> getAttendancesForCurrentMonth() {
+        List<Attendance> attendances = attendanceService.getAttendancesForCurrentMonth();
+        return ResponseEntity.ok(attendances);
     }
 }

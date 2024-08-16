@@ -1,5 +1,9 @@
 package com.example.employeeservice.service.impl;
 
+import com.example.employeeservice.client.IdentityClient;
+import com.example.employeeservice.dto.request.ApiResponse;
+import com.example.employeeservice.dto.request.UserCreationRequest;
+import com.example.employeeservice.dto.response.UserResponse;
 import com.example.employeeservice.entity.Employee;
 import com.example.employeeservice.repository.EmployeeRepository;
 import com.example.employeeservice.service.IEmployeeService;
@@ -14,11 +18,31 @@ public class implEmployeeService implements IEmployeeService {
 
     @Autowired
     private  EmployeeRepository employeeRepository;
+    @Autowired
+    private IdentityClient identityClient;
 
 
     @Override
     public Employee createEmployee(Employee employee) {
-        return employeeRepository.save(employee);
+        UserCreationRequest userCreationRequest = new UserCreationRequest();
+
+
+
+        Employee  em = employeeRepository.save(employee);
+        if (employee.getAccount_id().equals("true")){
+            try{
+                String us = "NV000"+em.getId();
+                userCreationRequest.setUsername(us);
+                userCreationRequest.setPassword("123456");
+                ApiResponse<UserResponse> response= identityClient.createUser(userCreationRequest);
+                System.out.println("Response: " + response);
+                em.setAccount_id(us);
+                updateEmployee(em.getId(),em);
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+        }
+        return em;
     }
 
     @Override
@@ -28,8 +52,14 @@ public class implEmployeeService implements IEmployeeService {
     }
 
     @Override
+    public String getEmployeeNameById(Long id) {
+        return employeeRepository.findEmployeeNameById(id);
+    }
+
+    @Override
     public List<Employee> getAllEmployees() {
-        return employeeRepository.findAll();
+       // return employeeRepository.findAll();
+        return employeeRepository.findAllNonAdminEmployees();
     }
 
     @Override
@@ -48,6 +78,7 @@ public class implEmployeeService implements IEmployeeService {
             existingEmployee.setAddress(employeeDetails.getAddress());
             existingEmployee.setEmail(employeeDetails.getEmail());
             existingEmployee.setStatus(employeeDetails.getStatus());
+            existingEmployee.setAccount_id(employeeDetails.getAccount_id());
             employeeRepository.save(existingEmployee);
             return true;
         }
@@ -61,5 +92,10 @@ public class implEmployeeService implements IEmployeeService {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public Employee getEmployeeByAccountId(String accountId) {
+        return employeeRepository.findByAccountId(accountId);
     }
 }

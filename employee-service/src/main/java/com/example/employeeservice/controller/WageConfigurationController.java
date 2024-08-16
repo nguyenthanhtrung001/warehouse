@@ -33,6 +33,15 @@ public class WageConfigurationController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
+    @GetMapping()
+    public ResponseEntity<WageConfiguration> getWageConfiguration() {
+        WageConfiguration wageConfiguration = wageConfigurationService.getAll();
+        if (wageConfiguration != null) {
+            return new ResponseEntity<>(wageConfiguration, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
 
     @PutMapping("/{id}")
     public ResponseEntity<WageConfiguration> updateWageConfiguration(@PathVariable Long id, @RequestBody WageConfiguration wageConfiguration) {

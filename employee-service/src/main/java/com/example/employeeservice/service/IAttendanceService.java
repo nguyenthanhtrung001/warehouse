@@ -1,5 +1,6 @@
 package com.example.employeeservice.service;
 
+import com.example.employeeservice.dto.request.WorkShiftRequest;
 import com.example.employeeservice.entity.Attendance;
 import com.example.employeeservice.entity.Employee;
 import com.example.employeeservice.entity.WorkShift;
@@ -8,7 +9,7 @@ import java.util.List;
 
 public interface IAttendanceService {
     Attendance createAttendance(Attendance attendance);
-    Attendance createAttendance(Employee employee, WorkShift workShift);
+    List<Attendance> createAttendance(WorkShiftRequest workShiftRequest);
     Attendance updateStatusAttendance(Long attendanceId, Integer status);
 
     Attendance getAttendanceById(Long id);
@@ -24,4 +25,8 @@ public interface IAttendanceService {
     boolean updateStatusAttendance(Long id);
 
     boolean deleteAttendance(Long id);
+    public List<Attendance> getAttendancesByEmployeeId(Long employeeId);
+    public List<Attendance> getAttendancesByEmployeeIdForCurrentMonth(Long employeeId);
+    public List<Attendance> getAttendancesByEmployeeIdForCurrentWeek(Long employeeId);
+    public List<Attendance> getAttendancesForCurrentMonth();
 }

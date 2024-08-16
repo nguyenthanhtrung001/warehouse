@@ -17,6 +17,16 @@ public class Payroll {
     private  String working_period;
     private int workingDays;
 
+    private  String note;
+
+    public String getNote() {
+        return note;
+    }
+
+    public void setNote(String note) {
+        this.note = note;
+    }
+
     public String getNamePayroll() {
         return namePayroll;
     }

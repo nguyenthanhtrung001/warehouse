@@ -7,6 +7,7 @@ public interface IWageConfigurationService {
     WageConfiguration createWageConfiguration(WageConfiguration wageConfiguration);
 
     WageConfiguration getWageConfigurationById(Long id);
+    WageConfiguration getAll();
 
     WageConfiguration updateWageConfiguration(Long id, WageConfiguration wageConfiguration);
 

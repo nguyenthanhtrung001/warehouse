@@ -25,7 +25,8 @@ public class Employee {
     private String position;
     private String address;
     private String email;
-    private  String account_id;
+    @Column(name = "account_id", unique = true)
+    private String account_id;
 
     public String getAccount_id() {
         return account_id;

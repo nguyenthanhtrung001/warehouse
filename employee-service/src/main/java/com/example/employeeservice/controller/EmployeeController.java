@@ -57,4 +57,12 @@ public class EmployeeController {
             return ResponseEntity.notFound().build();
         }
     }
+    @GetMapping("/account/{accountId}")
+    public Employee getEmployeeByAccountId(@PathVariable String accountId) {
+        return employeeService.getEmployeeByAccountId(accountId);
+    }
+    @GetMapping("/{id}/name")
+    public String getEmployeeNameById(@PathVariable Long id) {
+        return employeeService.getEmployeeNameById(id);
+    }
 }
