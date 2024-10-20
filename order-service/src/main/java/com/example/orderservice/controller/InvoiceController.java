@@ -81,4 +81,13 @@ public class InvoiceController {
         return invoiceService.getProductSalesSummary( year);
     }
 
+    @GetMapping("/customer/{customerId}")
+    public ResponseEntity<List<Invoice>> getInvoicesByCustomerId(@PathVariable Long customerId) {
+        List<Invoice> invoices = invoiceService.getInvoicesByCustomerId(customerId);
+        if (invoices.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(invoices);
+    }
+
 }

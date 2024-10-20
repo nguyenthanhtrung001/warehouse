@@ -82,4 +82,11 @@ public class InvoiceDetailController {
     public ProductQuantity getProductQuantitiesForLastThreeMonths(@RequestParam Long productId) {
         return invoiceDetailService.getProductQuantitiesForLastThreeMonths(productId);
     }
+
+    @GetMapping("/{productId}/total-sold-last-week")
+    public Integer getTotalSoldProductForLastWeek(@PathVariable Long productId) {
+        return invoiceDetailService.getTotalSoldProductForLastWeek(productId);
+    }
+
+
 }

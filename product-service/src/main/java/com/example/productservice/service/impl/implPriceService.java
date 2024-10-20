@@ -29,6 +29,11 @@ public class implPriceService implements IPriceService {
     }
 
     @Override
+    public Long getPriceByProductId(Long productId) {
+       return priceRepository.findFirstByProductIdOrderByEffectiveDateDesc(productId).getPrice();
+    }
+
+    @Override
     public Price createPrice(PriceRequest price) {
         Price priceUpdate = new Price();
 

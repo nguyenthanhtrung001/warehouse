@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.List;
@@ -68,7 +69,10 @@ public class implReturnNoteService implements IReturnNoteService {
         List<ReturnDetail> returnDetails = new ArrayList<>();
         for (ReturnDetailRequest detailRequest : returnNoteRequest.getReturnDetails()) {
             ReturnDetail returnDetail = new ReturnDetail();
-            returnDetail.setReturnNote(savedReturnNote.getId());
+            // thay đỗi quan hệ giữa returnnote và detail
+            ReturnNote note = new ReturnNote();
+            note.setId(savedReturnNote.getId());
+            returnDetail.setReturnNote(note);
             returnDetail.setPurchasePrice(detailRequest.getPurchasePrice());
             returnDetail.setProductId(detailRequest.getProductId());
             returnDetail.setQuantity(detailRequest.getQuantity());

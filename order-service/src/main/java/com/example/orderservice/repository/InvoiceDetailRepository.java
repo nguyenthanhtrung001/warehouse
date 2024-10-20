@@ -49,4 +49,7 @@ public interface InvoiceDetailRepository extends JpaRepository<InvoiceDetail, Lo
 
     @Query("SELECT id.note_return FROM InvoiceDetail id WHERE id.invoiceId.id = :invoiceId AND id.productId = :productId")
     String findNoteReturnByInvoiceIdAndProductId(@Param("invoiceId") Long invoiceId, @Param("productId") Long productId);
+
+    @Query("SELECT SUM(i.quantity) FROM InvoiceDetail i WHERE i.productId = :productId AND i.invoiceId.printDate BETWEEN :startDate AND :endDate")
+    Integer sumQuantityByProductIdAndDateRange(Long productId, LocalDateTime startDate, LocalDateTime endDate);
 }

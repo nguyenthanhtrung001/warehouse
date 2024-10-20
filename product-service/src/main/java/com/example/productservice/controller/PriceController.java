@@ -111,4 +111,15 @@ public class PriceController {
         List<Price> prices = priceService.getAllPrices();
         return new ResponseEntity<>(prices, HttpStatus.OK);
     }
+    @GetMapping("/prices/{productId}")
+    public ResponseEntity<Long> getPrice(@PathVariable Long productId) {
+        Long price = priceService.getPriceByProductId(productId);
+
+        if (price != null) {
+            return ResponseEntity.ok(price);
+        }
+
+        return ResponseEntity.notFound().build(); // Trả về 404 nếu không tìm thấy giá
+    }
+
 }

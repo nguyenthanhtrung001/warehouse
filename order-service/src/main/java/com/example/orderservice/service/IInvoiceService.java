@@ -12,6 +12,7 @@ public interface  IInvoiceService {
     Invoice createInvoice(InvoiceRequest invoiceRequest);
 
     public long getTotalPriceForCurrentWeek();
+    public List<Invoice> getInvoicesByCustomerId(Long customerId);
 
     public long getTotalPriceForCurrentMonth();
 
@@ -30,4 +31,6 @@ public interface  IInvoiceService {
     boolean deleteInvoiceWithStatus_1(Long id);
 
     public Map<String, Object> getProductSalesSummary(int year);
+
+
 }

@@ -52,4 +52,13 @@ public class CustomerController {
             return ResponseEntity.notFound().build();
         }
     }
+    @GetMapping("/email")
+    public ResponseEntity<Customer> getCustomerByEmail(@RequestParam String email) {
+        Customer customer = customerService.getCustomerByEmail(email);
+        if (customer != null) {
+            return ResponseEntity.ok(customer);
+        } else {
+            return ResponseEntity.notFound().build();  // Trả về 404 nếu không tìm thấy
+        }
+    }
 }

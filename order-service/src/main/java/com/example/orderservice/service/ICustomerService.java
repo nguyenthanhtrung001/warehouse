@@ -15,4 +15,7 @@ public interface  ICustomerService {
     boolean updateCustomer(Long id, Customer customer);
 
     boolean deleteCustomer(Long id);
+    public Customer getCustomerByEmail(String email);
+
+
 }

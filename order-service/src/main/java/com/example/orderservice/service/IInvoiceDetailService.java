@@ -24,4 +24,5 @@ public interface IInvoiceDetailService {
     public ProductQuantity getProductQuantitiesForLastThreeMonths(Long productId);
     public String getNoteReturnByInvoiceIdAndProductId(Long invoiceId, Long productId);
 
+    public Integer getTotalSoldProductForLastWeek(Long productId);
 }

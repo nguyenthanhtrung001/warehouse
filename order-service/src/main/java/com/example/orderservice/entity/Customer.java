@@ -32,8 +32,36 @@ public class Customer {
     @OneToMany(mappedBy = "customer")
     private List<Invoice> invoices;
 
+    @JsonIgnore
+    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<ContactInfo> contactInfos;
+
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "default_contact_info_id")
+//    private ContactInfo defaultContactInfo;
+
+
+
     public Customer() {
     }
+
+    public List<Invoice> getInvoices() {
+        return invoices;
+    }
+
+    public void setInvoices(List<Invoice> invoices) {
+        this.invoices = invoices;
+    }
+
+    public List<ContactInfo> getContactInfos() {
+        return contactInfos;
+    }
+
+    public void setContactInfos(List<ContactInfo> contactInfos) {
+        this.contactInfos = contactInfos;
+    }
+
+
 
     public Long getId() {
         return id;

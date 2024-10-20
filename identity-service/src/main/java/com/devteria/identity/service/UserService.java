@@ -61,6 +61,36 @@ public class UserService {
         return userMapper.toUserResponse(user);
     }
 
+    public UserResponse createEmployee(UserCreationRequest request) {
+        // Kiểm tra xem tên người dùng đã tồn tại chưa
+        if (userRepository.existsByUsername(request.getUsername())) {
+            throw new AppException(ErrorCode.USER_EXISTED);
+        }
+
+        // Tạo đối tượng User từ request
+        User user = userMapper.toUser(request);
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+
+        // Tạo một tập hợp vai trò cho nhân viên
+        HashSet<Role> roles = new HashSet<>();
+        // Thêm vai trò nhân viên vào
+        roleRepository.findById(PredefinedRole.STAFF_ROLE).ifPresent(roles::add);
+
+        user.setRoles(roles);
+
+        // Lưu người dùng vào cơ sở dữ liệu
+        user = userRepository.save(user);
+
+        // Nếu cần thêm thông tin liên quan đến nhân viên, thực hiện ở đây
+        // Ví dụ: tạo profile cho nhân viên
+        // var profileRequest = profileMapper.toProfileCreationRequest(request);
+        // profileRequest.setUserId(user.getId());
+        // profileClient.createProfile(profileRequest);
+
+        return userMapper.toUserResponse(user);
+    }
+
+
     public UserResponse getMyInfo() {
         var context = SecurityContextHolder.getContext();
         String name = context.getAuthentication().getName();

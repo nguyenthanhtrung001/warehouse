@@ -3,7 +3,6 @@ package com.example.goodsservice.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -18,19 +17,13 @@ public class Receipt {
     private LocalDateTime receiptDate;
 
     @ManyToOne
+    @JoinColumn(name = "supplier_id", nullable = false)
     private Supplier supplier;
 
-/*    @ManyToOne
-    @JoinColumn(name = "employee_id", nullable = false)
-    private Employee employee;*/
+    @ManyToOne
+    @JoinColumn(name = "warehouse_id", nullable = false)
+    private Warehouse warehouse;
 
-    public List<DeliveryNote> getDeliveryNotes() {
-        return deliveryNotes;
-    }
-
-    public void setDeliveryNotes(List<DeliveryNote> deliveryNotes) {
-        this.deliveryNotes = deliveryNotes;
-    }
     @JsonIgnore
     @OneToMany(mappedBy = "receipt")
     private List<DeliveryNote> deliveryNotes;
@@ -41,13 +34,7 @@ public class Receipt {
     @Column(name = "employee_id", nullable = false)
     private Long employeeId;
 
-    public Long getEmployeeId() {
-        return employeeId;
-    }
-
-    public void setEmployeeId(Long employeeId) {
-        this.employeeId = employeeId;
-    }
+    // Constructors, getters, and setters
 
     public Receipt() {
     }
@@ -55,15 +42,6 @@ public class Receipt {
     public Receipt(Long id) {
         this.id = id;
     }
-
-    public Long getPurchasePrice() {
-        return purchasePrice;
-    }
-
-    public void setPurchasePrice(Long purchasePrice) {
-        this.purchasePrice = purchasePrice;
-    }
-// Getters and setters
 
     public Long getId() {
         return id;
@@ -89,13 +67,13 @@ public class Receipt {
         this.supplier = supplier;
     }
 
-/*    public Employee getEmployee() {
-        return employee;
+    public Warehouse getWarehouse() {
+        return warehouse;
     }
 
-    public void setEmployee(Employee employee) {
-        this.employee = employee;
-    }*/
+    public void setWarehouse(Warehouse warehouse) {
+        this.warehouse = warehouse;
+    }
 
     public Integer getStatus() {
         return status;
@@ -103,5 +81,29 @@ public class Receipt {
 
     public void setStatus(Integer status) {
         this.status = status;
+    }
+
+    public Long getPurchasePrice() {
+        return purchasePrice;
+    }
+
+    public void setPurchasePrice(Long purchasePrice) {
+        this.purchasePrice = purchasePrice;
+    }
+
+    public Long getEmployeeId() {
+        return employeeId;
+    }
+
+    public void setEmployeeId(Long employeeId) {
+        this.employeeId = employeeId;
+    }
+
+    public List<DeliveryNote> getDeliveryNotes() {
+        return deliveryNotes;
+    }
+
+    public void setDeliveryNotes(List<DeliveryNote> deliveryNotes) {
+        this.deliveryNotes = deliveryNotes;
     }
 }

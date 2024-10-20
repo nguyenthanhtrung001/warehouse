@@ -22,9 +22,20 @@ public class Invoice {
     private Long price;
     private Long employeeId;
     private Integer status;
-
+    @JsonIgnore
     @ManyToOne
     private Customer customer;
+
+    @ManyToOne
+    private ContactInfo contactInfo;
+
+    public ContactInfo getContactInfo() {
+        return contactInfo;
+    }
+
+    public void setContactInfo(ContactInfo contactInfo) {
+        this.contactInfo = contactInfo;
+    }
 
     @JsonIgnore
     @OneToMany(mappedBy = "invoice")

@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 
@@ -15,7 +16,7 @@ import java.util.List;
 public interface ReturnDetailRepository extends JpaRepository<ReturnDetail, Long> {
     @Query("SELECT new com.example.orderservice.dto.response.ProductQuantity(rd.productId, SUM(rd.quantity)) " +
             "FROM ReturnDetail rd " +
-            "JOIN ReturnNote rn ON rd.returnNote = rn.id " +
+            "JOIN ReturnNote rn ON rd.returnNote.id = rn.id " +
             "WHERE rn.returnDate >= :startOfMonth AND rn.returnDate <= :endOfMonth " +
             "GROUP BY rd.productId")
     List<ProductQuantity> findProductQuantitiesForMonth(@Param("startOfMonth") LocalDate startOfMonth,
@@ -24,6 +25,9 @@ public interface ReturnDetailRepository extends JpaRepository<ReturnDetail, Long
 
 
 
-    @Query("SELECT rd FROM ReturnDetail rd WHERE rd.returnNote IN (SELECT rn.id FROM ReturnNote rn WHERE rn.invoice.id = :invoiceId)")
+    @Query("SELECT rd FROM ReturnDetail rd WHERE rd.returnNote.id IN (SELECT rn.id FROM ReturnNote rn WHERE rn.invoice.id = :invoiceId)")
     List<ReturnDetail> findByInvoiceId(@Param("invoiceId") Long invoiceId);
+    @Query("SELECT SUM(r.quantity) FROM ReturnDetail r WHERE r.productId = :productId AND r.returnNote.returnDate BETWEEN :startDate AND :endDate")
+    Integer sumQuantityByProductIdAndDateRange(Long productId, LocalDate startDate, LocalDate endDate);
+
 }

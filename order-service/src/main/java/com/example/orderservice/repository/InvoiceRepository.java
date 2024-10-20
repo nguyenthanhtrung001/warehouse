@@ -13,6 +13,7 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
     List<Invoice> findByPrintDateBetween(LocalDateTime startDateTime, LocalDateTime endDateTime);
 
     List<Invoice> findByStatus(int i);
+    List<Invoice> findByCustomerId(Long customerId);
 
     @Query("SELECT i FROM Invoice i WHERE i.status NOT IN (0, 1)")
     List<Invoice> findAllInvoicesWithStatusNotInZeroOrOne();

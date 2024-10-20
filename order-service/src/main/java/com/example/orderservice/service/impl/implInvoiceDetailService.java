@@ -6,6 +6,7 @@ import com.example.orderservice.dto.response.ProductQuantity;
 import com.example.orderservice.entity.InvoiceDetail;
 import com.example.orderservice.repository.InvoiceDetailRepository;
 
+import com.example.orderservice.repository.ReturnDetailRepository;
 import com.example.orderservice.service.IInvoiceDetailService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +18,9 @@ import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.YearMonth;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -27,6 +30,8 @@ public class implInvoiceDetailService implements IInvoiceDetailService {
 
     @Autowired
     private  InvoiceDetailRepository invoiceDetailRepository;
+    @Autowired
+    private ReturnDetailRepository returnDetailRepository;
     @Autowired
     private ProductClient productClient;
 
@@ -148,4 +153,29 @@ public class implInvoiceDetailService implements IInvoiceDetailService {
     public String getNoteReturnByInvoiceIdAndProductId(Long invoiceId, Long productId) {
         return invoiceDetailRepository.findNoteReturnByInvoiceIdAndProductId(invoiceId, productId);
     }
+
+    @Override
+    public Integer getTotalSoldProductForLastWeek(Long productId) {
+        // Lấy ngày đầu và cuối của tuần trước đó
+        LocalDateTime startOfLastWeek = LocalDate.now().minus(1, ChronoUnit.WEEKS).with(java.time.DayOfWeek.MONDAY).atStartOfDay();
+        LocalDateTime endOfLastWeek = startOfLastWeek.plusDays(6).with(LocalTime.MAX);
+
+        // Tổng số lượng bán ra từ InvoiceDetail trong tuần trước
+        Integer totalSold = invoiceDetailRepository.sumQuantityByProductIdAndDateRange(productId, startOfLastWeek, endOfLastWeek);
+        if (totalSold == null) {
+            totalSold = 0;
+        }
+        System.out.println("Mua:"+totalSold);
+        LocalDate startOfLastWeekDate = startOfLastWeek.toLocalDate();
+        LocalDate endOfLastWeekDate = endOfLastWeek.toLocalDate();
+        // Tổng số lượng trả lại từ ReturnDetail trong tuần trước
+        Integer totalReturned = returnDetailRepository.sumQuantityByProductIdAndDateRange(productId, startOfLastWeekDate, endOfLastWeekDate);
+        if (totalReturned == null) {
+            totalReturned = 0;
+        }
+        System.out.println("Tra:"+totalReturned);
+        // Tổng số lượng bán sau khi trừ số lượng trả lại
+        return totalSold - totalReturned;
+    }
+
 }

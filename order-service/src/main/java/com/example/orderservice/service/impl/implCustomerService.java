@@ -56,4 +56,9 @@ public class implCustomerService implements ICustomerService {
         }
         return false;
     }
+
+    @Override
+    public Customer getCustomerByEmail(String email) {
+        return customerRepository.findByEmail(email);
+    }
 }

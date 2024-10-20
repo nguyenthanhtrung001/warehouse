@@ -8,8 +8,9 @@ public class ReturnDetail {
     private Long id;
 
 
+    @ManyToOne
     @JoinColumn(name = "return_note_id")
-    private Long returnNote;
+    private ReturnNote returnNote;
 
     @Column(name = "product_id")
     private Long productId;
@@ -28,11 +29,11 @@ public class ReturnDetail {
         this.purchasePrice = purchasePrice;
     }
 
-    public Long getReturnNote() {
+    public ReturnNote getReturnNote() {
         return returnNote;
     }
 
-    public void setReturnNote(Long returnNote) {
+    public void setReturnNote(ReturnNote returnNote) {
         this.returnNote = returnNote;
     }
 

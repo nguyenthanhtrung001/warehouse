@@ -13,6 +13,7 @@ import com.example.orderservice.entity.InvoiceDetail;
 import com.example.orderservice.repository.CustomerRepository;
 import com.example.orderservice.repository.InvoiceDetailRepository;
 import com.example.orderservice.repository.InvoiceRepository;
+import com.example.orderservice.repository.ReturnDetailRepository;
 import com.example.orderservice.security.EncoderDecoder;
 import com.example.orderservice.service.IInvoiceDetailService;
 import com.example.orderservice.service.IInvoiceService;
@@ -26,6 +27,7 @@ import java.time.*;
 import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.time.temporal.ChronoUnit;
 
 @Service
 public class implInvoiceService implements IInvoiceService {
@@ -33,8 +35,7 @@ public class implInvoiceService implements IInvoiceService {
     private InvoiceRepository invoiceRepository;
     @Autowired
     private InvoiceDetailRepository invoiceDetailRepository;
-    @Autowired
-    private IReturnDetailService returnDetailService;
+
     @Autowired
     private CustomerRepository customerRepository;
     @Autowired
@@ -116,6 +117,11 @@ public class implInvoiceService implements IInvoiceService {
                 .mapToLong(Invoice::getPrice)
                 .sum();
 
+    }
+
+    @Override
+    public List<Invoice> getInvoicesByCustomerId(Long customerId) {
+        return invoiceRepository.findByCustomerId(customerId);
     }
 
     @Override
@@ -292,4 +298,6 @@ public class implInvoiceService implements IInvoiceService {
 
         return result;
     }
+
+
 }

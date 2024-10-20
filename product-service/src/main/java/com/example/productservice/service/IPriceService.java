@@ -9,6 +9,7 @@ public interface IPriceService {
 
     List<Price> getAllPrices();
     Price getPriceById(Long id);
+    Long getPriceByProductId(Long productId);
     Price createPrice(PriceRequest price);
     boolean updatePrice(Long id, Price price);
     boolean deletePrice(Long id);
