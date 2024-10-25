@@ -15,4 +15,6 @@ import java.util.Optional;
 public interface ProductClient {
     @GetMapping (value = "/api/products/nameproduct/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     String getNameProductByID(@PathVariable("id") Long id);
+    @GetMapping (value = "/api/products/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    ProductResponse getProductByID(@PathVariable("id") Long id);
 }

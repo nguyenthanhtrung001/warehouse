@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -21,7 +20,7 @@ public class InventoryCheckSlip {
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "inventory_balancing_date")
-    private LocalDateTime  inventoryBalancingDate;
+    private LocalDateTime inventoryBalancingDate;
 
     @Column(name = "status", nullable = false)
     private Integer status;
@@ -40,6 +39,10 @@ public class InventoryCheckSlip {
 
     @Column(name = "employee_id", nullable = false)
     private Long employeeId;
+
+    @Column(name = "warehouse_id", nullable = false)
+    private Long warehouseId;
+
     @JsonIgnore
     @OneToMany(mappedBy = "inventoryCheckSlip", cascade = CascadeType.ALL)
     private List<InventoryCheckDetail> inventoryCheckDetails;
@@ -123,6 +126,14 @@ public class InventoryCheckSlip {
 
     public void setEmployeeId(Long employeeId) {
         this.employeeId = employeeId;
+    }
+
+    public Long getWarehouseId() {
+        return warehouseId;
+    }
+
+    public void setWarehouseId(Long warehouseId) {
+        this.warehouseId = warehouseId;
     }
 
     public List<InventoryCheckDetail> getInventoryCheckDetails() {

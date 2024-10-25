@@ -25,18 +25,20 @@ public class implEmployeeService implements IEmployeeService {
     @Override
     public Employee createEmployee(Employee employee) {
         UserCreationRequest userCreationRequest = new UserCreationRequest();
-
-
-
+        if(employee.getAccountId().equals("false"))
+        {
+            employee.setAccountId(null);
+        }
         Employee  em = employeeRepository.save(employee);
-        if (employee.getAccount_id().equals("true")){
+        if (employee.getAccountId()==null) return  em;
+        if (employee.getAccountId().equals("true")){
             try{
                 String us = "NV000"+em.getId();
                 userCreationRequest.setUsername(us);
                 userCreationRequest.setPassword("123456");
                 ApiResponse<UserResponse> response= identityClient.createUser(userCreationRequest);
                 System.out.println("Response: " + response);
-                em.setAccount_id(us);
+                em.setAccountId(us);
                 updateEmployee(em.getId(),em);
             }catch (Exception e){
                 e.printStackTrace();
@@ -61,6 +63,11 @@ public class implEmployeeService implements IEmployeeService {
        // return employeeRepository.findAll();
         return employeeRepository.findAllNonAdminEmployees();
     }
+    @Override
+    public List<Employee> getAllEmployees(Long warehouseId, Long employeeId) {
+        return employeeRepository.findAllNonAdminEmployeesByWarehouseIdAndNotEmployeeId(warehouseId, employeeId);
+    }
+
 
     @Override
     public boolean updateEmployee(Long id, Employee employeeDetails) {
@@ -78,7 +85,7 @@ public class implEmployeeService implements IEmployeeService {
             existingEmployee.setAddress(employeeDetails.getAddress());
             existingEmployee.setEmail(employeeDetails.getEmail());
             existingEmployee.setStatus(employeeDetails.getStatus());
-            existingEmployee.setAccount_id(employeeDetails.getAccount_id());
+            existingEmployee.setAccountId(employeeDetails.getAccountId());
             employeeRepository.save(existingEmployee);
             return true;
         }

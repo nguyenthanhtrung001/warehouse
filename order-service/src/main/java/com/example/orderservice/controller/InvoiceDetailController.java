@@ -65,9 +65,12 @@ public class InvoiceDetailController {
         }
     }
     @GetMapping("/top-product")
-    public List<ProductQuantity> getTopProductQuantities(@RequestParam(defaultValue = "10") Integer top) {
-        return invoiceDetailService.getProductQuantities(top);
+    public List<ProductQuantity> getTopProductQuantities(
+            @RequestParam(defaultValue = "10") Integer top,
+            @RequestParam Long warehouseId) {
+        return invoiceDetailService.getProductQuantities(warehouseId, top);
     }
+
     @GetMapping("/products/quantities/current-month")
     public List<ProductQuantity> getProductQuantitiesForCurrentMonth() {
         return invoiceDetailService.getProductQuantitiesForCurrentMonth();
@@ -75,9 +78,11 @@ public class InvoiceDetailController {
 
     @GetMapping("/products/quantities/by-month-year")
     public List<ProductQuantity> getProductQuantitiesForMonthYear(@RequestParam int month,
-                                                                  @RequestParam int year) {
-        return invoiceDetailService.getProductQuantitiesForMonthYear(month, year);
+                                                                  @RequestParam int year,
+                                                                  @RequestParam Long warehouseId) {
+        return invoiceDetailService.getProductQuantitiesForMonthYear(month, year, warehouseId);
     }
+
     @GetMapping("/quantities/last-three-months")
     public ProductQuantity getProductQuantitiesForLastThreeMonths(@RequestParam Long productId) {
         return invoiceDetailService.getProductQuantitiesForLastThreeMonths(productId);

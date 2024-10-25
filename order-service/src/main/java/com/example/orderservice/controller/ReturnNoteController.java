@@ -59,11 +59,13 @@ public class ReturnNoteController {
     }
 
     @GetMapping("/revenue/monthly")
-    public long getMonthlyRevenue() {
-        return returnNoteService.calculateRevenueForCurrentMonth();
+    public long getMonthlyRevenue(@RequestParam("warehouseId") Long warehouseId) {
+        return returnNoteService.calculateRevenueForCurrentMonth(warehouseId);
     }
+
     @GetMapping("/count/current-month")
-    public long getReturnNoteCountForCurrentMonth() {
-        return returnNoteService.countReturnNotesForCurrentMonth();
+    public long getReturnNoteCountForCurrentMonth(@RequestParam Long warehouseId) {
+        return returnNoteService.countReturnNotesForCurrentMonth(warehouseId);
     }
+
 }

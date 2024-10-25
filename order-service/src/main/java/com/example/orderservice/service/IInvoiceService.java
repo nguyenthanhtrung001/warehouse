@@ -14,13 +14,13 @@ public interface  IInvoiceService {
     public long getTotalPriceForCurrentWeek();
     public List<Invoice> getInvoicesByCustomerId(Long customerId);
 
-    public long getTotalPriceForCurrentMonth();
+    public long getTotalPriceForCurrentMonth(Long wareHouseId);
 
     Invoice getInvoiceById(Long id);
 
-    List<Invoice> getAllInvoices();
+    public List<Invoice> getAllInvoices(Long warehouseId);
 
-    public List<Invoice> getAllInvoicesWithStatus(Integer status);
+    public List<Invoice> getInvoicesByStatusAndWarehouseId(int status, Long warehouseId);
 
     public boolean updateInvoice(Long id, Invoice invoice);
 
@@ -31,6 +31,7 @@ public interface  IInvoiceService {
     boolean deleteInvoiceWithStatus_1(Long id);
 
     public Map<String, Object> getProductSalesSummary(int year);
+    public Map<String, Object> getProductSalesSummary(int year, Long wareHouseId);
 
 
 }

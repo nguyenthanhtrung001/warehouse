@@ -104,10 +104,16 @@ public class implInvoiceDetailService implements IInvoiceDetailService {
     }
 
     @Override
-    public List<ProductQuantity> getProductQuantities(Integer limit) {
-        Pageable pageable = PageRequest.of(0, limit);
+    public List<ProductQuantity> getProductQuantities(Integer top) {
+        Pageable pageable = PageRequest.of(0, top);
         return invoiceDetailRepository.findProductQuantities(pageable);
     }
+    @Override
+    public List<ProductQuantity> getProductQuantities(Long warehouseId, Integer top) {
+        Pageable pageable = PageRequest.of(0, top);
+        return invoiceDetailRepository.findProductQuantitiesByWarehouseId(warehouseId, pageable);
+    }
+
 
     @Override
     public List<ProductQuantity> getProductQuantitiesForCurrentMonth() {
@@ -119,6 +125,7 @@ public class implInvoiceDetailService implements IInvoiceDetailService {
 
     }
 
+    // hệ thống
     @Override
     public List<ProductQuantity> getProductQuantitiesForMonthYear(int month, int year) {
         YearMonth specifiedMonth = YearMonth.of(year, month);
@@ -127,6 +134,15 @@ public class implInvoiceDetailService implements IInvoiceDetailService {
 
         return invoiceDetailRepository.findProductQuantitiesForMonth(startOfMonth, endOfMonth);
     }
+    @Override
+    public List<ProductQuantity> getProductQuantitiesForMonthYear(int month, int year, Long warehouseId) {
+        YearMonth specifiedMonth = YearMonth.of(year, month);
+        LocalDateTime startOfMonth = specifiedMonth.atDay(1).atStartOfDay();
+        LocalDateTime endOfMonth = specifiedMonth.atEndOfMonth().atTime(23, 59, 59);
+
+        return invoiceDetailRepository.findProductQuantitiesForMonth(startOfMonth, endOfMonth, warehouseId);
+    }
+
     @Override
     public ProductQuantity getProductQuantitiesForLastThreeMonths(Long productId) {
         ProductQuantity allQuantities = new ProductQuantity();

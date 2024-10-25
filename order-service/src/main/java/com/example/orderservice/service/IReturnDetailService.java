@@ -19,4 +19,5 @@ public interface IReturnDetailService {
     boolean deleteReturnDetail(Long id);
     public List<ProductQuantity> getProductQuantitiesForCurrentMonth();
     public List<ProductQuantity> getProductQuantitiesForMonthYear(int month, int year);
+    public List<ProductQuantity> getProductQuantitiesForMonthYear(int month, int year, Long warehouseId);
 }

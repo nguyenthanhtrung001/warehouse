@@ -37,6 +37,15 @@ public class EmployeeController {
         List<Employee> employees = employeeService.getAllEmployees();
         return ResponseEntity.ok(employees);
     }
+    @GetMapping("/warehouse")
+    public ResponseEntity<List<Employee>> getAllEmployees(
+            @RequestParam(value = "warehouseId", required = false) Long warehouseId,
+            @RequestParam(value = "employeeId", required = false) Long employeeId) {
+
+        List<Employee> employees = employeeService.getAllEmployees(warehouseId, employeeId);
+        return ResponseEntity.ok(employees);
+    }
+
 
     @PutMapping("/{id}")
     public ResponseEntity<Employee> updateEmployee(@PathVariable Long id, @RequestBody Employee employee) {

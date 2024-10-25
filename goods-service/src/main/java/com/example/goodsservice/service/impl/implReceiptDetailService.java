@@ -43,6 +43,7 @@ public class implReceiptDetailService implements IReceiptDetailService {
         return receiptDetailRepository.save(receiptDetail);
     }
 
+    // not fix
     @Override
     public List<ProductQuantity> getProductQuantitiesForCurrentMonth() {
         YearMonth currentMonth = YearMonth.now();
@@ -53,15 +54,25 @@ public class implReceiptDetailService implements IReceiptDetailService {
 
     }
 
+    // Dành cho toàn bộ hệ thông
+//    @Override
+//    public List<ProductQuantity> getProductQuantitiesForMonthYear(int month, int year) {
+//        YearMonth specifiedMonth = YearMonth.of(year, month);
+//        LocalDateTime startOfMonth = specifiedMonth.atDay(1).atStartOfDay();
+//        LocalDateTime endOfMonth = specifiedMonth.atEndOfMonth().atTime(23, 59, 59);
+//
+//        return receiptDetailRepository.findProductQuantitiesForCurrentMonth(startOfMonth, endOfMonth);
+//
+//    }
     @Override
-    public List<ProductQuantity> getProductQuantitiesForMonthYear(int month, int year) {
+    public List<ProductQuantity> getProductQuantitiesForMonthYear(int month, int year, Long warehouseId) {
         YearMonth specifiedMonth = YearMonth.of(year, month);
         LocalDateTime startOfMonth = specifiedMonth.atDay(1).atStartOfDay();
         LocalDateTime endOfMonth = specifiedMonth.atEndOfMonth().atTime(23, 59, 59);
 
-        return receiptDetailRepository.findProductQuantitiesForCurrentMonth(startOfMonth, endOfMonth);
-
+        return receiptDetailRepository.findProductQuantitiesForCurrentMonth(startOfMonth, endOfMonth, warehouseId);
     }
+
 
     @Override
     public ReceiptDetail addReceiptDetail(Long receiptId, ReceiptDetail receiptDetail) {
@@ -127,10 +138,7 @@ public class implReceiptDetailService implements IReceiptDetailService {
         return receiptDetailRepository.findById(id);
     }
 
-    @Override
-    public List<ReceiptDetail> getAllReceiptDetails() {
-        return receiptDetailRepository.findAll();
-    }
+
 
     @Override
     public boolean updateReceiptDetail(Long id, ReceiptDetail receiptDetail) {
@@ -151,6 +159,7 @@ public class implReceiptDetailService implements IReceiptDetailService {
         }
         return false;
     }
+
 
     @Override
     public Integer getTotalQuantityByReceiptId(Long receiptId) {

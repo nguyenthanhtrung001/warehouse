@@ -1,6 +1,8 @@
 package com.example.inventoryservice.controller;
 
+import com.example.inventoryservice.dto.ProductResponse;
 import com.example.inventoryservice.dto.response.BatchLocation;
+import com.example.inventoryservice.dto.response.ProductQuantity;
 import com.example.inventoryservice.entity.Batch;
 import com.example.inventoryservice.service.IBatchService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,5 +70,16 @@ public class BatchController {
     @GetMapping("/expiring-in-7-days")
     public List<Long> getExpiringProductIdsIn7Days() {
         return batchService.getProductIdsWithBatchesExpiringIn7Days();
+    }
+
+    @GetMapping("/warehouse/{warehouseId}")
+    public ResponseEntity<List<ProductResponse>> getProductsByWarehouseId(@PathVariable Long warehouseId) {
+        try {
+            List<ProductResponse> products = batchService.getProductsByWarehouseId(warehouseId);
+            return new ResponseEntity<>(products, HttpStatus.OK);
+        } catch (Exception e) {
+            // Xử lý lỗi (có thể log lại hoặc gửi thông báo lỗi phù hợp)
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }

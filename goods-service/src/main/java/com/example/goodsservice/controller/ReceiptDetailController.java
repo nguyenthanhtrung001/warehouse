@@ -32,12 +32,7 @@ public class ReceiptDetailController {
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    @GetMapping
-    public ResponseEntity<List<ReceiptDetail>> getAllReceiptDetails() {
-        List<ReceiptDetail> receiptDetails = receiptDetailService.getAllReceiptDetails();
-        return new ResponseEntity<>(receiptDetails, HttpStatus.OK);
-    }
-
+    
     @PutMapping("/{id}")
     public ResponseEntity<ReceiptDetail> updateReceiptDetail(@PathVariable Long id, @RequestBody ReceiptDetail receiptDetail) {
         boolean updated = receiptDetailService.updateReceiptDetail(id, receiptDetail);
@@ -80,9 +75,12 @@ public class ReceiptDetailController {
         return receiptDetailService.getProductQuantitiesForCurrentMonth();
     }
     @GetMapping("/products/quantities/by-month-year")
-    public List<ProductQuantity> getProductQuantitiesForMonthYear(@RequestParam int month, @RequestParam int year) {
-        return receiptDetailService.getProductQuantitiesForMonthYear(month, year);
+    public List<ProductQuantity> getProductQuantitiesForMonthYear(@RequestParam int month,
+                                                                  @RequestParam int year,
+                                                                  @RequestParam Long warehouseId) {
+        return receiptDetailService.getProductQuantitiesForMonthYear(month, year, warehouseId);
     }
+
     @GetMapping("/exists/{productId}")
     public Boolean checkProductIdExists(@PathVariable Long productId) {
         boolean exists = receiptDetailService.existsByProductId(productId);

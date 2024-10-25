@@ -11,14 +11,21 @@ import java.util.List;
 
 @Repository
 public interface ReceiptRepository extends JpaRepository<Receipt, Long> {
+    @Query("SELECT r FROM Receipt r WHERE r.receiptDate BETWEEN :startOfMonth AND :endOfMonth AND r.warehouse.id = :warehouseId")
+    List<Receipt> findAllReceiptsInMonth(
+            @Param("startOfMonth") LocalDateTime startOfMonth,
+            @Param("endOfMonth") LocalDateTime endOfMonth,
+            @Param("warehouseId") Long warehouseId
+    );
     @Query("SELECT r FROM Receipt r WHERE r.receiptDate BETWEEN :startOfMonth AND :endOfMonth")
     List<Receipt> findAllReceiptsInMonth(
             @Param("startOfMonth") LocalDateTime startOfMonth,
             @Param("endOfMonth") LocalDateTime endOfMonth
     );
 
-    @Query("SELECT r FROM Receipt r WHERE r.status <> 0")
-    List<Receipt> findAllByStatusNotZero();
-    @Query("SELECT r FROM Receipt r WHERE r.status <> 0 AND r.status <> 3")
-    List<Receipt> findAllByStatusNotZeroAndNotThree();
+    @Query("SELECT r FROM Receipt r WHERE r.status <> 0 AND r.warehouse.id = :warehouseId")
+    List<Receipt> findAllByStatusNotZeroAndWarehouseId(@Param("warehouseId") Long warehouseId);
+
+    @Query("SELECT r FROM Receipt r WHERE r.status <> 0 AND r.status <> 3 AND r.warehouse.id = :warehouseId")
+    List<Receipt> findAllByStatusNotZeroAndNotThree(@Param("warehouseId") Long warehouseId);
 }

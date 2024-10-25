@@ -51,12 +51,23 @@ public class implReceiptService implements IReceiptService {
     @Autowired
     BathDetailMapper bathDetailMapper;
 
-    @Override
-    public Receipt createReceipt(Receipt receipt) {
-        // Gọi api tạo lô hàng trước
-        return receiptRepository.save(receipt);
-    }
 
+    @Override
+    public ReceiptSummary getReceiptSummaryForCurrentMonth(Long warehouseId) {
+        LocalDate today = LocalDate.now();
+        LocalDateTime startOfMonth = today.withDayOfMonth(1).atStartOfDay();
+        LocalDateTime endOfMonth = today.withDayOfMonth(today.lengthOfMonth()).atTime(LocalTime.MAX);
+
+        // Sử dụng warehouseId khi gọi phương thức repository
+        List<Receipt> receipts = receiptRepository.findAllReceiptsInMonth(startOfMonth, endOfMonth, warehouseId);
+
+        long totalReceipts = receipts.size();
+        long totalPurchasePrice = receipts.stream()
+                .mapToLong(receipt -> receipt.getPurchasePrice() != null ? receipt.getPurchasePrice() : 0)
+                .sum();
+
+        return new ReceiptSummary(totalReceipts, totalPurchasePrice);
+    }
     @Override
     public ReceiptSummary getReceiptSummaryForCurrentMonth() {
         LocalDate today = LocalDate.now();
@@ -80,13 +91,14 @@ public class implReceiptService implements IReceiptService {
     }
 
     @Override
-    public List<Receipt> getAllReceipts() {
-        return receiptRepository.findAllByStatusNotZero();
+    public List<Receipt> getAllReceipts(Long warehouseId) {
+        return receiptRepository.findAllByStatusNotZeroAndWarehouseId(warehouseId);
     }
 
+
     @Override
-    public List<Receipt> getAllReceiptsForReturn() {
-        return receiptRepository.findAllByStatusNotZeroAndNotThree();
+    public List<Receipt> getAllReceiptsForReturn(Long warehouseId) {
+        return receiptRepository.findAllByStatusNotZeroAndNotThree(warehouseId);
     }
 
     @Override
@@ -162,6 +174,7 @@ public class implReceiptService implements IReceiptService {
         // gọi API tạo lô hàng và cập nhật số lượng cho lô hàng
         BathRequest bathRequest = bathMapper.toBathRequest(importExportRequest);
         bathRequest.setStatus(1);
+        bathRequest.setWarehouseId(importExportRequest.getWarehouseId());
         BathRequest bath= new BathRequest();
         try{
              bath = inventoryClient.createBath(bathRequest);
@@ -182,6 +195,8 @@ public class implReceiptService implements IReceiptService {
            receipt.setSupplier(supplier);
            receipt.setStatus(1);
            receipt.setPurchasePrice(importExportRequest.getPrice());
+           receipt.setWarehouse(new Warehouse(importExportRequest.getWarehouseId()));
+
            // API lấy thông tin đăng nhập để set ID Nhân viên
             receipt.setEmployeeId(importExportRequest.getEmployeeId());
            savedReceipt = receiptRepository.save(receipt);
@@ -219,37 +234,44 @@ public class implReceiptService implements IReceiptService {
 
         return savedReceipt;
     }
+
+    @Override
+    public List<ReportImportExport> createReportImportExport(Integer month, Integer year) {
+        return null;
+    }
+
     public static List<ProductQuantity> getLargestList(List<List<ProductQuantity>> lists) {
         return lists.stream()
                 .max(Comparator.comparingInt(List::size))
                 .orElse(new ArrayList<>());
     }
-
+    // từng kho
     @Override
-    public List<ReportImportExport> createReportImportExport(Integer month, Integer year) {
+    public List<ReportImportExport> createReportImportExport(Integer month, Integer year, Long wareHouseId) {
         List<ReportImportExport> reportImportExports = new ArrayList<>();
 
         // Khởi tạo các danh sách với giá trị mặc định nếu các dịch vụ trả về null
-        List<ProductQuantity> list_export_return_order = Optional.ofNullable(orderClient.getProductQuantity_import_order(month, year))
+        List<ProductQuantity> list_export_return_order = Optional.ofNullable(orderClient.getProductQuantity_import_order(month, year, wareHouseId))
                 .orElse(new ArrayList<>());
 
-        List<ProductQuantity> list_import_check_inventory = Optional.ofNullable(inventoryClient.getProductQuantity_import_check_inventory(month, year))
+        List<ProductQuantity> list_import_check_inventory = Optional.ofNullable(inventoryClient.getProductQuantity_import_check_inventory(month, year, wareHouseId))
                 .orElse(new ArrayList<>());
 
-        List<ProductQuantity> list_import_receipt = Optional.ofNullable(receiptDetailService.getProductQuantitiesForMonthYear(month, year))
+        //1
+        List<ProductQuantity> list_import_receipt = Optional.ofNullable(receiptDetailService.getProductQuantitiesForMonthYear(month, year, wareHouseId))
+                .orElse(new ArrayList<>());
+        //2
+        List<ProductQuantity> list_export_cancel = Optional.ofNullable(deliveryDetailService.getProductQuantitiesForMonthYearAndType(month, year, 2,wareHouseId))
                 .orElse(new ArrayList<>());
 
-        List<ProductQuantity> list_export_cancel = Optional.ofNullable(deliveryDetailService.getProductQuantitiesForMonthYearAndType(month, year, 2))
+
+        List<ProductQuantity> list_export_return_receipt = Optional.ofNullable(deliveryDetailService.getProductQuantitiesForMonthYearAndType(month, year, 1, wareHouseId))
+                .orElse(new ArrayList<>());
+        //3
+        List<ProductQuantity> list_export_check_inventory = Optional.ofNullable(inventoryClient.getProductQuantity_export_check_inventory(month, year,wareHouseId))
                 .orElse(new ArrayList<>());
 
-
-        List<ProductQuantity> list_export_return_receipt = Optional.ofNullable(deliveryDetailService.getProductQuantitiesForMonthYearAndType(month, year, 1))
-                .orElse(new ArrayList<>());
-
-        List<ProductQuantity> list_export_check_inventory = Optional.ofNullable(inventoryClient.getProductQuantity_export_check_inventory(month, year))
-                .orElse(new ArrayList<>());
-
-        List<ProductQuantity> list_import_order = Optional.ofNullable(orderClient.getProductQuantity_export_return_order(month, year))
+        List<ProductQuantity> list_import_order = Optional.ofNullable(orderClient.getProductQuantity_export_return_order(month, year,wareHouseId))
                 .orElse(new ArrayList<>());
 
         List<List<ProductQuantity>> allLists = Arrays.asList(
@@ -353,11 +375,12 @@ public class implReceiptService implements IReceiptService {
 
         return reportImportExports;
     }
+    //  fixed not check
 
     @Override
-    public List<ProductSummary> getProductSummaryBySupplierId(Long supplierId) {
-        List<ReceiptDetail> receiptDetails = receiptDetailRepository.findByReceipt_Supplier_Id(supplierId);
-        List<DeliveryDetail> deliveryDetails = deliveryDetailRepository.findByDeliveryNote_Receipt_Supplier_Id(supplierId);
+    public List<ProductSummary> getProductSummaryBySupplierId(Long supplierId, Long warehouseId) {
+        List<ReceiptDetail> receiptDetails = receiptDetailRepository.findByReceipt_Supplier_IdAndReceipt_Warehouse_Id(supplierId, warehouseId);
+        List<DeliveryDetail> deliveryDetails = deliveryDetailRepository.findByDeliveryNote_Receipt_Supplier_IdAndDeliveryNote_Receipt_Warehouse_Id(supplierId, warehouseId);
 
         Map<Long, ProductSummary> productSummaryMap = new HashMap<>();
 

@@ -1,10 +1,10 @@
 package com.example.orderservice.entity;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -15,13 +15,13 @@ public class Invoice {
     private Long id;
 
     @Column(name = "print_date")
-//    @Temporal(TemporalType.TIMESTAMP)
     @Convert(converter = Jsr310JpaConverters.LocalDateTimeConverter.class) // Sử dụng converter
     private LocalDateTime printDate;
 
     private Long price;
     private Long employeeId;
     private Integer status;
+
     @JsonIgnore
     @ManyToOne
     private Customer customer;
@@ -29,52 +29,24 @@ public class Invoice {
     @ManyToOne
     private ContactInfo contactInfo;
 
-    public ContactInfo getContactInfo() {
-        return contactInfo;
-    }
-
-    public void setContactInfo(ContactInfo contactInfo) {
-        this.contactInfo = contactInfo;
-    }
-
     @JsonIgnore
     @OneToMany(mappedBy = "invoice")
     private List<ReturnNote> returnNotes;
 
+    @Column(name = "warehouse_id", nullable = false)
+    private Long warehouseId;
+
     private String note;
+
+    // Constructors
+    public Invoice() {
+    }
 
     public Invoice(Long id) {
         this.id = id;
     }
 
-    public String getNote() {
-        return note;
-    }
-
-    public void setNote(String note) {
-        this.note = note;
-    }
-
-    public Long getEmployeeId() {
-        return employeeId;
-    }
-
-    public void setEmployeeId(Long employeeId) {
-        this.employeeId = employeeId;
-    }
-
-    public List<ReturnNote> getReturnNotes() {
-        return returnNotes;
-    }
-
-    public void setReturnNotes(List<ReturnNote> returnNotes) {
-        this.returnNotes = returnNotes;
-    }
-
-
-    public Invoice() {
-    }
-
+    // Getters and Setters
     public Long getId() {
         return id;
     }
@@ -99,6 +71,22 @@ public class Invoice {
         this.price = price;
     }
 
+    public Long getEmployeeId() {
+        return employeeId;
+    }
+
+    public void setEmployeeId(Long employeeId) {
+        this.employeeId = employeeId;
+    }
+
+    public Integer getStatus() {
+        return status;
+    }
+
+    public void setStatus(Integer status) {
+        this.status = status;
+    }
+
     public Customer getCustomer() {
         return customer;
     }
@@ -107,19 +95,35 @@ public class Invoice {
         this.customer = customer;
     }
 
- /*   public Long getEmployeeId() {
-        return employeeId;
+    public ContactInfo getContactInfo() {
+        return contactInfo;
     }
 
-    public void setEmployeeId(Long employeeId) {
-        this.employeeId = employeeId;
-    }*/
-
-    public Integer getStatus() {
-        return status;
+    public void setContactInfo(ContactInfo contactInfo) {
+        this.contactInfo = contactInfo;
     }
 
-    public void setStatus(Integer status) {
-        this.status = status;
+    public List<ReturnNote> getReturnNotes() {
+        return returnNotes;
+    }
+
+    public void setReturnNotes(List<ReturnNote> returnNotes) {
+        this.returnNotes = returnNotes;
+    }
+
+    public Long getWarehouseId() {
+        return warehouseId;
+    }
+
+    public void setWarehouseId(Long warehouseId) {
+        this.warehouseId = warehouseId;
+    }
+
+    public String getNote() {
+        return note;
+    }
+
+    public void setNote(String note) {
+        this.note = note;
     }
 }

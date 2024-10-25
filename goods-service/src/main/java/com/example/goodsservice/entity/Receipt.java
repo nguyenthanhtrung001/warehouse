@@ -11,7 +11,7 @@ public class Receipt {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long id ;
 
     @Temporal(TemporalType.TIMESTAMP)
     private LocalDateTime receiptDate;

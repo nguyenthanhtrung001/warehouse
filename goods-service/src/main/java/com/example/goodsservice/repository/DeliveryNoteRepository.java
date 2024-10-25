@@ -10,6 +10,7 @@ import java.util.List;
 
 @Repository
 public interface DeliveryNoteRepository extends JpaRepository<DeliveryNote, Long> {
-    @Query("SELECT dn FROM DeliveryNote dn WHERE dn.type = :type")
-    List<DeliveryNote> findAllByType(@Param("type") Integer type);
+    @Query("SELECT dn FROM DeliveryNote dn WHERE dn.type = :type AND dn.warehouseSource.id = :warehouseId")
+    List<DeliveryNote> findAllByTypeAndWarehouseId(@Param("type") Integer type, @Param("warehouseId") Long warehouseId);
+
 }

@@ -121,9 +121,10 @@ public class BatchDetailController {
         return batchDetailService.getBatchDetailsByProductId(productId);
     }
     @GetMapping("/top-lowest-quantity")
-    public List<ProductQuantity> getTopLowestQuantity(@RequestParam int limit) {
-        return batchDetailService.getTopNLowestQuantity(limit);
+    public List<ProductQuantity> getTopLowestQuantity(@RequestParam int limit, @RequestParam Long warehouseId) {
+        return batchDetailService.getTopNLowestQuantity(limit, warehouseId);
     }
+
     @DeleteMapping("/delete")
     public ResponseEntity<Boolean> deleteBatchDetailReturnBatchID(@RequestBody List<Long> listID) {
         boolean isDeleted = batchDetailService.deleteBatchDetailReturnBathID(listID);

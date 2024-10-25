@@ -9,6 +9,7 @@ public class ReturnNoteRequest {
     private Long price;
     private List<ReturnDetailRequest> returnDetails;
 
+
     public Long getPrice() {
         return price;
     }

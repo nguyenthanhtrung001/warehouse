@@ -28,7 +28,7 @@ public interface  IBatchDetailService {
     boolean updateQuantityForReturnOrder(Long id, Integer quantity);
 
     List<OrderQuantity> updateQuantityForOrder(Long id, Integer quantity);
-    public List<ProductQuantity> getTopNLowestQuantity(int limit);
+    public List<ProductQuantity> getTopNLowestQuantity(int limit, Long warehouseId);
 
     boolean deleteBatchDetailReturnBathID(List<Long>ListID);
     boolean deleteBatchDetail(Long id);

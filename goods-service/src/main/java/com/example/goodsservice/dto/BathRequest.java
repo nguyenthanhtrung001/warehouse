@@ -21,6 +21,15 @@ public class BathRequest {
 
     private String note;
     private int status;
+    private Long warehouseId;
+
+    public Long getWarehouseId() {
+        return warehouseId;
+    }
+
+    public void setWarehouseId(Long warehouseId) {
+        this.warehouseId = warehouseId;
+    }
 
     public int getStatus() {
         return status;

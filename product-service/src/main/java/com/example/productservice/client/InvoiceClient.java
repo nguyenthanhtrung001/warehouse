@@ -11,8 +11,9 @@ import java.util.List;
 @FeignClient(name = "order-service", url = "http://localhost:8087")
 
 public interface InvoiceClient {
-    @GetMapping (value = "/api/invoice-details/top-product", produces = MediaType.APPLICATION_JSON_VALUE)
-    List<ProductQuantity> getTopProductSale(@RequestParam("top") Integer limit);
+    @GetMapping(value = "/api/invoice-details/top-product", produces = MediaType.APPLICATION_JSON_VALUE)
+    List<ProductQuantity> getTopProductSale(@RequestParam("top") Integer limit, @RequestParam("warehouseId") Long warehouseId);
+
     @GetMapping (value = "/api/invoice-details/quantities/last-three-months", produces = MediaType.APPLICATION_JSON_VALUE)
     ProductQuantity getQuantityProductSaleThreeMonth(@RequestParam("productId") Long productId);
 

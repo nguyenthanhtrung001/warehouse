@@ -16,8 +16,8 @@ import java.util.List;
 @FeignClient(name = "inventory-service", url = "http://localhost:8086")
 public interface InventoryClient {
 
-   @GetMapping (value = "/api/batch-details/top-lowest-quantity", produces = MediaType.APPLICATION_JSON_VALUE)
-   List<ProductQuantity> getTopNLowestQuantity(@RequestParam("limit") Integer limit);
+   @GetMapping(value = "/api/batch-details/top-lowest-quantity", produces = MediaType.APPLICATION_JSON_VALUE)
+   List<ProductQuantity> getTopNLowestQuantity(@RequestParam("limit") Integer limit, @RequestParam("warehouseId") Long warehouseId);
    @GetMapping (value = "/api/batch-details/quantity/{productId}", produces = MediaType.APPLICATION_JSON_VALUE)
    Integer getQuantityByProductId(@PathVariable("productId") Long id);
    @GetMapping (value = "/api/batches/batch-location/{productId}", produces = MediaType.APPLICATION_JSON_VALUE)

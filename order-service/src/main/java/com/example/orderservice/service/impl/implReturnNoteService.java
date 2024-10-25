@@ -166,11 +166,16 @@ public class implReturnNoteService implements IReturnNoteService {
 
     @Override
     public long getTotalPriceForCurrentWeek() {
-        LocalDate today = LocalDate.now();
-        LocalDate startOfWeek = today.with(TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY));
-        LocalDate endOfWeek = today.with(TemporalAdjusters.nextOrSame(java.time.DayOfWeek.SUNDAY));
+       return 0;
+    }
 
-        List<ReturnNote> returnNotes = returnNoteRepository.findByReturnDateBetween(startOfWeek, endOfWeek);
+    @Override
+    public long getTotalPriceForCurrentMonth(Long wareHouseId) {
+        LocalDate today = LocalDate.now();
+        LocalDate startOfMonth = today.withDayOfMonth(1);
+        LocalDate endOfMonth = today.withDayOfMonth(today.lengthOfMonth());
+
+        List<ReturnNote> returnNotes = returnNoteRepository.findByReturnDateBetweenAndInvoice_WarehouseId(startOfMonth, endOfMonth,wareHouseId);
 
         return returnNotes.stream()
                 .filter(returnNote -> returnNote.getPrice() != null) // Kiểm tra null
@@ -179,33 +184,19 @@ public class implReturnNoteService implements IReturnNoteService {
     }
 
     @Override
-    public long getTotalPriceForCurrentMonth() {
+    public long countReturnNotesForCurrentMonth(Long wareHouseId) {
         LocalDate today = LocalDate.now();
         LocalDate startOfMonth = today.withDayOfMonth(1);
         LocalDate endOfMonth = today.withDayOfMonth(today.lengthOfMonth());
 
-        List<ReturnNote> returnNotes = returnNoteRepository.findByReturnDateBetween(startOfMonth, endOfMonth);
-
-        return returnNotes.stream()
-                .filter(returnNote -> returnNote.getPrice() != null) // Kiểm tra null
-                .mapToLong(ReturnNote::getPrice)
-                .sum();
-    }
-
-    @Override
-    public long countReturnNotesForCurrentMonth() {
-        LocalDate today = LocalDate.now();
-        LocalDate startOfMonth = today.withDayOfMonth(1);
-        LocalDate endOfMonth = today.withDayOfMonth(today.lengthOfMonth());
-
-        return returnNoteRepository.countByReturnDateBetween(startOfMonth, endOfMonth);
+        return returnNoteRepository.countByReturnDateBetweenAndInvoice_WarehouseId(startOfMonth, endOfMonth,wareHouseId);
 
     }
 
     @Override
-    public long calculateRevenueForCurrentMonth() {
-        long totalInvoicePrice = invoiceService.getTotalPriceForCurrentMonth();
-        long totalReturnNotePrice = getTotalPriceForCurrentMonth();
+    public long calculateRevenueForCurrentMonth(Long wareHouseId) {
+        long totalInvoicePrice = invoiceService.getTotalPriceForCurrentMonth(wareHouseId);
+        long totalReturnNotePrice = getTotalPriceForCurrentMonth(wareHouseId);
         System.out.println("GT1"+totalInvoicePrice);
         System.out.println("GT2"+totalReturnNotePrice);
         System.out.println("GT3"+ (totalInvoicePrice - totalReturnNotePrice));

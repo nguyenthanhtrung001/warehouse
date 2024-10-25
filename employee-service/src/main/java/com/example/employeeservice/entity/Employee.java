@@ -13,46 +13,56 @@ public class Employee {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "employee_name", nullable = false, length = 150)
     private String employeeName;
+
+    @Column(name = "basic_salary")
     private Double basicSalary;
+
+    @Column(name = "gender", length = 10)
     private String gender;
+
     @Temporal(TemporalType.DATE)
+    @Column(name = "date_of_birth", nullable = false)
     private Date dateOfBirth;
+
+    @Column(name = "phone_number", length = 15)
     private String phoneNumber;
+
+    @Column(name = "image")
     private String image;
+
     @Temporal(TemporalType.DATE)
+    @Column(name = "date_joined")
     private Date dateJoined;
+
+    @Column(name = "position", length = 150)
     private String position;
+
+    @Column(name = "address", length = 500)
     private String address;
+
+    @Column(name = "email", nullable = false, unique = true)
     private String email;
+
     @Column(name = "account_id", unique = true)
-    private String account_id;
+    private String accountId;
 
-    public String getAccount_id() {
-        return account_id;
-    }
-
-    public void setAccount_id(String account_id) {
-        this.account_id = account_id;
-    }
-
-    public List<Payroll> getPayrolls() {
-        return payrolls;
-    }
-
-    public void setPayrolls(List<Payroll> payrolls) {
-        this.payrolls = payrolls;
-    }
-
+    @Column(name = "status")
     private int status;
+
+    @Column(name = "warehouse_id", nullable = true)
+    private Long warehouseId;
 
     @JsonIgnore
     @OneToMany(mappedBy = "employee")
     private List<Payroll> payrolls;
+
     // Default constructor
     public Employee() {}
 
     // Getters and Setters
+
     public Long getId() {
         return id;
     }
@@ -141,11 +151,35 @@ public class Employee {
         this.email = email;
     }
 
+    public String getAccountId() {
+        return accountId;
+    }
+
+    public void setAccountId(String accountId) {
+        this.accountId = accountId;
+    }
+
     public int getStatus() {
         return status;
     }
 
     public void setStatus(int status) {
         this.status = status;
+    }
+
+    public Long getWarehouseId() {
+        return warehouseId;
+    }
+
+    public void setWarehouseId(Long warehouseId) {
+        this.warehouseId = warehouseId;
+    }
+
+    public List<Payroll> getPayrolls() {
+        return payrolls;
+    }
+
+    public void setPayrolls(List<Payroll> payrolls) {
+        this.payrolls = payrolls;
     }
 }

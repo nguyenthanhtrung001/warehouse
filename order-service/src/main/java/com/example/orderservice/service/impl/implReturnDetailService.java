@@ -92,6 +92,7 @@ public class implReturnDetailService implements IReturnDetailService {
 
     }
 
+    // hệ thống
     @Override
     public List<ProductQuantity> getProductQuantitiesForMonthYear(int month, int year) {
         YearMonth specifiedMonth = YearMonth.of(year, month);
@@ -101,4 +102,13 @@ public class implReturnDetailService implements IReturnDetailService {
         return returnDetailRepository.findProductQuantitiesForMonth(startOfMonth, endOfMonth);
 
     }
+    @Override
+    public List<ProductQuantity> getProductQuantitiesForMonthYear(int month, int year, Long warehouseId) {
+        YearMonth specifiedMonth = YearMonth.of(year, month);
+        LocalDate startOfMonth = specifiedMonth.atDay(1);
+        LocalDate endOfMonth = specifiedMonth.atEndOfMonth();
+
+        return returnDetailRepository.findProductQuantitiesForMonth(startOfMonth, endOfMonth, warehouseId);
+    }
+
 }

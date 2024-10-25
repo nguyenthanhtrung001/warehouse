@@ -14,6 +14,8 @@ public class Import_Export_Request {
     private Integer status;
     private Long price;
     private Long employeeId;
+
+    private Long warehouseId;
     private List<Import_Export_DetailRequest> import_Export_Details;
     // Lô hàng
     private String batchName;
@@ -25,6 +27,14 @@ public class Import_Export_Request {
 
     private Integer quantity;
     private Long location;
+
+    public Long getWarehouseId() {
+        return warehouseId;
+    }
+
+    public void setWarehouseId(Long warehouseId) {
+        this.warehouseId = warehouseId;
+    }
 
     public Long getBatchID() {
         return batchID;

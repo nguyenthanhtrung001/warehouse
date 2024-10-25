@@ -15,7 +15,7 @@ public interface InventoryCheckDetailRepository extends JpaRepository<InventoryC
     void deleteAllByInventoryCheckSlipId(Long id);
 
     List<InventoryCheckDetail> findByInventoryCheckSlipId(Long id);
-
+    // hệ thống
     @Query("SELECT new com.example.inventoryservice.dto.response.ProductQuantity(icd.batchDetail.productId, SUM(CASE WHEN icd.quantityDiscrepancy > 0 THEN icd.quantityDiscrepancy ELSE 0 END)) " +
             "FROM InventoryCheckDetail icd " +
             "JOIN InventoryCheckSlip ics ON icd.inventoryCheckSlip.id = ics.id " +
@@ -23,6 +23,17 @@ public interface InventoryCheckDetailRepository extends JpaRepository<InventoryC
             "GROUP BY icd.batchDetail.productId")
     List<ProductQuantity> findProductDiscrepanciesForMonth(@Param("startOfMonth") LocalDateTime startOfMonth,
                                                               @Param("endOfMonth") LocalDateTime endOfMonth);
+    @Query("SELECT new com.example.inventoryservice.dto.response.ProductQuantity(icd.batchDetail.productId, SUM(CASE WHEN icd.quantityDiscrepancy > 0 THEN icd.quantityDiscrepancy ELSE 0 END)) " +
+            "FROM InventoryCheckDetail icd " +
+            "JOIN InventoryCheckSlip ics ON icd.inventoryCheckSlip.id = ics.id " +
+            "WHERE ics.inventoryCheckTime >= :startOfMonth AND ics.inventoryCheckTime <= :endOfMonth " +
+            "AND ics.warehouseId = :warehouseId " +  // Thêm điều kiện lọc theo warehouseId
+            "GROUP BY icd.batchDetail.productId")
+    List<ProductQuantity> findProductDiscrepanciesForMonth(@Param("startOfMonth") LocalDateTime startOfMonth,
+                                                           @Param("endOfMonth") LocalDateTime endOfMonth,
+                                                           @Param("warehouseId") Long warehouseId); // Thêm tham số warehouseId
+
+    // hệ thống
     @Query("SELECT new com.example.inventoryservice.dto.response.ProductQuantity(icd.batchDetail.productId, SUM(CASE WHEN icd.quantityDiscrepancy < 0 THEN icd.quantityDiscrepancy ELSE 0 END)) " +
             "FROM InventoryCheckDetail icd " +
             "JOIN InventoryCheckSlip ics ON icd.inventoryCheckSlip.id = ics.id " +
@@ -30,4 +41,16 @@ public interface InventoryCheckDetailRepository extends JpaRepository<InventoryC
             "GROUP BY icd.batchDetail.productId")
 
     List<ProductQuantity> findProductDiscrepanciesLessForMonth(LocalDateTime startOfMonth, LocalDateTime endOfMonth);
+
+    @Query("SELECT new com.example.inventoryservice.dto.response.ProductQuantity(icd.batchDetail.productId, SUM(CASE WHEN icd.quantityDiscrepancy < 0 THEN icd.quantityDiscrepancy ELSE 0 END)) " +
+            "FROM InventoryCheckDetail icd " +
+            "JOIN InventoryCheckSlip ics ON icd.inventoryCheckSlip.id = ics.id " +
+            "WHERE ics.inventoryCheckTime >= :startOfMonth AND ics.inventoryCheckTime <= :endOfMonth " +
+            "AND ics.warehouseId = :warehouseId " + // Thêm điều kiện để lọc theo warehouseId
+            "GROUP BY icd.batchDetail.productId")
+    List<ProductQuantity> findProductDiscrepanciesLessForMonth(@Param("startOfMonth") LocalDateTime startOfMonth,
+                                                               @Param("endOfMonth") LocalDateTime endOfMonth,
+                                                               @Param("warehouseId") Long warehouseId);
+
+
 }

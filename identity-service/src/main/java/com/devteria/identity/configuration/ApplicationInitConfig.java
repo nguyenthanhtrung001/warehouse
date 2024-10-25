@@ -47,6 +47,11 @@ public class ApplicationInitConfig {
                         .name(PredefinedRole.USER_ROLE)
                         .description("User role")
                         .build());
+// đã bổ sung role staff
+                roleRepository.save(Role.builder()
+                        .name(PredefinedRole.STAFF_ROLE)
+                        .description("Staff role")
+                        .build());
 
                 Role adminRole = roleRepository.save(Role.builder()
                         .name(PredefinedRole.ADMIN_ROLE)
@@ -65,6 +70,8 @@ public class ApplicationInitConfig {
                 userRepository.save(user);
                 log.warn("admin user has been created with default password: admin, please change it");
             }
+
+
             log.info("Application initialization completed .....");
         };
     }

@@ -23,10 +23,21 @@ public interface InventoryClient {
    BathDetailRequest createDetailBath(@RequestBody BathDetailRequest Request);
    @PutMapping( value = "/api/batch-details/quantity/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
    ResponseEntity<String> updateDetailBathForDelivery(@PathVariable("id") Long id, @RequestParam("quantity") Integer quantity);
+   // hệ thống
    @GetMapping( value = "/api/inventory-check-slips/products/discrepancies/by-month-year", produces = MediaType.APPLICATION_JSON_VALUE)
    List<ProductQuantity> getProductQuantity_import_check_inventory(@RequestParam("month") Integer month, @RequestParam("year") Integer year);
+   @GetMapping(value = "/api/inventory-check-slips/products/discrepancies/by-month-year", produces = MediaType.APPLICATION_JSON_VALUE)
+   List<ProductQuantity> getProductQuantity_import_check_inventory(@RequestParam("month") Integer month,
+                                                                @RequestParam("year") Integer year,
+                                                                @RequestParam("warehouseId") Long warehouseId);
+
+   // hệ thống
    @GetMapping( value = "/api/inventory-check-slips/products/discrepancies-less/by-month-year", produces = MediaType.APPLICATION_JSON_VALUE)
    List<ProductQuantity> getProductQuantity_export_check_inventory(@RequestParam("month") Integer month, @RequestParam("year") Integer year);
+   @GetMapping(value = "/api/inventory-check-slips/products/discrepancies-less/by-month-year", produces = MediaType.APPLICATION_JSON_VALUE)
+   List<ProductQuantity> getProductQuantity_export_check_inventory(@RequestParam("month") Integer month,
+                                                                   @RequestParam("year") Integer year,
+                                                                   @RequestParam("warehouseId") Long warehouseId);
 
    @DeleteMapping(value = "/api/batch-details/delete",produces = MediaType.APPLICATION_JSON_VALUE)
    boolean deleteBatchDetailReturnBatchID(@RequestBody List<Long> listID);

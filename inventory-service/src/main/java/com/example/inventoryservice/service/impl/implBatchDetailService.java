@@ -197,8 +197,8 @@ public class implBatchDetailService implements IBatchDetailService {
     }
 
     @Override
-    public List<ProductQuantity> getTopNLowestQuantity(int limit) {
-        List<ProductQuantity> allProductQuantities = batchDetailRepository.findAllOrderedByQuantity();
+    public List<ProductQuantity> getTopNLowestQuantity(int limit, Long warehouseId) {
+        List<ProductQuantity> allProductQuantities = batchDetailRepository.findAllInventoryProductAndQuantityForWarehouse(warehouseId);
         return allProductQuantities.stream()
                 .limit(limit)
                 .collect(Collectors.toList());

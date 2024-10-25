@@ -11,6 +11,7 @@ public class InvoiceRequest {
     private Long employeeId;
     private List<InvoiceDetailRequest> order_Details;
     private String note;
+    private Long warehouseId;
 
     public InvoiceRequest() {
     }
@@ -21,6 +22,14 @@ public class InvoiceRequest {
 
     public void setCustomer(Long customer) {
         this.customer = customer;
+    }
+
+    public Long getWarehouseId() {
+        return warehouseId;
+    }
+
+    public void setWarehouseId(Long warehouseId) {
+        this.warehouseId = warehouseId;
     }
 
     public Long getPrice() {

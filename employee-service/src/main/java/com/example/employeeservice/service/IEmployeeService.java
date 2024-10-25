@@ -11,6 +11,7 @@ public interface IEmployeeService {
     public String getEmployeeNameById(Long id);
 
     List<Employee> getAllEmployees();
+    public List<Employee> getAllEmployees(Long warehouseId, Long employeeId);
 
     boolean updateEmployee(Long id, Employee employee);
 

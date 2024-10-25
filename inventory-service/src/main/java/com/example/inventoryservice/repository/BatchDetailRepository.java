@@ -28,11 +28,21 @@ public interface BatchDetailRepository extends JpaRepository<BatchDetail, Long> 
     @Query("SELECT bd FROM BatchDetail bd WHERE bd.productId = :productId AND bd.quantity > 0")
     List<BatchDetail> findByProductIdAndQuantityGreaterThan(Long productId);
 
-    @Query("SELECT new com.example.inventoryservice.dto.response.ProductQuantity(b.productId, SUM(b.quantity)) " +
-            "FROM BatchDetail b " +
-            "GROUP BY b.productId " +
-            "ORDER BY SUM(b.quantity) ASC")
-    List<ProductQuantity> findAllOrderedByQuantity();
+    @Query("SELECT new com.example.inventoryservice.dto.response.ProductQuantity(bd.productId, SUM(bd.quantity)) " +
+            "FROM BatchDetail bd " +
+            "JOIN bd.batch b " +
+            "WHERE b.warehouseId = :warehouseId " +
+            "GROUP BY bd.productId " +
+            "ORDER BY SUM(bd.quantity) ASC")
+    List<ProductQuantity> findAllInventoryProductAndQuantityForWarehouse(@Param("warehouseId") Long warehouseId);
 
     List<BatchDetail> findByProductId(Long productId);
+    @Query("SELECT new com.example.inventoryservice.dto.response.ProductQuantity(bd.productId, SUM(bd.quantity)) " +
+            "FROM BatchDetail bd " +
+            "JOIN bd.batch b " +
+            "WHERE b.warehouseId = :warehouseId " +
+            "GROUP BY bd.productId")
+    List<ProductQuantity> findProductQuantitiesByWarehouseId(@Param("warehouseId") Long warehouseId);
+
+
 }

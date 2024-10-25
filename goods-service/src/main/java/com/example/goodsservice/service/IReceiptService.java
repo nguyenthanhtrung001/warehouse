@@ -11,11 +11,11 @@ import java.util.List;
 
 public interface  IReceiptService {
 
-    Receipt createReceipt(Receipt receipt);
+    ReceiptSummary getReceiptSummaryForCurrentMonth(Long warehouseId);
     public ReceiptSummary getReceiptSummaryForCurrentMonth();
     Receipt getReceiptById(Long id);
-    List<Receipt> getAllReceipts();
-    List<Receipt> getAllReceiptsForReturn();
+    List<Receipt> getAllReceipts(Long warehouseId);
+    public List<Receipt> getAllReceiptsForReturn(Long warehouseId);
     boolean updateReceipt(Long id, Receipt receipt);
     boolean deleteReceiptUpdateStatus(Long id);
     boolean updateReceiptStatus(Long id, Integer status);
@@ -25,5 +25,7 @@ public interface  IReceiptService {
 
     public List<ReportImportExport> createReportImportExport( Integer month, Integer year);
 
-    public List<ProductSummary> getProductSummaryBySupplierId(Long supplierId) ;
-}
+    public List<ProductSummary> getProductSummaryBySupplierId(Long supplierId, Long warehouseId);
+    public List<ReportImportExport> createReportImportExport(Integer month, Integer year, Long wareHouseId);
+
+    }

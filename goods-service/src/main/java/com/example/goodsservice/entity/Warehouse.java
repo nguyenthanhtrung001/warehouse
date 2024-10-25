@@ -11,7 +11,7 @@ public class Warehouse implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long id ;
 
     @Column(name = "warehouse_name", nullable = false, length = 150)
     private String warehouseName;

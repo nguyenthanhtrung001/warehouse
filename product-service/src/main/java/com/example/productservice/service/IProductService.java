@@ -9,10 +9,11 @@ import java.util.List;
 public interface IProductService {
     public List<ProductResponse> getAllProducts();
     public List<ProductResponse> getAllProductsHasLocationBatch();
-    public List<ProductResponse> getTopLowestProduct(Integer top);
-    public List<ProductResponse> getNotifyTopLowestProduct(Integer quantity);
+    public List<ProductResponse> getTopLowestProduct(Integer top, Long warehouseId );
+    public List<ProductResponse> getNotifyTopLowestProduct(Integer quantity, Long wareHouseID);
 
-    public List<ProductResponse> getTopProductSale(Integer top);
+
+    public List<ProductResponse> getTopProductSale(Integer top, Long wareHouseId);
     public List<ProductResponse> getProposeProduct();
     public List<ProductResponse> getExpiredProduct();
     public Integer getProductCount();

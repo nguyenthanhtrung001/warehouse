@@ -18,6 +18,7 @@ public interface DeliveryDetailRepository extends JpaRepository<DeliveryDetail, 
     List<DeliveryDetail> findByDeliveryNoteIdAndType(@Param("deliveryNoteId") Long deliveryNoteId,@Param("type") Long type);
 
 
+    // toàn bộ hệ thống
     @Query("SELECT new com.example.goodsservice.dto.response.ProductQuantity(dd.ProductId, SUM(dd.quantity)) " +
             "FROM DeliveryDetail dd " +
             "WHERE dd.deliveryNote.deliveryDate >= :startOfMonth AND dd.deliveryNote.deliveryDate <= :endOfMonth " +
@@ -26,6 +27,17 @@ public interface DeliveryDetailRepository extends JpaRepository<DeliveryDetail, 
     List<ProductQuantity> findProductQuantitiesForMonthAndType(@Param("startOfMonth") LocalDateTime startOfMonth,
                                                                @Param("endOfMonth") LocalDateTime endOfMonth,
                                                                @Param("type") Integer type);
+    @Query("SELECT new com.example.goodsservice.dto.response.ProductQuantity(dd.ProductId, SUM(dd.quantity)) " +
+            "FROM DeliveryDetail dd " +
+            "WHERE dd.deliveryNote.deliveryDate >= :startOfMonth " +
+            "AND dd.deliveryNote.deliveryDate <= :endOfMonth " +
+            "AND dd.deliveryNote.type = :type " +
+            "AND (dd.deliveryNote.warehouseSource.id = :warehouseId) " +
+            "GROUP BY dd.ProductId")
+    List<ProductQuantity> findProductQuantitiesForMonthAndType(@Param("startOfMonth") LocalDateTime startOfMonth,
+                                                               @Param("endOfMonth") LocalDateTime endOfMonth,
+                                                               @Param("type") Integer type,
+                                                               @Param("warehouseId") Long warehouseId);
 
     @Query("SELECT SUM(dd.quantity) FROM DeliveryDetail dd WHERE dd.deliveryNote.receipt.id = :receiptId AND dd.batchDetail_Id = :batchDetailId")
     Integer findTotalQuantityByReceiptIdAndBatchDetailId(@Param("receiptId") Long receiptId, @Param("batchDetailId") Long batchDetailId);
@@ -33,5 +45,7 @@ public interface DeliveryDetailRepository extends JpaRepository<DeliveryDetail, 
     @Query("SELECT SUM(dd.quantity) FROM DeliveryDetail dd WHERE dd.deliveryNote.receipt.id = :receiptId")
     Integer findTotalQuantityByReceiptId(@Param("receiptId") Long receiptId);
 
-    List<DeliveryDetail> findByDeliveryNote_Receipt_Supplier_Id(Long supplierId);
+    List<DeliveryDetail> findByDeliveryNote_Receipt_Supplier_IdAndDeliveryNote_Receipt_Warehouse_Id(Long supplierId, Long warehouseId);
+
+
 }

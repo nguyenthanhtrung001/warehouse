@@ -7,10 +7,23 @@ public class ProductResponse {
     private double weight;
     private String description;
     private int status;
+    private long quantity;
 
     public ProductResponse() {
     }
 
+    public ProductResponse(String productName, long quantity) {
+        this.productName = productName;
+        this.quantity = quantity;
+    }
+
+    public long getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(long quantity) {
+        this.quantity = quantity;
+    }
 
     public Long getId() {
         return this.id;

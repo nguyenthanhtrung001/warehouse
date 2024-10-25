@@ -1,6 +1,9 @@
 package com.example.inventoryservice.service.impl;
 
+import com.example.inventoryservice.client.ProductClient;
+import com.example.inventoryservice.dto.ProductResponse;
 import com.example.inventoryservice.dto.response.BatchLocation;
+import com.example.inventoryservice.dto.response.ProductQuantity;
 import com.example.inventoryservice.entity.Batch;
 import com.example.inventoryservice.entity.BatchDetail;
 import com.example.inventoryservice.entity.Location;
@@ -11,10 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -24,7 +24,8 @@ public class implBatchService implements IBatchService {
     private  BatchRepository batchRepository;
     @Autowired
     private BatchDetailRepository batchDetailRepository;
-
+    @Autowired
+    ProductClient productClient;
 
     @Override
     public Batch createBatch(Batch batch) {
@@ -90,6 +91,34 @@ public class implBatchService implements IBatchService {
                 .distinct()
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public List<ProductResponse> getProductsByWarehouseId(Long warehouseId) {
+        // Lấy danh sách ProductQuantity theo warehouseId
+        List<ProductQuantity> productQuantities = getProductQuantitiesByWarehouseId(warehouseId);
+        List<ProductResponse> productResponses = new ArrayList<>();
+
+        for (ProductQuantity productQuantity : productQuantities) {
+            try {
+                // Lấy tên sản phẩm từ productClient và tạo ProductResponse
+               // String productName = productClient.getNameProductByID(productQuantity.getProductId());
+              ProductResponse response = productClient.getProductByID(productQuantity.getProductId());
+              response.setQuantity(productQuantity.getQuantity());
+              productResponses.add(response);
+                //productResponses.add(new ProductResponse(productName, productQuantity.getQuantity())); // Cần thêm số lượng nếu cần
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return productResponses;
+    }
+
+
+
+    public List<ProductQuantity> getProductQuantitiesByWarehouseId(Long warehouseId) {
+        return batchDetailRepository.findProductQuantitiesByWarehouseId(warehouseId);
+    }
+
     public List<Long> getProductIdsWithBatchesExpiringIn7Days() {
         // Lấy ngày hiện tại
         Date currentDate = new Date();

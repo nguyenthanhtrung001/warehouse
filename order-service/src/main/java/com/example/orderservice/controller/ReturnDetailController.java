@@ -65,9 +65,11 @@ public class ReturnDetailController {
 
     @GetMapping("/products/quantities/by-month-year")
     public List<ProductQuantity> getProductQuantitiesForMonthYear(@RequestParam int month,
-                                                                  @RequestParam int year) {
-        return returnDetailService.getProductQuantitiesForMonthYear(month, year);
+                                                                  @RequestParam int year,
+                                                                  @RequestParam Long warehouseId) {
+        return returnDetailService.getProductQuantitiesForMonthYear(month, year, warehouseId);
     }
+
     @GetMapping("/return-order/{invoiceId}")
     public List<InvoiceDetailResponse> getInvoiceDetailsByInvoiceId(@PathVariable Long invoiceId) {
         return returnDetailService.getReturnDetailsByInvoiceId(invoiceId);

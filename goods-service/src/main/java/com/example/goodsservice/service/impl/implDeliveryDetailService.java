@@ -29,34 +29,6 @@ public class implDeliveryDetailService implements IDeliveryDetailService {
     private ModelMapper modelMapper  = new ModelMapper();
 
     @Override
-    public DeliveryDetail createDeliveryDetail(DeliveryDetail deliveryDetail) {
-        return deliveryDetailRepository.save(deliveryDetail);
-    }
-
-    @Override
-    public Optional<DeliveryDetail> getDeliveryDetailById(Long id) {
-        return deliveryDetailRepository.findById(id);
-    }
-
-    @Override
-    public List<DeliveryDetail> getAllDeliveryDetails() {
-        return deliveryDetailRepository.findAllByType(1);
-    }
-
-    @Override
-    public boolean updateDeliveryDetail(Long id, DeliveryDetail deliveryDetail) {
-        if (deliveryDetailRepository.existsById(id)) {
-            deliveryDetail.setQuantity(deliveryDetail.getQuantity());
-           deliveryDetail.setBatchDetail_Id(deliveryDetail.getBatchDetail_Id());
-
-            deliveryDetailRepository.save(deliveryDetail);
-            return true;
-        }
-        return false;
-    }
-
-
-    @Override
     public boolean deleteDeliveryDetail(Long id) {
         if (deliveryDetailRepository.existsById(id)) {
             deliveryDetailRepository.deleteById(id);
@@ -66,8 +38,8 @@ public class implDeliveryDetailService implements IDeliveryDetailService {
     }
 
     @Override
-    public List<NoteDetailResponse> getNoteDetails(Long node) {
-        List<DeliveryDetail> receiptDetails= deliveryDetailRepository.findByDeliveryNoteId(node);
+    public List<NoteDetailResponse> getNoteDetails(Long nodeID) {
+        List<DeliveryDetail> receiptDetails= deliveryDetailRepository.findByDeliveryNoteId(nodeID);
 
         List<NoteDetailResponse> noteDetailResponses = new ArrayList<>();
         for (DeliveryDetail detail : receiptDetails){
@@ -85,7 +57,7 @@ public class implDeliveryDetailService implements IDeliveryDetailService {
         }
         return noteDetailResponses;
     }
-
+    // not fix
     public List<ProductQuantity> getProductQuantitiesForCurrentMonthAndType(int type) {
         YearMonth currentMonth = YearMonth.now();
         LocalDateTime startOfMonth = currentMonth.atDay(1).atStartOfDay();
@@ -93,7 +65,7 @@ public class implDeliveryDetailService implements IDeliveryDetailService {
 
         return deliveryDetailRepository.findProductQuantitiesForMonthAndType(startOfMonth, endOfMonth, type);
     }
-
+    // hệ thống
     public List<ProductQuantity> getProductQuantitiesForMonthYearAndType(int month, int year, int type) {
         YearMonth specifiedMonth = YearMonth.of(year, month);
         LocalDateTime startOfMonth = specifiedMonth.atDay(1).atStartOfDay();
@@ -101,13 +73,22 @@ public class implDeliveryDetailService implements IDeliveryDetailService {
 
         return deliveryDetailRepository.findProductQuantitiesForMonthAndType(startOfMonth, endOfMonth, type);
     }
+    @Override
+    public List<ProductQuantity> getProductQuantitiesForMonthYearAndType(int month, int year, int type, Long warehouseId) {
+        YearMonth specifiedMonth = YearMonth.of(year, month);
+        LocalDateTime startOfMonth = specifiedMonth.atDay(1).atStartOfDay();
+        LocalDateTime endOfMonth = specifiedMonth.atEndOfMonth().atTime(23, 59, 59);
 
+        return deliveryDetailRepository.findProductQuantitiesForMonthAndType(startOfMonth, endOfMonth, type, warehouseId);
+    }
+
+    // not fix
     @Override
     public Integer getTotalQuantity(Long receiptId, Long batchDetailId) {
         Integer totalQuantity = deliveryDetailRepository.findTotalQuantityByReceiptIdAndBatchDetailId(receiptId, batchDetailId);
         return (totalQuantity != null) ? totalQuantity : 0;
     }
-
+    // not fix
     @Override
     public Integer getTotalQuantityByReceiptId(Long receiptId) {
         Integer totalQuantity = deliveryDetailRepository.findTotalQuantityByReceiptId(receiptId);

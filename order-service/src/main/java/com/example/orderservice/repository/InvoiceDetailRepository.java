@@ -21,18 +21,37 @@ public interface InvoiceDetailRepository extends JpaRepository<InvoiceDetail, Lo
     //    void deleteByInvoiceId(Long invoiceId);
     List<InvoiceDetail> findByInvoiceId_Id(Long invoiceId);
 
+    // hệ thống
     @Query("SELECT new com.example.orderservice.dto.response.ProductQuantity(d.productId, SUM(d.quantity)) " +
             "FROM InvoiceDetail d " +
             "GROUP BY d.productId " +
             "ORDER BY SUM(d.quantity) DESC")
     List<ProductQuantity> findProductQuantities(Pageable pageable);
+    @Query("SELECT new com.example.orderservice.dto.response.ProductQuantity(d.productId, SUM(d.quantity)) " +
+            "FROM InvoiceDetail d " +
+            "JOIN d.invoiceId i " +  // Kết nối với thực thể Invoice
+            "WHERE i.warehouseId = :warehouseId " +  // Lọc theo warehouseId
+            "GROUP BY d.productId " +
+            "ORDER BY SUM(d.quantity) DESC")
+    List<ProductQuantity> findProductQuantitiesByWarehouseId(@Param("warehouseId") Long warehouseId, Pageable pageable);
 
+
+    // hệ thống
     @Query("SELECT new com.example.orderservice.dto.response.ProductQuantity(id.productId, SUM(id.quantity)) " +
             "FROM InvoiceDetail id " +
             "WHERE id.invoiceId.printDate >= :startOfMonth AND id.invoiceId.printDate <= :endOfMonth " +
             "GROUP BY id.productId")
     List<ProductQuantity> findProductQuantitiesForMonth(@Param("startOfMonth") LocalDateTime startOfMonth,
                                                         @Param("endOfMonth") LocalDateTime endOfMonth);
+    @Query("SELECT new com.example.orderservice.dto.response.ProductQuantity(id.productId, SUM(id.quantity)) " +
+            "FROM InvoiceDetail id " +
+            "JOIN id.invoiceId invoice " + // Kết nối với bảng Invoice để lấy warehouseId
+            "WHERE invoice.printDate >= :startOfMonth AND invoice.printDate <= :endOfMonth " +
+            "AND invoice.warehouseId = :warehouseId " + // Lọc theo warehouseId
+            "GROUP BY id.productId")
+    List<ProductQuantity> findProductQuantitiesForMonth(@Param("startOfMonth") LocalDateTime startOfMonth,
+                                                        @Param("endOfMonth") LocalDateTime endOfMonth,
+                                                        @Param("warehouseId") Long warehouseId);
 
     @Query("SELECT new com.example.orderservice.dto.response.ProductQuantity(id.productId, SUM(id.quantity)) " +
             "FROM InvoiceDetail id " +

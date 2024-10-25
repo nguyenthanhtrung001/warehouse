@@ -45,6 +45,7 @@ public class implInventoryCheckSlipService implements IInventoryCheckSlipService
 
         inventoryCheckSlip.setNotes(inventoryCheckSlipRequest.getNotes());
         inventoryCheckSlip.setEmployeeId(inventoryCheckSlipRequest.getEmployeeId());
+        inventoryCheckSlip.setWarehouseId(inventoryCheckSlipRequest.getWarehouseId());
         try{
             InventoryCheckSlip savedSlip = inventoryCheckSlipRepository.save(inventoryCheckSlip);
 
@@ -99,8 +100,8 @@ public class implInventoryCheckSlipService implements IInventoryCheckSlipService
     }
 
     @Override
-    public List<InventoryCheckSlip> getAllInventoryCheckSlips() {
-        return inventoryCheckSlipRepository.findAll();
+    public List<InventoryCheckSlip> getAllInventoryCheckSlips(Long warehouseId) {
+        return inventoryCheckSlipRepository.findByWarehouseId(warehouseId);
     }
 
 
@@ -150,6 +151,7 @@ public class implInventoryCheckSlipService implements IInventoryCheckSlipService
         return true;
     }
 
+    // not fix
     @Override
     public List<ProductQuantity> getProductDiscrepanciesForCurrentMonth() {
         YearMonth currentMonth = YearMonth.now();
@@ -160,6 +162,7 @@ public class implInventoryCheckSlipService implements IInventoryCheckSlipService
 
     }
 
+    // hệ thống
     @Override
     public List<ProductQuantity> getProductDiscrepanciesForMonthYear(int month, int year) {
         YearMonth specifiedMonth = YearMonth.of(year, month);
@@ -169,7 +172,17 @@ public class implInventoryCheckSlipService implements IInventoryCheckSlipService
         return inventoryCheckDetailRepository.findProductDiscrepanciesForMonth(startOfMonth, endOfMonth);
 
     }
+    @Override
+    public List<ProductQuantity> getProductDiscrepanciesForMonthYear(int month, int year, Long warehouseId) {
+        YearMonth specifiedMonth = YearMonth.of(year, month);
+        LocalDateTime startOfMonth = specifiedMonth.atDay(1).atStartOfDay();
+        LocalDateTime endOfMonth = specifiedMonth.atEndOfMonth().atTime(23, 59, 59);
 
+        return inventoryCheckDetailRepository.findProductDiscrepanciesForMonth(startOfMonth, endOfMonth, warehouseId);
+    }
+
+
+    // hệ thống
     @Override
     public List<ProductQuantity> getProductDiscrepanciesLessForMonthYear(int month, int year) {
         YearMonth specifiedMonth = YearMonth.of(year, month);
@@ -179,7 +192,16 @@ public class implInventoryCheckSlipService implements IInventoryCheckSlipService
         return inventoryCheckDetailRepository.findProductDiscrepanciesLessForMonth(startOfMonth, endOfMonth);
 
     }
+    @Override
+    public List<ProductQuantity> getProductDiscrepanciesLessForMonthYear(int month, int year, Long warehouseId) {
+        YearMonth specifiedMonth = YearMonth.of(year, month);
+        LocalDateTime startOfMonth = specifiedMonth.atDay(1).atStartOfDay();
+        LocalDateTime endOfMonth = specifiedMonth.atEndOfMonth().atTime(23, 59, 59);
 
+        return inventoryCheckDetailRepository.findProductDiscrepanciesLessForMonth(startOfMonth, endOfMonth, warehouseId);
+    }
+
+    // hệ thống
     @Override
     public List<ProductQuantity> getProductDiscrepanciesLessForCurrentMonth() {
         YearMonth currentMonth = YearMonth.now();
@@ -189,5 +211,8 @@ public class implInventoryCheckSlipService implements IInventoryCheckSlipService
         return inventoryCheckDetailRepository.findProductDiscrepanciesLessForMonth(startOfMonth, endOfMonth);
 
     }
+
+
+
 
 }

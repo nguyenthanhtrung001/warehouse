@@ -33,10 +33,11 @@ public class ReceiptController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Receipt>> getAllReceipts() {
-        List<Receipt> receipts = receiptService.getAllReceipts();
+    public ResponseEntity<List<Receipt>> getAllReceipts(@RequestParam("warehouseId") Long warehouseId) {
+        List<Receipt> receipts = receiptService.getAllReceipts(warehouseId);
         return ResponseEntity.ok(receipts);
     }
+
 
     @PutMapping("/{id}")
     public ResponseEntity<Void> updateReceipt(@PathVariable Long id, @RequestBody Receipt receipt) {
@@ -82,25 +83,37 @@ public class ReceiptController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
+    @GetMapping("/straightforwardness")
+    public ResponseEntity<ReceiptSummary> getReceiptSummary(@RequestParam("warehouseId") Long warehouseId) {
+        ReceiptSummary summary = receiptService.getReceiptSummaryForCurrentMonth(warehouseId);
+        return ResponseEntity.ok(summary);
+    }
     @GetMapping("/summary")
     public ResponseEntity<ReceiptSummary> getReceiptSummary() {
         ReceiptSummary summary = receiptService.getReceiptSummaryForCurrentMonth();
         return ResponseEntity.ok(summary);
     }
 
+
     @GetMapping("/report/import-export")
     public List<ReportImportExport> createReportImportExport(
             @RequestParam("month") Integer month,
-            @RequestParam("year") Integer year) {
-        return receiptService.createReportImportExport(month, year);
+            @RequestParam("year") Integer year,
+            @RequestParam("warehouseId") Long warehouseId) {
+        return receiptService.createReportImportExport(month, year, warehouseId);
     }
+
     @GetMapping("/for-return")
-    public ResponseEntity<List<Receipt>> getAllReceiptsForReturn() {
-        List<Receipt> receipts = receiptService.getAllReceiptsForReturn();
+    public ResponseEntity<List<Receipt>> getAllReceiptsForReturn(@RequestParam Long warehouseId) {
+        List<Receipt> receipts = receiptService.getAllReceiptsForReturn(warehouseId);
         return ResponseEntity.ok(receipts);
     }
+
     @GetMapping("/supplier/{supplierId}")
-    public List<ProductSummary> getProductSummaryBySupplierId(@PathVariable Long supplierId) {
-        return receiptService.getProductSummaryBySupplierId(supplierId);
+    public List<ProductSummary> getProductSummaryBySupplierId(
+            @PathVariable Long supplierId,
+            @RequestParam Long warehouseId) {
+        return receiptService.getProductSummaryBySupplierId(supplierId, warehouseId);
     }
+
 }

@@ -13,6 +13,8 @@ public class InventoryCheckSlipRequest {
     private Integer quantityDiscrepancyDecrease;
     private String notes;
     private Long employeeId;
+
+    private Long warehouseId;
     private List<InventoryCheckDetailRequest> inventoryCheckDetails;
 
 
@@ -29,6 +31,14 @@ public class InventoryCheckSlipRequest {
     }
 
     public InventoryCheckSlipRequest() {
+    }
+
+    public Long getWarehouseId() {
+        return warehouseId;
+    }
+
+    public void setWarehouseId(Long warehouseId) {
+        this.warehouseId = warehouseId;
     }
 
     public LocalDateTime getInventoryCheckTime() {

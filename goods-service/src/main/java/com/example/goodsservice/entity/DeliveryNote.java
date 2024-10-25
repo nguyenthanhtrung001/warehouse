@@ -1,10 +1,7 @@
 package com.example.goodsservice.entity;
 
 import jakarta.persistence.*;
-
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Date;
 
 @Entity
 public class DeliveryNote {
@@ -20,44 +17,25 @@ public class DeliveryNote {
     @JoinColumn(name = "receipt_id", nullable = true)
     private Receipt receipt;
 
-  /*  @ManyToOne
-    @JoinColumn(name = "employee_id", nullable = false)
-    private Employee employee;
-*/  private Integer type;
-    private Integer status;
+    @ManyToOne
+    @JoinColumn(name = "warehouse_source_id", nullable = false)
+    private Warehouse warehouseSource;
 
-    private Long price;
-
-    public Long getPrice() {
-        return price;
-    }
-
-    public void setPrice(Long price) {
-        this.price = price;
-    }
-
-    public Integer getType() {
-        return type;
-    }
-
-    public void setType(Integer type) {
-        this.type = type;
-    }
-
-    public Long getEmployeeId() {
-        return employeeId;
-    }
-
-    public void setEmployeeId(Long employeeId) {
-        this.employeeId = employeeId;
-    }
+    @ManyToOne
+    @JoinColumn(name = "warehouse_destination_id", nullable = true)
+    private Warehouse warehouseDestination;
 
     @Column(name = "employee_id", nullable = false)
     private Long employeeId;
+
+    private Integer type;
+    private Integer status;
+    private Long price;
+
+    // Constructors, getters, and setters
+
     public DeliveryNote() {
     }
-
-    // Getters and setters
 
     public Long getId() {
         return id;
@@ -83,13 +61,37 @@ public class DeliveryNote {
         this.receipt = receipt;
     }
 
-/*    public Employee getEmployee() {
-        return employee;
+    public Warehouse getWarehouseSource() {
+        return warehouseSource;
     }
 
-    public void setEmployee(Employee employee) {
-        this.employee = employee;
-    }*/
+    public void setWarehouseSource(Warehouse warehouseSource) {
+        this.warehouseSource = warehouseSource;
+    }
+
+    public Warehouse getWarehouseDestination() {
+        return warehouseDestination;
+    }
+
+    public void setWarehouseDestination(Warehouse warehouseDestination) {
+        this.warehouseDestination = warehouseDestination;
+    }
+
+    public Long getEmployeeId() {
+        return employeeId;
+    }
+
+    public void setEmployeeId(Long employeeId) {
+        this.employeeId = employeeId;
+    }
+
+    public Integer getType() {
+        return type;
+    }
+
+    public void setType(Integer type) {
+        this.type = type;
+    }
 
     public Integer getStatus() {
         return status;
@@ -97,5 +99,13 @@ public class DeliveryNote {
 
     public void setStatus(Integer status) {
         this.status = status;
+    }
+
+    public Long getPrice() {
+        return price;
+    }
+
+    public void setPrice(Long price) {
+        this.price = price;
     }
 }

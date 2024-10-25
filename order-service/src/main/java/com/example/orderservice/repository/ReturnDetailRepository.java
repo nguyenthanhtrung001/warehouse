@@ -14,6 +14,7 @@ import java.util.List;
 
 @Repository
 public interface ReturnDetailRepository extends JpaRepository<ReturnDetail, Long> {
+   // hệ thống
     @Query("SELECT new com.example.orderservice.dto.response.ProductQuantity(rd.productId, SUM(rd.quantity)) " +
             "FROM ReturnDetail rd " +
             "JOIN ReturnNote rn ON rd.returnNote.id = rn.id " +
@@ -21,6 +22,15 @@ public interface ReturnDetailRepository extends JpaRepository<ReturnDetail, Long
             "GROUP BY rd.productId")
     List<ProductQuantity> findProductQuantitiesForMonth(@Param("startOfMonth") LocalDate startOfMonth,
                                                         @Param("endOfMonth") LocalDate endOfMonth);
+    @Query("SELECT new com.example.orderservice.dto.response.ProductQuantity(rd.productId, SUM(rd.quantity)) " +
+            "FROM ReturnDetail rd " +
+            "JOIN ReturnNote rn ON rd.returnNote.id = rn.id " +
+            "WHERE rn.returnDate >= :startOfMonth AND rn.returnDate <= :endOfMonth " +
+            "AND rn.invoice.warehouseId = :warehouseId " +  // Lọc theo warehouseId
+            "GROUP BY rd.productId")
+    List<ProductQuantity> findProductQuantitiesForMonth(@Param("startOfMonth") LocalDate startOfMonth,
+                                                        @Param("endOfMonth") LocalDate endOfMonth,
+                                                        @Param("warehouseId") Long warehouseId);
 
 
 

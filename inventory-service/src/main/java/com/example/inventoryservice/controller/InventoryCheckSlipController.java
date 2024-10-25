@@ -42,9 +42,9 @@ public class InventoryCheckSlipController {
     }
 
     @GetMapping
-    public ResponseEntity<List<InventoryCheckSlip>> getAllInventoryCheckSlips() {
-        List<InventoryCheckSlip> inventoryCheckSlips = inventoryCheckSlipService.getAllInventoryCheckSlips();
-        return ResponseEntity.ok(inventoryCheckSlips);
+    public ResponseEntity<List<InventoryCheckSlip>> getAllInventoryCheckSlips(@RequestParam Long warehouseId) {
+        List<InventoryCheckSlip> slips = inventoryCheckSlipService.getAllInventoryCheckSlips(warehouseId);
+        return ResponseEntity.ok(slips);
     }
 
     @PutMapping("/{id}")
@@ -81,8 +81,9 @@ public class InventoryCheckSlipController {
 
     @GetMapping("/products/discrepancies/by-month-year")
     public List<ProductQuantity> getProductDiscrepanciesForMonthYear(@RequestParam int month,
-                                                                        @RequestParam int year) {
-        return inventoryCheckSlipService.getProductDiscrepanciesForMonthYear(month, year);
+                                                                     @RequestParam int year,
+                                                                     @RequestParam Long warehouseId) {
+        return inventoryCheckSlipService.getProductDiscrepanciesForMonthYear(month, year, warehouseId);
     }
 
     @GetMapping("/products/discrepancies-less/current-month")
@@ -92,8 +93,10 @@ public class InventoryCheckSlipController {
 
     @GetMapping("/products/discrepancies-less/by-month-year")
     public List<ProductQuantity> getProductDiscrepanciesLessForMonthYear(@RequestParam int month,
-                                                                     @RequestParam int year) {
-        return inventoryCheckSlipService.getProductDiscrepanciesLessForMonthYear(month, year);
+                                                                         @RequestParam int year,
+                                                                         @RequestParam Long warehouseId) {
+        return inventoryCheckSlipService.getProductDiscrepanciesLessForMonthYear(month, year, warehouseId);
     }
+
 }
 

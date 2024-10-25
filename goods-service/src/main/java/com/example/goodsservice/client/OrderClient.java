@@ -10,10 +10,21 @@ import java.util.List;
 
 @FeignClient(name = "order-service", url = "http://localhost:8087")
 public interface OrderClient {
+   // hệ thống
     @GetMapping( value = "/api/invoice-details/products/quantities/by-month-year", produces = MediaType.APPLICATION_JSON_VALUE)
     List<ProductQuantity> getProductQuantity_export_return_order(@RequestParam("month") Integer month, @RequestParam("year") Integer year);
-
+    @GetMapping(value = "/api/invoice-details/products/quantities/by-month-year", produces = MediaType.APPLICATION_JSON_VALUE)
+    List<ProductQuantity> getProductQuantity_export_return_order(
+            @RequestParam("month") Integer month,
+            @RequestParam("year") Integer year,
+            @RequestParam("warehouseId") Long warehouseId);
+    // hệ thống
     @GetMapping( value = "/api/return-details/products/quantities/by-month-year", produces = MediaType.APPLICATION_JSON_VALUE)
     List<ProductQuantity> getProductQuantity_import_order(@RequestParam("month") Integer month, @RequestParam("year") Integer year);
+    @GetMapping(value = "/api/return-details/products/quantities/by-month-year", produces = MediaType.APPLICATION_JSON_VALUE)
+    List<ProductQuantity> getProductQuantity_import_order(
+            @RequestParam("month") Integer month,
+            @RequestParam("year") Integer year,
+            @RequestParam("warehouseId") Long warehouseId);
 
 }

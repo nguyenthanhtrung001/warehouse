@@ -64,13 +64,19 @@ public class ProductController {
 
     }
     @GetMapping("/top-lowest")
-    public List<ProductResponse> getTopLowestProduct(@RequestParam("top") Integer top) {
-        return productService.getTopLowestProduct(top);
+    public List<ProductResponse> getTopLowestProduct(
+            @RequestParam("top") Integer top,
+            @RequestParam("warehouseId") Long warehouseId) {
+        return productService.getTopLowestProduct(top, warehouseId);
     }
+
     @GetMapping("/top-sale")
-    public List<ProductResponse> getTopProductSale(@RequestParam("top") Integer top) {
-        return productService.getTopProductSale(top);
+    public List<ProductResponse> getTopProductSale(
+            @RequestParam(value = "top") Integer top,
+            @RequestParam(value = "warehouseId") Long warehouseId) {
+        return productService.getTopProductSale(top, warehouseId);
     }
+
     @GetMapping("/propose")
     public List<ProductResponse> getProposeProduct() {
         return productService.getProposeProduct();
@@ -80,10 +86,13 @@ public class ProductController {
         return productService.getExpiredProduct();
     }
     @GetMapping("/notify-lowest")
-    public ResponseEntity<List<ProductResponse>> getNotifyTopLowestProduct() {
-        List<ProductResponse> products = productService.getNotifyTopLowestProduct(10);
+    public ResponseEntity<List<ProductResponse>> getNotifyTopLowestProduct(
+            @RequestParam(value = "quantity", defaultValue = "10") Integer quantity,
+            @RequestParam(value = "warehouseId") Long warehouseId) {
+        List<ProductResponse> products = productService.getNotifyTopLowestProduct(quantity, warehouseId);
         return ResponseEntity.ok(products);
     }
+
     @PutMapping("/{id}/status")
     public ResponseEntity<String> updateProductStatus(@PathVariable("id") Long productId) {
         try {

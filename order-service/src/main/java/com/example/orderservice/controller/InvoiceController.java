@@ -38,13 +38,16 @@ public class InvoiceController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Invoice>> getAllInvoices() {
-        List<Invoice> invoices = invoiceService.getAllInvoices();
+    public ResponseEntity<List<Invoice>> getAllInvoices(@RequestParam Long warehouseId) {
+        List<Invoice> invoices = invoiceService.getAllInvoices(warehouseId);
         return ResponseEntity.ok(invoices);
     }
+
     @GetMapping("/status")
-    public ResponseEntity<List<Invoice>> getInvoicesByStatus(@RequestParam Integer status) {
-        List<Invoice> invoices = invoiceService.getAllInvoicesWithStatus(status);
+    public ResponseEntity<List<Invoice>> getInvoicesByStatus(
+            @RequestParam Integer status,
+            @RequestParam Long warehouseId) { // Thêm tham số warehouseId
+        List<Invoice> invoices = invoiceService.getInvoicesByStatusAndWarehouseId(status, warehouseId);
         return ResponseEntity.ok(invoices);
     }
 
@@ -76,10 +79,17 @@ public class InvoiceController {
             return new ResponseEntity<>("Hóa đơn không tồn tại.", HttpStatus.NOT_FOUND);
         }
     }
-    @GetMapping("/api/product-summary")
+    @GetMapping("/product-summary")
     public Map<String, Object> getProductSummary( @RequestParam int year) {
         return invoiceService.getProductSalesSummary( year);
     }
+    @GetMapping("/product-summary-warehouse")
+    public Map<String, Object> getProductSummary(
+            @RequestParam int year,
+            @RequestParam Long wareHouseId) {  // Thêm tham số wareHouseId
+        return invoiceService.getProductSalesSummary(year, wareHouseId); // Gọi phương thức với tham số mới
+    }
+
 
     @GetMapping("/customer/{customerId}")
     public ResponseEntity<List<Invoice>> getInvoicesByCustomerId(@PathVariable Long customerId) {

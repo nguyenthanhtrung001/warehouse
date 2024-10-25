@@ -53,15 +53,17 @@ public class DeliveryNoteController {
     }
 
     @GetMapping
-    public ResponseEntity<List<DeliveryNote>> getAllDeliveryNotes() {
-        List<DeliveryNote> deliveryNotes = deliveryNoteService.getAllDeliveryNotes();
+    public ResponseEntity<List<DeliveryNote>> getAllDeliveryNotes(@RequestParam Long warehouseId) {
+        List<DeliveryNote> deliveryNotes = deliveryNoteService.getAllDeliveryNotes(warehouseId);
         return ResponseEntity.ok(deliveryNotes);
     }
+
     @GetMapping("/cancel")
-    public ResponseEntity<List<DeliveryNote>> getAllDeliveryNotesCancel() {
-        List<DeliveryNote> deliveryNotes = deliveryNoteService.getAllDeliveryNotesCancel();
+    public ResponseEntity<List<DeliveryNote>> getAllDeliveryNotesCancel(@RequestParam Long warehouseId) {
+        List<DeliveryNote> deliveryNotes = deliveryNoteService.getAllDeliveryNotesCancel(warehouseId);
         return ResponseEntity.ok(deliveryNotes);
     }
+
 
     @PutMapping("/{id}")
     public ResponseEntity<DeliveryNote> updateDeliveryNote(@PathVariable Long id, @RequestBody DeliveryNote deliveryNoteDetails) {

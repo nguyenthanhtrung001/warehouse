@@ -110,10 +110,10 @@ public class implProductService implements IProductService {
     }
 
     @Override
-    public List<ProductResponse> getTopLowestProduct(Integer top) {
+    public List<ProductResponse> getTopLowestProduct(Integer top, Long warehouseId ) {
         List<ProductResponse> productResponses = new ArrayList<>();
         try{
-            List<ProductQuantity> productQuantitys = inventoryClient.getTopNLowestQuantity(top);
+            List<ProductQuantity> productQuantitys = inventoryClient.getTopNLowestQuantity(top, warehouseId);
             for (ProductQuantity x : productQuantitys)
             {
                 Product product = productRepository.findById(x.getProductId()).orElse(null);
@@ -136,17 +136,21 @@ public class implProductService implements IProductService {
     }
 
     @Override
-    public List<ProductResponse> getNotifyTopLowestProduct(Integer quantity) {
-        return getTopLowestProduct(10).stream()
+    public List<ProductResponse> getNotifyTopLowestProduct(Integer quantity, Long wareHouseID) {
+        return getTopLowestProduct(10,wareHouseID).stream()
                 .filter(response -> response.getQuantity() <= quantity)
                 .collect(Collectors.toList());
     }
 
+
+
     @Override
-    public List<ProductResponse> getTopProductSale(Integer top) {
+    public List<ProductResponse> getTopProductSale(Integer top, Long wareHouseId) {
+        System.out.println("Vào hàm getTopProductSale :");
         List<ProductResponse> productResponses = new ArrayList<>();
         try{
-            List<ProductQuantity> productQuantitys = invoiceClient.getTopProductSale(top);
+            List<ProductQuantity> productQuantitys = invoiceClient.getTopProductSale(top,wareHouseId);
+            System.out.println("Danh sach sp:"+productQuantitys.size());
             for (ProductQuantity x : productQuantitys)
             {
                 Product product = productRepository.findById(x.getProductId()).orElse(null);

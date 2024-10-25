@@ -8,10 +8,10 @@ import java.util.List;
 
 public interface IDeliveryNoteService {
 
-        DeliveryNote createDeliveryNote(DeliveryNote deliveryNote);
+
         DeliveryNote getDeliveryNoteById(Long id);
-        List<DeliveryNote> getAllDeliveryNotes();
-        public List<DeliveryNote> getAllDeliveryNotesCancel();
+        public List<DeliveryNote> getAllDeliveryNotesCancel(Long warehouseId);
+        public List<DeliveryNote> getAllDeliveryNotes(Long warehouseId);
         boolean updateDeliveryNote(Long id, DeliveryNote deliveryNoteDetails);
         boolean deleteDeliveryNote(Long id);
         boolean updateDeliveryNoteStatus(Long id, Integer status);

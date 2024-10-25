@@ -5,6 +5,7 @@ import com.example.goodsservice.dto.*;
 import com.example.goodsservice.entity.DeliveryDetail;
 import com.example.goodsservice.entity.DeliveryNote;
 import com.example.goodsservice.entity.Receipt;
+import com.example.goodsservice.entity.Warehouse;
 import com.example.goodsservice.repository.DeliveryDetailRepository;
 import com.example.goodsservice.repository.DeliveryNoteRepository;
 import com.example.goodsservice.service.IDeliveryDetailService;
@@ -37,12 +38,6 @@ public class implDeliveryNoteService implements IDeliveryNoteService {
     private IDeliveryDetailService deliveryDetailService;
 
 
-
-    @Override
-    public DeliveryNote createDeliveryNote(DeliveryNote deliveryNote) {
-        return deliveryNoteRepository.save(deliveryNote);
-    }
-
     @Override
     public DeliveryNote getDeliveryNoteById(Long id) {
         Optional<DeliveryNote> optionalDeliveryNote = deliveryNoteRepository.findById(id);
@@ -50,12 +45,13 @@ public class implDeliveryNoteService implements IDeliveryNoteService {
     }
 
     @Override
-    public List<DeliveryNote> getAllDeliveryNotes() {
-        return deliveryNoteRepository.findAllByType(1);
+    public List<DeliveryNote> getAllDeliveryNotes(Long warehouseId) {
+        return deliveryNoteRepository.findAllByTypeAndWarehouseId(1, warehouseId);
     }
+
     @Override
-    public List<DeliveryNote> getAllDeliveryNotesCancel() {
-        return deliveryNoteRepository.findAllByType(2);
+    public List<DeliveryNote> getAllDeliveryNotesCancel(Long warehouseId) {
+        return deliveryNoteRepository.findAllByTypeAndWarehouseId(2, warehouseId);
     }
 
     @Override
@@ -110,6 +106,8 @@ public class implDeliveryNoteService implements IDeliveryNoteService {
             deliveryNote.setType(1);// xuất trả nhà cung cấp
             deliveryNote.setPrice(importExportRequest.getPrice());
             deliveryNote.setEmployeeId(importExportRequest.getEmployeeId());
+            // set warehouse
+            deliveryNote.setWarehouseSource( new Warehouse(importExportRequest.getWarehouseId()));
             savedNote = deliveryNoteRepository.save(deliveryNote);
 
         }catch (Exception e)
@@ -120,7 +118,7 @@ public class implDeliveryNoteService implements IDeliveryNoteService {
 
         // gọi API tạo lô hàng và cập nhật số lượng cho lô hàng
         // getDeliveryNote: Tạo chi tiết phiếu xuất
-        DeliveryNote result= getDeliveryNote( importExportRequest, savedNote);
+        DeliveryNote result = setDeliveryNoteAndUpdateInventory( importExportRequest, savedNote);
         Integer quantityReceipt = receiptDetailService.getTotalQuantityByReceiptId(result.getReceipt().getId());
         Integer quantityNote = deliveryDetailService.getTotalQuantityByReceiptId(result.getReceipt().getId());
         if (quantityNote == quantityReceipt)
@@ -141,6 +139,8 @@ public class implDeliveryNoteService implements IDeliveryNoteService {
             deliveryNote.setStatus(1);
             deliveryNote.setType(2);// xuất hủy hàng
             deliveryNote.setEmployeeId(importExportRequest.getEmployeeId());
+            // set warehouse
+            deliveryNote.setWarehouseSource(new Warehouse(importExportRequest.getWarehouseId()));
             savedNote = deliveryNoteRepository.save(deliveryNote);
         }catch (Exception e)
         {
@@ -149,10 +149,10 @@ public class implDeliveryNoteService implements IDeliveryNoteService {
 
         // gọi API tạo lô hàng và cập nhật số lượng cho lô hàng về 0
 
-        return getDeliveryNote(importExportRequest, savedNote);
+        return setDeliveryNoteAndUpdateInventory(importExportRequest, savedNote);
     }
 
-    private DeliveryNote getDeliveryNote(Import_Export_Request importExportRequest, DeliveryNote savedNote) {
+    private DeliveryNote setDeliveryNoteAndUpdateInventory(Import_Export_Request importExportRequest, DeliveryNote savedNote) {
 
         for (Import_Export_DetailRequest detailRequest : importExportRequest.getImport_Export_Details()) {
            try {
