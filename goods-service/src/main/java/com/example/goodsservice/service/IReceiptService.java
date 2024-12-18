@@ -22,10 +22,11 @@ public interface  IReceiptService {
     public List<DeliveryNote> getDeliveryNotesByReceiptId(Long receiptId);
 
     public Receipt createReceiptWithDetails(Import_Export_Request importExportRequest);
+    public Receipt createImportTransfer(Import_Export_Request importExportRequest);
 
     public List<ReportImportExport> createReportImportExport( Integer month, Integer year);
 
-    public List<ProductSummary> getProductSummaryBySupplierId(Long supplierId, Long warehouseId);
-    public List<ReportImportExport> createReportImportExport(Integer month, Integer year, Long wareHouseId);
+    public List<ProductSummary> getProductSummaryBySupplierId(Long supplierId, Long warehouseId, int year, int month);
+        public List<ReportImportExport> createReportImportExport(Integer month, Integer year, Long wareHouseId);
 
     }

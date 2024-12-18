@@ -26,6 +26,6 @@ public interface ReceiptRepository extends JpaRepository<Receipt, Long> {
     @Query("SELECT r FROM Receipt r WHERE r.status <> 0 AND r.warehouse.id = :warehouseId")
     List<Receipt> findAllByStatusNotZeroAndWarehouseId(@Param("warehouseId") Long warehouseId);
 
-    @Query("SELECT r FROM Receipt r WHERE r.status <> 0 AND r.status <> 3 AND r.warehouse.id = :warehouseId")
+    @Query("SELECT r FROM Receipt r WHERE r.status <> 0 AND r.status <> 3 AND r.warehouse.id = :warehouseId AND r.supplier is not null")
     List<Receipt> findAllByStatusNotZeroAndNotThree(@Param("warehouseId") Long warehouseId);
 }

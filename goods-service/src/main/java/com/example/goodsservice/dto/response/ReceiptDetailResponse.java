@@ -1,6 +1,5 @@
 package com.example.goodsservice.dto.response;
 
-import com.example.goodsservice.dto.Bath;
 import com.example.goodsservice.dto.BathRequest;
 import com.example.goodsservice.dto.Location;
 import com.example.goodsservice.entity.Receipt;

@@ -1,6 +1,7 @@
 package com.example.inventoryservice.controller;
 
 import com.example.inventoryservice.dto.ProductResponse;
+import com.example.inventoryservice.dto.response.BatchDetailInfo;
 import com.example.inventoryservice.dto.response.BatchLocation;
 import com.example.inventoryservice.dto.response.ProductQuantity;
 import com.example.inventoryservice.entity.Batch;
@@ -36,7 +37,10 @@ public class BatchController {
         List<Batch> batches = batchService.getAllBatches();
         return ResponseEntity.ok(batches);
     }
-
+    @GetMapping("/in-warehouse/{warehouseId}")
+    public List<Batch> getBatchesByWarehouseId(@PathVariable Long warehouseId) {
+        return batchService.getAllBatchesForWarehouseId(warehouseId);
+    }
     @PutMapping("/{id}")
     public ResponseEntity<Batch> updateBatch(@PathVariable Long id, @RequestBody Batch batch) {
         boolean updated = batchService.updateBatch(id, batch);
@@ -56,14 +60,17 @@ public class BatchController {
             return ResponseEntity.notFound().build();
         }
     }
-    @GetMapping("/batch-location/{productId}")
-    public BatchLocation getBatchLocationForProduct(@PathVariable Long productId) {
-        return batchService.getBatchLocatonForProduct(productId);
+    @GetMapping("/batch-location/{productId}/{warehouseId}")
+    public BatchLocation getBatchLocationForProduct(
+            @PathVariable Long productId,
+            @PathVariable Long warehouseId) {
+        return batchService.getBatchLocatonForProduct(productId, warehouseId);
     }
+
     // Controller để lấy danh sách productId đã hết hạn
     @GetMapping("/expired")
-    public List<Long> getExpiredProductIds() {
-        return batchService.getExpiredProductIds();
+    public List<Long> getExpiredProductIds(@RequestParam Long warehouseId) {
+        return batchService.getExpiredProductIds(warehouseId);
     }
 
     // Controller để lấy danh sách productId sắp hết hạn trong 7 ngày
@@ -81,5 +88,10 @@ public class BatchController {
             // Xử lý lỗi (có thể log lại hoặc gửi thông báo lỗi phù hợp)
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @GetMapping("/batches/details")
+    public List<BatchDetailInfo> getBatchDetailsByWarehouseId(@RequestParam Long warehouseId) {
+        return batchService.getBatchDetailsByWarehouseId(warehouseId);
     }
 }

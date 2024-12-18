@@ -19,4 +19,6 @@ public class UserCreationRequest {
     @Size(min = 6, message = "INVALID_PASSWORD")
     String password;
 
+    Integer type;
+
 }

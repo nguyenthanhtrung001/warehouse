@@ -21,7 +21,7 @@ public class User {
 
     String username;
     String password;
-
+    Integer status = 1;
     @ManyToMany
     Set<Role> roles;
 }

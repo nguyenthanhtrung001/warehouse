@@ -74,12 +74,12 @@ public class ReceiptDetailController {
     public List<ProductQuantity> getProductQuantitiesForCurrentMonth() {
         return receiptDetailService.getProductQuantitiesForCurrentMonth();
     }
-    @GetMapping("/products/quantities/by-month-year")
-    public List<ProductQuantity> getProductQuantitiesForMonthYear(@RequestParam int month,
-                                                                  @RequestParam int year,
-                                                                  @RequestParam Long warehouseId) {
-        return receiptDetailService.getProductQuantitiesForMonthYear(month, year, warehouseId);
-    }
+//    @GetMapping("/products/quantities/by-month-year")
+//    public List<ProductQuantity> getProductQuantitiesForMonthYear(@RequestParam int month,
+//                                                                  @RequestParam int year,
+//                                                                  @RequestParam Long warehouseId) {
+//        return receiptDetailService.getProductQuantitiesForMonthYearImportWarehouse(month, year, warehouseId);
+//    }
 
     @GetMapping("/exists/{productId}")
     public Boolean checkProductIdExists(@PathVariable Long productId) {

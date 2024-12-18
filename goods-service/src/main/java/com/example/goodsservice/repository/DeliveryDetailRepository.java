@@ -1,5 +1,6 @@
 package com.example.goodsservice.repository;
 
+import com.example.goodsservice.dto.response.DeliverySummaryResponse;
 import com.example.goodsservice.dto.response.ProductQuantity;
 import com.example.goodsservice.entity.DeliveryDetail;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -45,7 +46,17 @@ public interface DeliveryDetailRepository extends JpaRepository<DeliveryDetail, 
     @Query("SELECT SUM(dd.quantity) FROM DeliveryDetail dd WHERE dd.deliveryNote.receipt.id = :receiptId")
     Integer findTotalQuantityByReceiptId(@Param("receiptId") Long receiptId);
 
-    List<DeliveryDetail> findByDeliveryNote_Receipt_Supplier_IdAndDeliveryNote_Receipt_Warehouse_Id(Long supplierId, Long warehouseId);
+    List<DeliveryDetail> findByDeliveryNote_Receipt_Supplier_IdAndDeliveryNote_Receipt_Warehouse_IdAndDeliveryNote_DeliveryDateBetween(
+            Long supplierId,
+            Long warehouseId,
+            LocalDateTime startDate,
+            LocalDateTime endDate
+    );
 
+    @Query("SELECT SUM(dd.quantity) " +
+            "FROM DeliveryDetail dd " +
+            "JOIN dd.deliveryNote dn " +
+            "WHERE dn.type = :type AND dn.status = :status")
+    Long sumQuantityByTypeAndStatus(@Param("type") Integer type, @Param("status") Integer status);
 
 }

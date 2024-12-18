@@ -3,6 +3,9 @@ package com.devteria.identity.service;
 import java.util.HashSet;
 import java.util.List;
 
+import com.devteria.identity.entity.Permission;
+import com.devteria.identity.entity.Role;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import com.devteria.identity.dto.request.RoleRequest;
@@ -15,6 +18,8 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import java.util.HashSet;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -37,6 +42,21 @@ public class RoleService {
 
     public List<RoleResponse> getAll() {
         return roleRepository.findAll().stream().map(roleMapper::toRoleResponse).toList();
+    }
+    @Transactional
+    public Role updateRolePermissions(String roleName, Set<String> permissions) {
+        Role role = roleRepository.findById(roleName)
+                .orElseThrow(() -> new RuntimeException("Role not found"));
+
+        Set<Permission> permissionEntities = new HashSet<>();
+        for (String permissionName : permissions) {
+            Permission permission = permissionRepository.findById(permissionName)
+                    .orElseThrow(() -> new RuntimeException("Permission not found: " + permissionName));
+            permissionEntities.add(permission);
+        }
+
+        role.setPermissions(permissionEntities);
+        return roleRepository.save(role);
     }
 
     public void delete(String role) {

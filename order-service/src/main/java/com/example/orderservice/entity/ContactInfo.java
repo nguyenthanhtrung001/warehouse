@@ -38,6 +38,32 @@ public class ContactInfo{
     @OneToMany(mappedBy = "contactInfo")
     private List<Invoice> invoices;
 
+    public ContactInfo(Long id) {
+        this.id = id;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder address = new StringBuilder();
+        address.append(recipientName != null ? recipientName : "No Name");
+        address.append(" - ");
+        address.append(phoneNumber != null ? phoneNumber : "No Phone Number");
+        address.append(" - ");
+        address.append(detailedAddress != null ? detailedAddress : "No Detailed Address");
+
+        if (ward != null && !ward.isEmpty()) {
+            address.append(", ").append(ward);
+        }
+        if (district != null && !district.isEmpty()) {
+            address.append(", ").append(district);
+        }
+        if (province != null && !province.isEmpty()) {
+            address.append(", ").append(province);
+        }
+
+        return address.toString();
+    }
+
 
 
     public ContactInfo() {

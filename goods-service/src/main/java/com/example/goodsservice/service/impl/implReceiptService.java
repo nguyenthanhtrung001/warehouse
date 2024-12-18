@@ -12,16 +12,19 @@ import com.example.goodsservice.entity.*;
 import com.example.goodsservice.mapper.BathDetailMapper;
 import com.example.goodsservice.mapper.BathMapper;
 import com.example.goodsservice.repository.DeliveryDetailRepository;
+import com.example.goodsservice.repository.DeliveryNoteRepository;
 import com.example.goodsservice.repository.ReceiptDetailRepository;
 import com.example.goodsservice.repository.ReceiptRepository;
 import com.example.goodsservice.service.IDeliveryDetailService;
 import com.example.goodsservice.service.IReceiptDetailService;
 import com.example.goodsservice.service.IReceiptService;
+import com.example.goodsservice.validation.ImportExportRequestValidator;
 import jakarta.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -34,6 +37,8 @@ public class implReceiptService implements IReceiptService {
     private ReceiptRepository receiptRepository;
     @Autowired
     private DeliveryDetailRepository deliveryDetailRepository;
+    @Autowired
+    private DeliveryNoteRepository deliveryNoteRepository;
     @Autowired
     private ReceiptDetailRepository receiptDetailRepository;
     @Autowired
@@ -170,67 +175,186 @@ public class implReceiptService implements IReceiptService {
 
     @Transactional
     public Receipt createReceiptWithDetails(Import_Export_Request importExportRequest) {
+        // Khởi tạo Receipt
+        Receipt savedReceipt = null;
+        Long bathId = -1L;
+        try {
+            // Tạo Batch thông qua API
+            BathRequest bathRequest = bathMapper.toBathRequest(importExportRequest);
+            bathRequest.setStatus(1);
+            Date date = importExportRequest.getExpiryDate();
+            if (date == null) date = new Date();
+            bathRequest.setBatchName(importExportRequest.getBatchName() + "-" + createBatchName(importExportRequest.getWarehouseId(), date));
+            bathRequest.setWarehouseId(importExportRequest.getWarehouseId());
+            //
+            BathRequest bath = inventoryClient.createBath(bathRequest);
+            bathId = bath.getId();
 
-        // gọi API tạo lô hàng và cập nhật số lượng cho lô hàng
-        BathRequest bathRequest = bathMapper.toBathRequest(importExportRequest);
-        bathRequest.setStatus(1);
-        bathRequest.setWarehouseId(importExportRequest.getWarehouseId());
-        BathRequest bath= new BathRequest();
-        try{
-             bath = inventoryClient.createBath(bathRequest);
+            // Tạo Receipt và lưu vào cơ sở dữ liệu
+            Receipt receipt = new Receipt();
+            receipt.setReceiptDate(LocalDateTime.now());
+            receipt.setSupplier(new Supplier(importExportRequest.getSupplier()));
+            receipt.setStatus(1);
+            receipt.setPurchasePrice(importExportRequest.getPrice());
+            receipt.setWarehouse(new Warehouse(importExportRequest.getWarehouseId()));
+            receipt.setEmployeeId(importExportRequest.getEmployeeId());
+            //
+            try{
+                savedReceipt = receiptRepository.save(receipt);
+            }catch (Exception e){
+                if( bathId != -1L){
+                    inventoryClient.deleteBatchById(bathId);
+                }
+            }
+            if( savedReceipt == null){
+                throw new RuntimeException("Lỗi tạo phiếu nhập hàng");
 
-        }catch(Exception e){
+            }
+
+            // Tạo ReceiptDetail cho từng sản phẩm trong danh sách
+            for (Import_Export_DetailRequest detailRequest : importExportRequest.getImport_Export_Details()) {
+                createReceiptDetail(detailRequest, importExportRequest, bath, savedReceipt);
+            }
+        } catch (Exception e) {
             e.printStackTrace();
+
+            throw new RuntimeException("Đã xảy ra lỗi trong quá trình tạo phiếu nhập: " + e.getMessage());
         }
 
-         /*   System.out.println("ID Name:"+bath.getBatchName());
-        System.out.println("ID bath:"+bath.getId());*/
+        return savedReceipt;
+    }
 
-        Receipt savedReceipt = null;
-        Receipt receipt = new Receipt();
-       try {
-           receipt.setReceiptDate(LocalDateTime.now());
+    // Hàm phụ trợ để tạo ReceiptDetail
+    private void createReceiptDetail(Import_Export_DetailRequest detailRequest, Import_Export_Request importExportRequest, BathRequest bath, Receipt savedReceipt) {
+        Long bathDetailId =-1L;
+        try {
+            // Tạo BatchDetail thông qua API
+            Batch batchTmp = new Batch();
+            batchTmp.setId(bath.getId());
+            batchTmp.setWarehouseId(importExportRequest.getWarehouseId());
 
-           Supplier supplier = new Supplier(importExportRequest.getSupplier());
-           receipt.setSupplier(supplier);
-           receipt.setStatus(1);
-           receipt.setPurchasePrice(importExportRequest.getPrice());
-           receipt.setWarehouse(new Warehouse(importExportRequest.getWarehouseId()));
-
-           // API lấy thông tin đăng nhập để set ID Nhân viên
-            receipt.setEmployeeId(importExportRequest.getEmployeeId());
-           savedReceipt = receiptRepository.save(receipt);
-
-       }catch (Exception e)
-       {
-           e.printStackTrace();
-       }
-
-        for (Import_Export_DetailRequest detailRequest : importExportRequest.getImport_Export_Details()) {
-
-
-            System.out.println("ID Name abc:"+detailRequest.getProduct_Id());
-            Bath bathTmp =new Bath();
-            bathTmp.setId(bath.getId());
             Location location = new Location();
             location.setId(importExportRequest.getLocation());
+            location.setWarehouseId(importExportRequest.getWarehouseId());
+
             BathDetailRequest bathDetailRequest = bathDetailMapper.toBathDetailRequest(detailRequest);
-            bathDetailRequest.setBatch(bathTmp);
+            bathDetailRequest.setBatch(batchTmp);
             bathDetailRequest.setLocation(location);
+
             BathDetailRequest bathDetail = inventoryClient.createDetailBath(bathDetailRequest);
 
 
+            // Lưu ReceiptDetail vào cơ sở dữ liệu
             ReceiptDetail detail = new ReceiptDetail();
             detail.setReceipt(savedReceipt);
-
             detail.setPurchasePrice(detailRequest.getPurchasePrice());
             detail.setQuantity(detailRequest.getQuantity());
             detail.setBatchDetail_Id(bathDetail.getId());
             detail.setProductId(detailRequest.getProduct_Id());
+            try{
+                receiptDetailRepository.save(detail);
+            }catch (Exception e){
+                if( bathDetailId != -1L){
+                    inventoryClient.deleteBatchDetailById(bathDetailId);
+                }
+            }
 
-
-            receiptDetailRepository.save(detail);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Đã xảy ra lỗi trong quá trình tạo ReceiptDetail: " + e.getMessage());
         }
+    }
+    // Hàm tạo số ngẫu nhiên trong khoảng từ 100 đến 999
+    public static int generateRandomNumber() {
+        Random random = new Random();
+        return 100 + random.nextInt(900);
+    }
+
+    // Hàm tạo tên batch với định dạng dd/MM/yyyy và số ngẫu nhiên
+    public static String createBatchName(Long warehouseId, Date expiryDate) {
+        // Định dạng ngày theo dd/MM/yyyy
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+        String formattedDate = dateFormat.format(expiryDate);
+
+        // Gọi hàm tạo số ngẫu nhiên
+        int randomNumber = generateRandomNumber();
+
+        // Kết hợp ID kho, ngày định dạng, và số ngẫu nhiên
+        return "CK-" + warehouseId + "-" + formattedDate + "-" + randomNumber;
+    }
+
+    @Transactional
+    public Receipt createImportTransfer(Import_Export_Request importExportRequest) {
+        // gọi API tạo lô hàng và cập nhật số lượng cho lô hàng
+        BathRequest bathRequest = bathMapper.toBathRequest(importExportRequest);
+        bathRequest.setStatus(1);
+        bathRequest.setWarehouseId(importExportRequest.getWarehouseDestination());
+        bathRequest.setBatchName(createBatchName(importExportRequest.getWarehouseId(), importExportRequest.getExpiryDate()));
+        BathRequest bath= new BathRequest();
+        bath = inventoryClient.createBath(bathRequest);
+        System.out.println("ID bath:"+bath.getBatchName());
+        Receipt savedReceipt = null;
+        Receipt receipt = new Receipt();
+        try {
+            receipt.setReceiptDate(LocalDateTime.now());
+            receipt.setStatus(1);
+            receipt.setPurchasePrice(0l);
+            receipt.setWarehouse(new Warehouse(importExportRequest.getWarehouseDestination()));
+            receipt.setWarehouseTransfer(new Warehouse(importExportRequest.getWarehouseId()));
+
+            // API lấy thông tin đăng nhập để set ID Nhân viên
+            receipt.setEmployeeId(importExportRequest.getEmployeeId());
+            try{
+                savedReceipt = receiptRepository.save(receipt);
+            }catch (Exception e){
+                inventoryClient.getBathByDetail(bath.getId());
+            }
+            if (savedReceipt == null)
+            {
+                throw new RuntimeException("Đã xảy ra lỗi trong tạo nhập chuyển kho: ");
+
+            }
+
+
+        }catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        for (Import_Export_DetailRequest detailRequest : importExportRequest.getImport_Export_Details()) {
+
+            System.out.println("ID Name abc:"+detailRequest.getProduct_Id());
+            Batch batchTmp = new Batch();
+            batchTmp.setId(bath.getId());
+            batchTmp.setWarehouseId(importExportRequest.getWarehouseId());
+            Location location = new Location();
+            location.setId(importExportRequest.getLocation());
+            BathDetailRequest bathDetailRequest = bathDetailMapper.toBathDetailRequest(detailRequest);
+            bathDetailRequest.setBatch(batchTmp);
+            bathDetailRequest.setLocation(location);
+            BathDetailRequest bathDetail = inventoryClient.createDetailBath(bathDetailRequest);
+
+            ReceiptDetail detail = new ReceiptDetail();
+            detail.setReceipt(savedReceipt);
+
+            detail.setPurchasePrice(0L);
+            detail.setQuantity(detailRequest.getQuantity());
+            detail.setBatchDetail_Id(bathDetail.getId());
+            detail.setProductId(detailRequest.getProduct_Id());
+            System.out.println("99999:"+bath.getBatchName());
+
+            try{
+                receiptDetailRepository.save(detail);
+            }catch (Exception e){
+                inventoryClient.deleteBatchDetailById(detail.getId());
+                e.printStackTrace();
+            }
+        }
+
+        Optional<DeliveryNote> abc = deliveryNoteRepository.findById(importExportRequest.getDeliveryNote());
+        abc.get().setStatus(2);
+        deliveryNoteRepository.save(abc.get());
+
 
         return savedReceipt;
     }
@@ -258,12 +382,17 @@ public class implReceiptService implements IReceiptService {
                 .orElse(new ArrayList<>());
 
         //1
-        List<ProductQuantity> list_import_receipt = Optional.ofNullable(receiptDetailService.getProductQuantitiesForMonthYear(month, year, wareHouseId))
+        List<ProductQuantity> list_import_receipt = Optional.ofNullable(receiptDetailService.getProductQuantitiesForMonthYearImportWarehouse(month, year, wareHouseId,1))
                 .orElse(new ArrayList<>());
         //2
         List<ProductQuantity> list_export_cancel = Optional.ofNullable(deliveryDetailService.getProductQuantitiesForMonthYearAndType(month, year, 2,wareHouseId))
                 .orElse(new ArrayList<>());
+        // transfer
+        List<ProductQuantity> list_export_transfer = Optional.ofNullable(deliveryDetailService.getProductQuantitiesForMonthYearAndType(month, year, 3,wareHouseId))
+                .orElse(new ArrayList<>());
 
+        List<ProductQuantity> list_import_transfer = Optional.ofNullable(receiptDetailService.getProductQuantitiesForMonthYearImportWarehouse(month, year, wareHouseId,2))
+                .orElse(new ArrayList<>());
 
         List<ProductQuantity> list_export_return_receipt = Optional.ofNullable(deliveryDetailService.getProductQuantitiesForMonthYearAndType(month, year, 1, wareHouseId))
                 .orElse(new ArrayList<>());
@@ -281,7 +410,9 @@ public class implReceiptService implements IReceiptService {
                 list_export_return_receipt,
                 list_export_cancel,
                 list_export_check_inventory,
-                list_export_return_order
+                list_export_return_order,
+                list_export_transfer,
+                list_import_transfer
         );
 
         List<ProductQuantity> largestList = getLargestList(allLists);
@@ -332,6 +463,20 @@ public class implReceiptService implements IReceiptService {
                         .map(pq -> Optional.ofNullable(pq.getQuantity()).orElse(0L))
                         .findFirst()
                         .orElse(0L);
+                // transfer
+                Long quantityTransfer = list_export_transfer.stream()
+                        .filter(pq -> productId.equals(pq.getProductId()))
+                        .map(pq -> Optional.ofNullable(pq.getQuantity()).orElse(0L))
+                        .findFirst()
+                        .orElse(0L);
+                Long quantityTransferImport = list_import_transfer.stream()
+                        .filter(pq -> productId.equals(pq.getProductId()))
+                        .map(pq -> Optional.ofNullable(pq.getQuantity()).orElse(0L))
+                        .findFirst()
+                        .orElse(0L);
+
+                reportImportExport.setImport_transfer(Math.toIntExact(quantityTransferImport));
+                reportImportExport.setTransfer(Math.toIntExact(quantityTransfer));
 
                 reportImportExport.setExport_order(Math.toIntExact(quantityOrder));
                 reportImportExport.setExport_check(Math.toIntExact(quantityCheck0));
@@ -348,10 +493,13 @@ public class implReceiptService implements IReceiptService {
 
                         long a = reportImportExport.getImport_check_inventory()
                         + reportImportExport.getImport_return_order()
-                        + reportImportExport.getImport_supplier();
+                        + reportImportExport.getImport_supplier()
+                        + reportImportExport.getImport_transfer();
+
                         long b = reportImportExport.getExport_cancel()
                         + reportImportExport.getExport_supplier()
                         + reportImportExport.getExport_order()
+                                + reportImportExport.getTransfer()
                         + (reportImportExport.getExport_check()*-1);
 
 
@@ -378,9 +526,27 @@ public class implReceiptService implements IReceiptService {
     //  fixed not check
 
     @Override
-    public List<ProductSummary> getProductSummaryBySupplierId(Long supplierId, Long warehouseId) {
-        List<ReceiptDetail> receiptDetails = receiptDetailRepository.findByReceipt_Supplier_IdAndReceipt_Warehouse_Id(supplierId, warehouseId);
-        List<DeliveryDetail> deliveryDetails = deliveryDetailRepository.findByDeliveryNote_Receipt_Supplier_IdAndDeliveryNote_Receipt_Warehouse_Id(supplierId, warehouseId);
+    public List<ProductSummary> getProductSummaryBySupplierId(Long supplierId, Long warehouseId, int year, int month) {
+        LocalDate startOfMonth = LocalDate.of(year, month, 1);
+        LocalDate endOfMonth = startOfMonth.withDayOfMonth(startOfMonth.lengthOfMonth());
+
+        // Chuyển đổi sang LocalDateTime để phù hợp với tham số trong truy vấn
+        LocalDateTime startDateTime = startOfMonth.atStartOfDay();
+        LocalDateTime endDateTime = endOfMonth.atTime(LocalTime.MAX);
+
+        // Lấy dữ liệu từ ReceiptDetail dựa trên supplierId, warehouseId và thời gian tháng hiện tại
+        List<ReceiptDetail> receiptDetails = receiptDetailRepository.findByReceipt_Supplier_IdAndReceipt_Warehouse_IdAndReceipt_ReceiptDateBetween(
+                supplierId,
+                warehouseId,
+                startDateTime,
+                endDateTime);
+
+        // Lấy dữ liệu từ DeliveryDetail dựa trên supplierId, warehouseId và thời gian tháng hiện tại
+        List<DeliveryDetail> deliveryDetails = deliveryDetailRepository.findByDeliveryNote_Receipt_Supplier_IdAndDeliveryNote_Receipt_Warehouse_IdAndDeliveryNote_DeliveryDateBetween(
+                supplierId,
+                warehouseId,
+                startDateTime,
+                endDateTime);
 
         Map<Long, ProductSummary> productSummaryMap = new HashMap<>();
 

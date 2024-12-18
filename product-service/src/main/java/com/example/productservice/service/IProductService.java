@@ -8,16 +8,18 @@ import java.util.List;
 
 public interface IProductService {
     public List<ProductResponse> getAllProducts();
-    public List<ProductResponse> getAllProductsHasLocationBatch();
+    public List<ProductResponse> getAllProductsInWarehouse( Long wareHouseId);
+    public List<ProductResponse> getAllProductsHasLocationBatch(Long wareHouseId);
     public List<ProductResponse> getTopLowestProduct(Integer top, Long warehouseId );
     public List<ProductResponse> getNotifyTopLowestProduct(Integer quantity, Long wareHouseID);
 
 
     public List<ProductResponse> getTopProductSale(Integer top, Long wareHouseId);
     public List<ProductResponse> getProposeProduct();
-    public List<ProductResponse> getExpiredProduct();
+    public List<ProductResponse> getExpiredProduct(Long warehouseId);
     public Integer getProductCount();
     public Product getProductById(Long id);
+    public ProductResponse getProductQuantityById(Long id, Long warehouseId);
     public String getNameProductById(Long id);
     public Product createProduct(ProductRequest product);
     public Product updateProduct(ProductRequest product);

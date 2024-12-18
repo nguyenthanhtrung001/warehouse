@@ -32,9 +32,19 @@ public class DeliveryNote {
     private Integer status;
     private Long price;
 
+    private String reason;
+
     // Constructors, getters, and setters
 
     public DeliveryNote() {
+    }
+
+    public String getReason() {
+        return reason;
+    }
+
+    public void setReason(String reason) {
+        this.reason = reason;
     }
 
     public Long getId() {

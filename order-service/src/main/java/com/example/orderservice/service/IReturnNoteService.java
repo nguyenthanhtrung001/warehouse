@@ -1,6 +1,7 @@
 package com.example.orderservice.service;
 
 import com.example.orderservice.dto.ReturnNoteRequest;
+import com.example.orderservice.dto.response.MonthRevenue;
 import com.example.orderservice.entity.ReturnNote;
 
 import java.util.List;
@@ -11,7 +12,7 @@ public interface  IReturnNoteService {
 
     ReturnNote getReturnNoteById(Long id);
 
-    List<ReturnNote> getAllReturnNotes();
+    List<ReturnNote> getAllReturnNotes(Long warehouseId);
 
     boolean updateReturnNote(Long id, ReturnNote returnNote);
 
@@ -20,4 +21,6 @@ public interface  IReturnNoteService {
     public long getTotalPriceForCurrentMonth(Long wareHouseId);
     public long countReturnNotesForCurrentMonth(Long wareHouseId);
     public long calculateRevenueForCurrentMonth(Long wareHouseId);
+    public long calculateRevenueForCurrentMonth();
+    public List<MonthRevenue> getRevenueNMonth();
 }

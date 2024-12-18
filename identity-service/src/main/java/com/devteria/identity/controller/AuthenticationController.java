@@ -24,6 +24,7 @@ import lombok.experimental.FieldDefaults;
 public class AuthenticationController {
     AuthenticationService authenticationService;
 
+    // đăng nhập
     @PostMapping("/token")
     ApiResponse<AuthenticationResponse> authenticate(@RequestBody AuthenticationRequest request) {
         var result = authenticationService.authenticate(request);

@@ -1,7 +1,11 @@
 package com.example.orderservice.controller;
 
+import com.example.orderservice.dto.CustomerDTO;
+import com.example.orderservice.dto.response.ApiResponse;
 import com.example.orderservice.entity.Customer;
+import com.example.orderservice.exception.DuplicateFieldException;
 import com.example.orderservice.service.ICustomerService;
+import com.example.orderservice.validator.CustomerValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,9 +20,32 @@ public class CustomerController {
     private ICustomerService customerService;
 
     @PostMapping
-    public ResponseEntity<Customer> createCustomer(@RequestBody Customer customer) {
-        Customer createdCustomer = customerService.createCustomer(customer);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdCustomer);
+    public ResponseEntity<ApiResponse<Customer>> createCustomer(@RequestBody CustomerDTO customerDTO) {
+        // Validate customerDTO
+        List<String> validationErrors = CustomerValidator.validate(customerDTO);
+        if (!validationErrors.isEmpty()) {
+            // Nếu có lỗi validation, trả về lỗi
+            String errorMessage = String.join(", ", validationErrors);
+            ApiResponse<Customer> apiResponse = new ApiResponse<>(false, "Validation failed: " + errorMessage, null);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(apiResponse);
+        }
+
+        try {
+            // Nếu dữ liệu hợp lệ, tạo customer
+            Customer createdCustomer = customerService.createCustomer(customerDTO);
+
+            // Trả về thông báo thành công
+            ApiResponse<Customer> apiResponse = new ApiResponse<>(true, "Customer created successfully", createdCustomer);
+            return ResponseEntity.status(HttpStatus.CREATED).body(apiResponse);
+        } catch (DuplicateFieldException e) {
+            // Nếu trùng số điện thoại hoặc email, trả về lỗi
+            ApiResponse<Customer> apiResponse = new ApiResponse<>(false, e.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(apiResponse);
+        } catch (Exception e) {
+            // Nếu có lỗi khác, trả về lỗi chung
+            ApiResponse<Customer> apiResponse = new ApiResponse<>(false, "An unexpected error occurred: " + e.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponse);
+        }
     }
 
     @GetMapping("/{id}")
@@ -28,8 +55,8 @@ public class CustomerController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Customer>> getAllCustomers() {
-        List<Customer> customers = customerService.getAllCustomers();
+    public ResponseEntity<List<CustomerDTO>> getAllCustomers() {
+        List<CustomerDTO> customers = customerService.getAllCustomers();
         return ResponseEntity.ok(customers);
     }
 

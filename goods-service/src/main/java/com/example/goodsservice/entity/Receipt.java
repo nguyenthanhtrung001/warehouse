@@ -11,38 +11,41 @@ public class Receipt {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id ;
+    private Long id;
 
     @Temporal(TemporalType.TIMESTAMP)
     private LocalDateTime receiptDate;
 
     @ManyToOne
-    @JoinColumn(name = "supplier_id", nullable = false)
+    @JoinColumn(name = "supplier_id", nullable = true)
     private Supplier supplier;
 
     @ManyToOne
     @JoinColumn(name = "warehouse_id", nullable = false)
     private Warehouse warehouse;
 
+    @ManyToOne
+    @JoinColumn(name = "warehousetransfer_id", nullable = true)
+    private Warehouse warehouseTransfer;
+
     @JsonIgnore
     @OneToMany(mappedBy = "receipt")
     private List<DeliveryNote> deliveryNotes;
 
-    private Integer status;
-    private Long purchasePrice;
-
     @Column(name = "employee_id", nullable = false)
     private Long employeeId;
 
-    // Constructors, getters, and setters
+    private Integer status;
+    private Long purchasePrice;
 
-    public Receipt() {
-    }
+    // Constructors
+    public Receipt() {}
 
     public Receipt(Long id) {
         this.id = id;
     }
 
+    // Getters and Setters
     public Long getId() {
         return id;
     }
@@ -75,6 +78,22 @@ public class Receipt {
         this.warehouse = warehouse;
     }
 
+    public Warehouse getWarehouseTransfer() {
+        return warehouseTransfer;
+    }
+
+    public void setWarehouseTransfer(Warehouse warehouseTransfer) {
+        this.warehouseTransfer = warehouseTransfer;
+    }
+
+    public List<DeliveryNote> getDeliveryNotes() {
+        return deliveryNotes;
+    }
+
+    public void setDeliveryNotes(List<DeliveryNote> deliveryNotes) {
+        this.deliveryNotes = deliveryNotes;
+    }
+
     public Integer getStatus() {
         return status;
     }
@@ -97,13 +116,5 @@ public class Receipt {
 
     public void setEmployeeId(Long employeeId) {
         this.employeeId = employeeId;
-    }
-
-    public List<DeliveryNote> getDeliveryNotes() {
-        return deliveryNotes;
-    }
-
-    public void setDeliveryNotes(List<DeliveryNote> deliveryNotes) {
-        this.deliveryNotes = deliveryNotes;
     }
 }

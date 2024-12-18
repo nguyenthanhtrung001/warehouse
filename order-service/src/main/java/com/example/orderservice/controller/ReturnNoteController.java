@@ -1,10 +1,10 @@
 package com.example.orderservice.controller;
 import com.example.orderservice.dto.ReturnNoteRequest;
+import com.example.orderservice.dto.response.MonthRevenue;
 import com.example.orderservice.entity.ReturnNote;
 
 import com.example.orderservice.service.IReturnNoteService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,9 +32,9 @@ public class ReturnNoteController {
         }
     }
 
-    @GetMapping
-    public ResponseEntity<List<ReturnNote>> getAllReturnNotes() {
-        List<ReturnNote> returnNotes = returnNoteService.getAllReturnNotes();
+    @GetMapping("/warehouse/{warehouseId}")
+    public ResponseEntity<List<ReturnNote>> getAllReturnNotes(@PathVariable Long warehouseId) {
+        List<ReturnNote> returnNotes = returnNoteService.getAllReturnNotes(warehouseId);
         return ResponseEntity.ok(returnNotes);
     }
 
@@ -62,7 +62,14 @@ public class ReturnNoteController {
     public long getMonthlyRevenue(@RequestParam("warehouseId") Long warehouseId) {
         return returnNoteService.calculateRevenueForCurrentMonth(warehouseId);
     }
-
+    @GetMapping("/revenue-warehouse/monthly")
+    public long getMonthlyRevenuerHouse() {
+        return returnNoteService.calculateRevenueForCurrentMonth();
+    }
+    @GetMapping("/revenue-warehouse-12-month")
+    public List<MonthRevenue> getRevenueNMonth() {
+        return returnNoteService.getRevenueNMonth();
+    }
     @GetMapping("/count/current-month")
     public long getReturnNoteCountForCurrentMonth(@RequestParam Long warehouseId) {
         return returnNoteService.countReturnNotesForCurrentMonth(warehouseId);

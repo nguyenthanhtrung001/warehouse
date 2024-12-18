@@ -7,18 +7,19 @@ import com.example.orderservice.dto.InvoiceRequest;
 
 import com.example.orderservice.dto.response.OrderQuantity;
 import com.example.orderservice.dto.response.ProductQuantity;
+import com.example.orderservice.entity.ContactInfo;
 import com.example.orderservice.entity.Customer;
 import com.example.orderservice.entity.Invoice;
 import com.example.orderservice.entity.InvoiceDetail;
 import com.example.orderservice.repository.CustomerRepository;
 import com.example.orderservice.repository.InvoiceDetailRepository;
 import com.example.orderservice.repository.InvoiceRepository;
-import com.example.orderservice.repository.ReturnDetailRepository;
 import com.example.orderservice.security.EncoderDecoder;
+import com.example.orderservice.service.IContactInfoService;
 import com.example.orderservice.service.IInvoiceDetailService;
 import com.example.orderservice.service.IInvoiceService;
-import com.example.orderservice.service.IReturnDetailService;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
+
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,7 +28,6 @@ import java.time.*;
 import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.time.temporal.ChronoUnit;
 
 @Service
 public class implInvoiceService implements IInvoiceService {
@@ -44,12 +44,65 @@ public class implInvoiceService implements IInvoiceService {
     ProductClient productClient;
     @Autowired
     IInvoiceDetailService invoiceDetailService;
+    @Autowired
+    IContactInfoService contactInfoService;
 
     private ModelMapper modelMapper = new ModelMapper();
 
 
-    @Transactional
+    public List<ProductQuantity> getProductQuantitySummary(InvoiceRequest invoiceRequest) {
+        // Sử dụng List để lưu trữ kết quả
+        List<ProductQuantity> productQuantityList = new ArrayList<>();
+
+        // Duyệt qua từng chi tiết hóa đơn trong InvoiceRequest
+        for (InvoiceDetailRequest detailRequest : invoiceRequest.getOrder_Details()) {
+            Long productId = detailRequest.getProduct_Id();
+            Long quantity = Long.valueOf(detailRequest.getQuantity());
+
+            // Kiểm tra nếu sản phẩm đã có trong danh sách
+            boolean productFound = false;
+            for (ProductQuantity productQuantity : productQuantityList) {
+                if (productQuantity.getProductId().equals(productId)) {
+                    // Nếu có, cộng thêm số lượng vào
+                    productQuantity.setQuantity(productQuantity.getQuantity() + quantity);
+                    productFound = true;
+                    break;
+                }
+            }
+
+            // Nếu sản phẩm chưa có trong danh sách, thêm mới
+            if (!productFound) {
+                productQuantityList.add(new ProductQuantity(productId, quantity));
+            }
+        }
+
+        return productQuantityList;
+    }
+    @Transactional(rollbackFor = IllegalArgumentException.class)
     public Invoice createInvoice(InvoiceRequest orderRequest) {
+
+        List<ProductQuantity> productQuantities = getProductQuantitySummary(orderRequest);
+        for (ProductQuantity productQuantity : productQuantities) {
+            Long productId = productQuantity.getProductId();
+            Long warehouseId = orderRequest.getWarehouseId();
+            Long quantityInventory = Long.valueOf(inventoryClient.getQuantityByProductIdAndWarehouse_lock(productId, warehouseId));
+
+            if (productQuantity.getQuantity() > quantityInventory) {
+                // Ném ngoại lệ nếu số lượng yêu cầu vượt quá tồn kho
+                throw new IllegalArgumentException("Tồn kho không đủ cho sản phẩm có ID: " + productId + ". Requested: " + productQuantity.getQuantity() + ", Available: " + quantityInventory);
+
+            }
+        }
+//        try {
+//            // Thêm độ trễ 30 giây
+//            Thread.sleep(20000); // 30 giây
+//        } catch (InterruptedException e) {
+//            // Xử lý nếu có lỗi khi sleep
+//            Thread.currentThread().interrupt();
+//            throw new RuntimeException("Đã xảy ra lỗi trong khi chờ đợi.", e);
+//        }
+
+
 
         // Find customer by ID
         Customer customer = customerRepository.findById(orderRequest.getCustomer())
@@ -62,6 +115,8 @@ public class implInvoiceService implements IInvoiceService {
         Invoice invoice = new Invoice();
         invoice.setPrintDate(currentDateTime); // Set print date to current date
         invoice.setCustomer(customer);
+        ContactInfo contactInfo = contactInfoService.getContactInfoById(orderRequest.getContactId());
+        invoice.setContactInfo(contactInfo.toString());
         invoice.setStatus(1); // Assuming status 1 means Success
         invoice.setPrice(orderRequest.getPrice()); // Calculate total price
         invoice.setEmployeeId(orderRequest.getEmployeeId());
@@ -73,7 +128,7 @@ public class implInvoiceService implements IInvoiceService {
 
         // Create InvoiceDetails
         List<InvoiceDetail> orderDetails = new ArrayList<>();
-        try{
+
             for (InvoiceDetailRequest detailRequest : orderRequest.getOrder_Details()) {
                 InvoiceDetail detail = new InvoiceDetail();
                 // InvoiceDetail detail = modelMapper.map(detailRequest,InvoiceDetail.class);
@@ -82,7 +137,20 @@ public class implInvoiceService implements IInvoiceService {
                 detail.setProductId(detailRequest.getProduct_Id());
                 detail.setQuantity(detailRequest.getQuantity());
                 detail.setPurchasePrice(detailRequest.getPurchasePrice());
-                List<OrderQuantity> orderQuantity = inventoryClient.updateDetailBathWithProduct(detail.getProductId(), detail.getQuantity());
+                List<OrderQuantity> orderQuantity = null;
+                try{
+                    orderQuantity = inventoryClient.updateDetailBathWithProduct(detail.getProductId(), detail.getQuantity(), savedInvoice.getWarehouseId());
+
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+                if (orderQuantity == null){
+                    System.out.println("rong: yes");
+                    throw new IllegalArgumentException("Tồn kho không đủ cho sản phẩm");
+
+
+                }
+                System.out.println("gia trị2222: "+orderQuantity.size());
 
                 String note = EncoderDecoder.encodeToJsonBase64(orderQuantity);
                 System.out.println("Idtmp:" + note);
@@ -91,10 +159,6 @@ public class implInvoiceService implements IInvoiceService {
 
                 orderDetails.add(detail);
             }
-        }catch (Exception e)
-        {
-            e.printStackTrace();
-        }
 
 
         // Save all InvoiceDetails
@@ -133,7 +197,7 @@ public class implInvoiceService implements IInvoiceService {
     }
 
     @Override
-    public long getTotalPriceForCurrentMonth(Long wareHouseId) {
+    public long getTotalPriceForMonth(Long wareHouseId) {
         LocalDate today = LocalDate.now();
         LocalDate startOfMonth = today.with(TemporalAdjusters.firstDayOfMonth());
         LocalDate endOfMonth = today.with(TemporalAdjusters.lastDayOfMonth());
@@ -141,13 +205,36 @@ public class implInvoiceService implements IInvoiceService {
         LocalDateTime startDateTime = startOfMonth.atStartOfDay();
         LocalDateTime endDateTime = endOfMonth.atTime(LocalTime.MAX);
 
-        List<Invoice> invoices = invoiceRepository.findByPrintDateBetweenAndWarehouseId(startDateTime, endDateTime,wareHouseId);
+        List<Invoice> invoices = invoiceRepository.findByPrintDateBetweenAndWarehouseId(startDateTime, endDateTime, wareHouseId);
 
         return invoices.stream()
                 .filter(invoice -> invoice.getPrice() != null) // Kiểm tra null
                 .mapToLong(Invoice::getPrice)
                 .sum();
 
+    }
+
+    @Override
+    public long getTotalPriceForMonth(int month, int year) {
+        // Xác định tháng và năm cụ thể
+        YearMonth specifiedMonth = YearMonth.of(year, month);
+
+        // Xác định ngày bắt đầu và kết thúc của tháng
+        LocalDate startOfMonth = specifiedMonth.atDay(1);
+        LocalDate endOfMonth = specifiedMonth.atEndOfMonth();
+
+        // Xác định thời gian bắt đầu và kết thúc trong ngày
+        LocalDateTime startDateTime = startOfMonth.atStartOfDay();
+        LocalDateTime endDateTime = endOfMonth.atTime(LocalTime.MAX);
+
+        // Lấy danh sách hóa đơn trong khoảng thời gian xác định
+        List<Invoice> invoices = invoiceRepository.findByPrintDateBetween(startDateTime, endDateTime);
+
+        // Tính tổng giá trị của các hóa đơn, bỏ qua các hóa đơn có giá trị null
+        return invoices.stream()
+                .filter(invoice -> invoice.getPrice() != null)
+                .mapToLong(Invoice::getPrice)
+                .sum();
     }
 
     // Helper method to calculate total price based on details
@@ -180,6 +267,17 @@ public class implInvoiceService implements IInvoiceService {
         return invoiceRepository.findById(invoiceId)
                 .map(invoice -> {
                     invoice.setStatus(newStatus);
+                    invoiceRepository.save(invoice);
+                    return true;
+                })
+                .orElse(false);
+    }
+    @Transactional
+    public boolean updateInvoiceStatusPayment(Long invoiceId, Integer newStatus) {
+        return invoiceRepository.findById(invoiceId)
+                .map(invoice -> {
+                    invoice.setStatus(newStatus);
+                    invoice.setPaymentDate(LocalDateTime.now());
                     invoiceRepository.save(invoice);
                     return true;
                 })
@@ -282,13 +380,13 @@ public class implInvoiceService implements IInvoiceService {
             Map<String, Long> monthlySales = entry.getValue();
 
             Map<String, Object> chartFormat = new HashMap<>();
-            String name="";
+            String name = "";
             try {
                 name = productClient.getNameProductByID(productId);
-            }catch (Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
             }
-            chartFormat.put("name",name);
+            chartFormat.put("name", name);
 
             // Lấy danh sách số lượng tổng cho từng tháng
             List<Long> dataValues = Arrays.stream(Month.values())
@@ -307,6 +405,7 @@ public class implInvoiceService implements IInvoiceService {
 
         return result;
     }
+
     @Override
     public Map<String, Object> getProductSalesSummary(int year, Long wareHouseId) {
         Map<String, Object> result = new HashMap<>();
@@ -320,7 +419,7 @@ public class implInvoiceService implements IInvoiceService {
             LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
 
             // Lấy danh sách số lượng sản phẩm từ hóa đơn cho tháng hiện tại
-            List<ProductQuantity> listImportOrder = Optional.ofNullable(invoiceDetailService.getProductQuantitiesForMonthYear(month.getValue(), year,wareHouseId))
+            List<ProductQuantity> listImportOrder = Optional.ofNullable(invoiceDetailService.getProductQuantitiesForMonthYear(month.getValue(), year, wareHouseId))
                     .orElse(Collections.emptyList()); // Sử dụng Collections.emptyList() để tối ưu hóa
 
             // Cập nhật số lượng sản phẩm vào map theo productId
@@ -344,13 +443,13 @@ public class implInvoiceService implements IInvoiceService {
             Map<String, Long> monthlySales = entry.getValue();
 
             Map<String, Object> chartFormat = new HashMap<>();
-            String name="";
+            String name = "";
             try {
                 name = productClient.getNameProductByID(productId);
-            }catch (Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
             }
-            chartFormat.put("name",name);
+            chartFormat.put("name", name);
 
             // Lấy danh sách số lượng tổng cho từng tháng
             List<Long> dataValues = Arrays.stream(Month.values())

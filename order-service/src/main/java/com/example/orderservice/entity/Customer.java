@@ -16,17 +16,19 @@ public class Customer {
     @Column(name = "customer_name", nullable = false)
     private String customerName;
 
-    @Column(name = "phone_number")
+    @Column(name = "phone_number", unique = true, nullable = false)
     private String phoneNumber;
 
     @Column(name = "date_of_birth")
     private LocalDate dateOfBirth;
 
-    private String address;
 
+    @Column(name = "email", unique = true)
     private String email;
 
     private String note;
+
+
 
     @JsonIgnore
     @OneToMany(mappedBy = "customer")
@@ -43,6 +45,10 @@ public class Customer {
 
 
     public Customer() {
+    }
+
+    public Customer(Long id) {
+        this.id = id;
     }
 
     public List<Invoice> getInvoices() {
@@ -95,13 +101,6 @@ public class Customer {
         this.dateOfBirth = dateOfBirth;
     }
 
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
 
     public String getEmail() {
         return email;

@@ -12,7 +12,7 @@ public interface IReceiptDetailService {
     ReceiptDetail createReceiptDetail(ReceiptDetail receiptDetail);
 
     public List<ProductQuantity> getProductQuantitiesForCurrentMonth();
-    public List<ProductQuantity> getProductQuantitiesForMonthYear(int month, int year, Long warehouseId);
+    public List<ProductQuantity> getProductQuantitiesForMonthYearImportWarehouse(int month, int year, Long warehouseId, Integer type);
     // toàn bộ hệ thống
     // public List<ProductQuantity> getProductQuantitiesForMonthYear(int month, int year);
     ReceiptDetail addReceiptDetail(Long receiptId, ReceiptDetail receiptDetail);
@@ -28,4 +28,4 @@ public interface IReceiptDetailService {
     boolean deleteReceiptDetail(Long id);
     public Integer getTotalQuantityByReceiptId(Long receiptId);
     boolean existsByProductId(Long productId);
-}
+    }

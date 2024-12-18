@@ -2,6 +2,8 @@ package com.devteria.identity.controller;
 
 import java.util.List;
 
+import com.devteria.identity.dto.request.RolePermissionUpdate;
+import com.devteria.identity.entity.Role;
 import org.springframework.web.bind.annotation.*;
 
 import com.devteria.identity.dto.request.ApiResponse;
@@ -40,5 +42,12 @@ public class RoleController {
     ApiResponse<Void> delete(@PathVariable String role) {
         roleService.delete(role);
         return ApiResponse.<Void>builder().build();
+    }
+    @PutMapping("/{roleName}/permissions")
+    public ApiResponse<Role> updateRolePermissions(@PathVariable String roleName, @RequestBody RolePermissionUpdate dto) {
+        Role updatedRole = roleService.updateRolePermissions(roleName, dto.getPermissions());
+        return ApiResponse.<Role>builder()
+                .result(updatedRole)
+                .build();
     }
 }

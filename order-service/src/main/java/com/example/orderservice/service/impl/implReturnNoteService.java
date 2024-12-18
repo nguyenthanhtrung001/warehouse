@@ -3,9 +3,9 @@ package com.example.orderservice.service.impl;
 import com.example.orderservice.client.InventoryClient;
 import com.example.orderservice.dto.ReturnDetailRequest;
 import com.example.orderservice.dto.ReturnNoteRequest;
+import com.example.orderservice.dto.response.MonthRevenue;
 import com.example.orderservice.dto.response.OrderQuantity;
 import com.example.orderservice.entity.Invoice;
-import com.example.orderservice.entity.InvoiceDetail;
 import com.example.orderservice.entity.ReturnDetail;
 import com.example.orderservice.entity.ReturnNote;
 import com.example.orderservice.repository.ReturnDetailRepository;
@@ -20,8 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.temporal.TemporalAdjusters;
+import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -122,8 +121,8 @@ public class implReturnNoteService implements IReturnNoteService {
     }
 
     @Override
-    public List<ReturnNote> getAllReturnNotes() {
-        return returnNoteRepository.findAll();
+    public List<ReturnNote> getAllReturnNotes(Long warehouseId) {
+        return returnNoteRepository.findByWarehouseId(warehouseId);
     }
 
     @Override
@@ -182,6 +181,23 @@ public class implReturnNoteService implements IReturnNoteService {
                 .mapToLong(ReturnNote::getPrice)
                 .sum();
     }
+    public long getTotalPriceForMonth(int month, int year) {
+        // Tạo đối tượng YearMonth với tháng và năm cụ thể
+        YearMonth specifiedMonth = YearMonth.of(year, month);
+
+        // Xác định ngày bắt đầu và kết thúc của tháng
+        LocalDate startOfMonth = specifiedMonth.atDay(1);
+        LocalDate endOfMonth = specifiedMonth.atEndOfMonth();
+
+        // Lấy danh sách các phiếu trả hàng trong khoảng thời gian xác định
+        List<ReturnNote> returnNotes = returnNoteRepository.findByReturnDateBetween(startOfMonth, endOfMonth);
+
+        // Tính tổng giá trị của các phiếu trả hàng, bỏ qua các phiếu có giá trị null
+        return returnNotes.stream()
+                .filter(returnNote -> returnNote.getPrice() != null)
+                .mapToLong(ReturnNote::getPrice)
+                .sum();
+    }
 
     @Override
     public long countReturnNotesForCurrentMonth(Long wareHouseId) {
@@ -195,7 +211,7 @@ public class implReturnNoteService implements IReturnNoteService {
 
     @Override
     public long calculateRevenueForCurrentMonth(Long wareHouseId) {
-        long totalInvoicePrice = invoiceService.getTotalPriceForCurrentMonth(wareHouseId);
+        long totalInvoicePrice = invoiceService.getTotalPriceForMonth(wareHouseId);
         long totalReturnNotePrice = getTotalPriceForCurrentMonth(wareHouseId);
         System.out.println("GT1"+totalInvoicePrice);
         System.out.println("GT2"+totalReturnNotePrice);
@@ -203,4 +219,42 @@ public class implReturnNoteService implements IReturnNoteService {
         return totalInvoicePrice - totalReturnNotePrice;
 
     }
+
+    @Override
+    public long calculateRevenueForCurrentMonth() {
+        YearMonth currentMonth = YearMonth.now();
+        int month = currentMonth.getMonthValue();
+        int year = currentMonth.getYear();
+
+        long totalInvoicePrice = invoiceService.getTotalPriceForMonth(month,year);
+        long totalReturnNotePrice = getTotalPriceForMonth(month,year);
+        System.out.println("GT1"+totalInvoicePrice);
+        System.out.println("GT2"+totalReturnNotePrice);
+        System.out.println("GT3"+ (totalInvoicePrice - totalReturnNotePrice));
+        return totalInvoicePrice - totalReturnNotePrice;
+    }
+    public long calculateRevenueForCurrentMonth(int month,  int year ) {
+        long totalInvoicePrice = invoiceService.getTotalPriceForMonth(month,year);
+        long totalReturnNotePrice = getTotalPriceForMonth(month,year);
+        System.out.println("GT1"+totalInvoicePrice);
+        System.out.println("GT2"+totalReturnNotePrice);
+        System.out.println("GT3"+ (totalInvoicePrice - totalReturnNotePrice));
+        return totalInvoicePrice - totalReturnNotePrice;
+    }
+    @Override
+    public List <MonthRevenue> getRevenueNMonth()
+    {
+        List <MonthRevenue> revenues = new ArrayList<>();
+        YearMonth currentMonth = YearMonth.now();
+        int month = currentMonth.getMonthValue();
+        int year = currentMonth.getYear();
+
+        for ( int i=1 ; i<= month ;i++)
+        {
+            revenues.add( new MonthRevenue("Tháng "+i,calculateRevenueForCurrentMonth(i,year) ));
+        }
+        return revenues;
+    }
+
+
 }

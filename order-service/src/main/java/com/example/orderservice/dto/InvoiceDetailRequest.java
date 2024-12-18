@@ -8,6 +8,12 @@ public class InvoiceDetailRequest {
     public InvoiceDetailRequest() {
     }
 
+    public InvoiceDetailRequest(Long product_Id, Long purchasePrice, Integer quantity) {
+        this.product_Id = product_Id;
+        this.purchasePrice = purchasePrice;
+        this.quantity = quantity;
+    }
+
     public Long getProduct_Id() {
         return product_Id;
     }

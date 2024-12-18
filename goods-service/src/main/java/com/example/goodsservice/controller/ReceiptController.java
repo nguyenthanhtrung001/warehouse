@@ -1,13 +1,11 @@
 package com.example.goodsservice.controller;
 
 import com.example.goodsservice.dto.Import_Export_Request;
-import com.example.goodsservice.dto.response.ProductQuantity;
-import com.example.goodsservice.dto.response.ProductSummary;
-import com.example.goodsservice.dto.response.ReceiptSummary;
-import com.example.goodsservice.dto.response.ReportImportExport;
+import com.example.goodsservice.dto.response.*;
 import com.example.goodsservice.entity.DeliveryNote;
 import com.example.goodsservice.entity.Receipt;
 import com.example.goodsservice.service.IReceiptService;
+import com.example.goodsservice.validation.ImportExportRequestValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -75,9 +73,39 @@ public class ReceiptController {
     }
 
     @PostMapping
-    public ResponseEntity<Receipt> createReceiptWithDetails(@RequestBody Import_Export_Request importExportRequest) {
+    public ResponseEntity<?> createReceiptWithDetails(@RequestBody Import_Export_Request importExportRequest) {
         try {
+            // Kiểm tra dữ liệu đầu vào
+            List<String> validationErrors = ImportExportRequestValidator.validateRequest(importExportRequest);
+            if (!validationErrors.isEmpty()) {
+                return ResponseEntity.badRequest()
+                        .body(new ApiResponse<>(false, "Dữ liệu không hợp lệ", validationErrors));
+            }
+
+            // Tạo Receipt với chi tiết
             Receipt createdReceipt = receiptService.createReceiptWithDetails(importExportRequest);
+
+            // Trả về thành công
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(new ApiResponse<>(true, "Phiếu nhập được tạo thành công", createdReceipt));
+
+        } catch (IllegalArgumentException e) {
+            // Trả về lỗi với thông báo chi tiết
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ApiResponse<>(false, e.getMessage(), null));
+
+        } catch (Exception e) {
+            // Ghi log lỗi và trả về phản hồi lỗi hệ thống
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse<>(false, "Đã xảy ra lỗi không xác định", null));
+        }
+    }
+
+    @PostMapping("/transfer")
+    public ResponseEntity<Receipt> createImportTransfer(@RequestBody Import_Export_Request importExportRequest) {
+        try {
+            Receipt createdReceipt = receiptService.createImportTransfer(importExportRequest);
             return ResponseEntity.status(HttpStatus.CREATED).body(createdReceipt);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
@@ -93,6 +121,7 @@ public class ReceiptController {
         ReceiptSummary summary = receiptService.getReceiptSummaryForCurrentMonth();
         return ResponseEntity.ok(summary);
     }
+
 
 
     @GetMapping("/report/import-export")
@@ -112,8 +141,12 @@ public class ReceiptController {
     @GetMapping("/supplier/{supplierId}")
     public List<ProductSummary> getProductSummaryBySupplierId(
             @PathVariable Long supplierId,
-            @RequestParam Long warehouseId) {
-        return receiptService.getProductSummaryBySupplierId(supplierId, warehouseId);
+            @RequestParam Long warehouseId,
+            @RequestParam int year,
+            @RequestParam int month) {
+
+        return receiptService.getProductSummaryBySupplierId(supplierId, warehouseId, year, month);
     }
+
 
 }

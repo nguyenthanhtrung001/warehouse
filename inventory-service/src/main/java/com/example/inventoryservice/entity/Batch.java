@@ -52,6 +52,9 @@ public class Batch {
         this.warehouseId = warehouseId;
     }
 
+    public Batch(Long warehouseId, Object o) {
+    }
+
     // Getters and Setters
     public Long getId() {
         return id;

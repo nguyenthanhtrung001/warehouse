@@ -76,6 +76,8 @@ public class AuthenticationService {
                 .findByUsername(request.getUsername())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
+        if (user.getStatus()!=1) throw new AppException(ErrorCode.UNAUTHORIZED);
+
         boolean authenticated = passwordEncoder.matches(request.getPassword(), user.getPassword());
 
         if (!authenticated) throw new AppException(ErrorCode.UNAUTHENTICATED);

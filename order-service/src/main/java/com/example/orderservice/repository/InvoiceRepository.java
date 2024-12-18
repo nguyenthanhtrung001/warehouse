@@ -12,6 +12,7 @@ import java.util.List;
 @Repository
 public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
     List<Invoice> findByPrintDateBetweenAndWarehouseId(LocalDateTime startDateTime, LocalDateTime endDateTime, Long warehouseId);
+    List<Invoice> findByPrintDateBetween(LocalDateTime startDateTime, LocalDateTime endDateTime);
 
     @Query("SELECT i FROM Invoice i WHERE i.status = :status AND i.warehouseId = :warehouseId")
     List<Invoice> findByStatusAndWarehouseId(@Param("status") int status, @Param("warehouseId") Long warehouseId);

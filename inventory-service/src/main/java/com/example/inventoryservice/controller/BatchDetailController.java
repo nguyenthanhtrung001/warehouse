@@ -1,6 +1,8 @@
 package com.example.inventoryservice.controller;
 
+import com.example.inventoryservice.dto.response.BatchDetailDTO;
 import com.example.inventoryservice.dto.response.OrderQuantity;
+import com.example.inventoryservice.dto.response.ProductLocation;
 import com.example.inventoryservice.dto.response.ProductQuantity;
 import com.example.inventoryservice.entity.Batch;
 import com.example.inventoryservice.entity.BatchDetail;
@@ -38,10 +40,19 @@ public class BatchDetailController {
         return ResponseEntity.ok(batchDetails);
     }
 
+//    @PutMapping("/{id}")
+//    public ResponseEntity<BatchDetail> updateBatchDetail(@PathVariable Long id, @RequestBody BatchDetail batchDetail) {
+//        boolean updated = batchDetailService.updateBatchDetail(id, batchDetail);
+//        if (updated) {
+//            return ResponseEntity.ok(batchDetail);
+//        } else {
+//            return ResponseEntity.notFound().build();
+//        }
+//    }
     @PutMapping("/{id}")
-    public ResponseEntity<BatchDetail> updateBatchDetail(@PathVariable Long id, @RequestBody BatchDetail batchDetail) {
-        boolean updated = batchDetailService.updateBatchDetail(id, batchDetail);
-        if (updated) {
+    public ResponseEntity<BatchDetail> updateLocationForProductWithBatchDetail(@PathVariable Long id, @RequestParam Long locationId) {
+        BatchDetail batchDetail  = batchDetailService.updateBatchDetailForProductWithLocation(id, locationId);
+        if (batchDetail != null) {
             return ResponseEntity.ok(batchDetail);
         } else {
             return ResponseEntity.notFound().build();
@@ -57,14 +68,24 @@ public class BatchDetailController {
         }
     }
     @PutMapping("/quantity/product/{id}")
-    public ResponseEntity<List<OrderQuantity>> updateQuantityForOrder(@PathVariable Long id, @RequestParam Integer quantity) {
-        List<OrderQuantity> updated = batchDetailService.updateQuantityForOrder(id, quantity);
+    public ResponseEntity<List<OrderQuantity>> updateQuantityForOrderInWarehouse(@PathVariable Long id, @RequestParam Integer quantity,  @RequestParam Long warehouseId) {
+        List<OrderQuantity> updated = batchDetailService.updateQuantityForOrder(id, quantity, warehouseId);
         if (updated != null) {
             return ResponseEntity.ok(updated);
         } else {
             return ResponseEntity.notFound().build();
         }
     }
+    @PutMapping("/quantity/transfer")
+    public ResponseEntity<List<OrderQuantity>> updateQuantityForOrder(
+            @RequestParam Long productId,
+            @RequestParam Integer quantity,
+            @RequestParam Long warehouseId) {
+
+        List<OrderQuantity> updatedOrders = batchDetailService.updateQuantityForOrder(productId, quantity, warehouseId);
+        return ResponseEntity.ok(updatedOrders);
+    }
+
     @PutMapping("/update-quantity-return-order/{id}")
     public ResponseEntity<String> updateQuantityForReturnOrder(
             @PathVariable("id") Long id,
@@ -90,6 +111,15 @@ public class BatchDetailController {
     public Integer getQuantityByIdProductId(@PathVariable Long productId) {
         return batchDetailService.getQuantityByIdProductId(productId);
     }
+    @GetMapping("/quantity/{productId}/{warehouseId}")
+    public Integer getQuantityByProductIdAndWarehouseId(@PathVariable Long productId, @PathVariable Long warehouseId) {
+        return batchDetailService.getQuantityByIdProductId(productId, warehouseId);
+    }
+    @GetMapping("/lock/quantity/{productId}/{warehouseId}")
+    public Integer getQuantityByProductIdAndWarehouseId_lock(@PathVariable Long productId, @PathVariable Long warehouseId) {
+        return batchDetailService.getQuantityByIdProductId_lock(productId, warehouseId);
+    }
+
     @GetMapping("/locations/{productId}")
     public List<Location> getLocationByProductId(@PathVariable Long productId) {
         return batchDetailService.getLocationByProductId(productId);
@@ -117,8 +147,8 @@ public class BatchDetailController {
         return batchDetailService.getBatchByBatchDetailById(id);
     }
     @GetMapping("/product/{productId}")
-    public List<BatchDetail> getBatchDetailsByProductId(@PathVariable Long productId) {
-        return batchDetailService.getBatchDetailsByProductId(productId);
+    public List<BatchDetail> getBatchDetailsByProductId(@PathVariable Long productId, @RequestParam Long warehouseId) {
+        return batchDetailService.getBatchDetailsByProductId(productId, warehouseId);
     }
     @GetMapping("/top-lowest-quantity")
     public List<ProductQuantity> getTopLowestQuantity(@RequestParam int limit, @RequestParam Long warehouseId) {
@@ -130,4 +160,14 @@ public class BatchDetailController {
         boolean isDeleted = batchDetailService.deleteBatchDetailReturnBathID(listID);
         return ResponseEntity.ok(isDeleted);
     }
+    @GetMapping("/batch/{batchId}")
+    public List<BatchDetailDTO> getBatchDetailsByBatchId(@PathVariable Long batchId) {
+        return batchDetailService.getBatchDetailsByBatchId(batchId);
+    }
+    @GetMapping("/location/{locationId}")
+    public ResponseEntity<List<ProductLocation>> getBatchDetailsByLocationId(@PathVariable Long locationId) {
+                List<ProductLocation> productLocations = batchDetailService.getBatchDetailsByLocationId(locationId);
+        return ResponseEntity.ok(productLocations);
+    }
+
 }

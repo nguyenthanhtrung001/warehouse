@@ -13,6 +13,8 @@ public interface OrderClient {
    // hệ thống
     @GetMapping( value = "/api/invoice-details/products/quantities/by-month-year", produces = MediaType.APPLICATION_JSON_VALUE)
     List<ProductQuantity> getProductQuantity_export_return_order(@RequestParam("month") Integer month, @RequestParam("year") Integer year);
+
+
     @GetMapping(value = "/api/invoice-details/products/quantities/by-month-year", produces = MediaType.APPLICATION_JSON_VALUE)
     List<ProductQuantity> getProductQuantity_export_return_order(
             @RequestParam("month") Integer month,
@@ -26,5 +28,9 @@ public interface OrderClient {
             @RequestParam("month") Integer month,
             @RequestParam("year") Integer year,
             @RequestParam("warehouseId") Long warehouseId);
+    // Lấy doanh thu 1 tháng của 1 kho
+    @GetMapping( value = "/api/return-notes/revenue/monthly", produces = MediaType.APPLICATION_JSON_VALUE)
+    Long getRevenueByWarehouseId(@RequestParam("warehouseId") Long warehouseId);
+
 
 }

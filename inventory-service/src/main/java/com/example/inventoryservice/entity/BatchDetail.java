@@ -1,5 +1,6 @@
 package com.example.inventoryservice.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 @Entity
@@ -9,6 +10,7 @@ public class BatchDetail {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
 
     @ManyToOne
     @JoinColumn(name = "batch_id", nullable = false)
@@ -27,6 +29,13 @@ public class BatchDetail {
 
     public BatchDetail(Long id) {
         this.id = id;
+    }
+
+    public BatchDetail(Long id,  Long productId,Integer quantity, Batch batch ) {
+        this.id = id;
+        this.batch = batch;
+        this.productId = productId;
+        this.quantity = quantity;
     }
 
     public Long getProductId() {

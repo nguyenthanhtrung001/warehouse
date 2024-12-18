@@ -1,11 +1,11 @@
 package com.example.goodsservice.controller;
 
 import com.example.goodsservice.dto.Import_Export_Request;
+import com.example.goodsservice.dto.response.ApiResponse;
+import com.example.goodsservice.dto.response.DeliverySummaryResponse;
 import com.example.goodsservice.dto.response.NoteDetailResponse;
 import com.example.goodsservice.dto.response.ProductQuantity;
-import com.example.goodsservice.dto.response.ReceiptDetailResponse;
 import com.example.goodsservice.entity.DeliveryNote;
-import com.example.goodsservice.entity.Receipt;
 import com.example.goodsservice.service.IDeliveryDetailService;
 import com.example.goodsservice.service.IDeliveryNoteService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +25,7 @@ public class DeliveryNoteController {
     private IDeliveryDetailService deliveryDetailService;
 
     @PostMapping
-    public ResponseEntity<DeliveryNote> createReceiptWithDetails(@RequestBody Import_Export_Request importExportRequest) {
+    public ResponseEntity<DeliveryNote> createDeliveryNoteWithDetails(@RequestBody Import_Export_Request importExportRequest) {
         try {
             DeliveryNote creatednote = deliveryNoteService.createDeliveryNoteWithDetails(importExportRequest);
             return ResponseEntity.status(HttpStatus.CREATED).body(creatednote);
@@ -33,8 +33,17 @@ public class DeliveryNoteController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
+    @PostMapping("/transfer")
+    public ResponseEntity<DeliveryNote> createTransfer(@RequestBody Import_Export_Request importExportRequest) {
+        try {
+            DeliveryNote transfer = deliveryNoteService.createTransfer(importExportRequest);
+            return ResponseEntity.status(HttpStatus.CREATED).body(transfer);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
     @PostMapping("/cancel")
-    public ResponseEntity<DeliveryNote> createDeliveryNote_Delete_WithDetails(@RequestBody Import_Export_Request importExportRequest) {
+    public ResponseEntity<DeliveryNote> createDeliveryNote_Cancel_WithDetails(@RequestBody Import_Export_Request importExportRequest) {
         try {
             DeliveryNote creatednote = deliveryNoteService.createDeliveryNote_Delete_WithDetails(importExportRequest);
             return ResponseEntity.status(HttpStatus.CREATED).body(creatednote);
@@ -63,7 +72,16 @@ public class DeliveryNoteController {
         List<DeliveryNote> deliveryNotes = deliveryNoteService.getAllDeliveryNotesCancel(warehouseId);
         return ResponseEntity.ok(deliveryNotes);
     }
-
+    @GetMapping("/transfer")
+    public ResponseEntity<List<DeliveryNote>> getAllTransfer(@RequestParam Long warehouseId) {
+        List<DeliveryNote> deliveryNotes = deliveryNoteService.getAllTransfer(warehouseId);
+        return ResponseEntity.ok(deliveryNotes);
+    }
+    @GetMapping("/import-transfer")
+    public ResponseEntity<List<DeliveryNote>> getAllImportTransfer(@RequestParam Long warehouseId) {
+        List<DeliveryNote> deliveryNotes = deliveryNoteService.getAllImportTransfer(warehouseId);
+        return ResponseEntity.ok(deliveryNotes);
+    }
 
     @PutMapping("/{id}")
     public ResponseEntity<DeliveryNote> updateDeliveryNote(@PathVariable Long id, @RequestBody DeliveryNote deliveryNoteDetails) {
@@ -87,6 +105,14 @@ public class DeliveryNoteController {
     public ResponseEntity<Void> deleteDeliveryNote(@PathVariable Long id) {
         boolean deleted = deliveryNoteService.deleteDeliveryNote(id);
         if (deleted) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.notFound().build();
+    }
+    @PostMapping("cancel-transfer/{id}")
+    public ResponseEntity<Void> cancelTransfer(@PathVariable Long id, @RequestBody String reason ){
+        boolean cancelTransfer = deliveryNoteService.cancelTransfer(id, reason);
+        if (cancelTransfer) {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.notFound().build();
@@ -120,4 +146,16 @@ public class DeliveryNoteController {
             return ResponseEntity.notFound().build();
         }
     }
+    @GetMapping("/delivery-summary")
+    public ApiResponse<DeliverySummaryResponse> getDeliverySummary(
+            @RequestParam Integer type,
+            @RequestParam Integer status) {
+
+        // Gọi service để lấy tổng số phiếu và tổng số lượng
+        DeliverySummaryResponse summary = deliveryNoteService.getSummaryByTypeAndStatus(type, status);
+
+        // Trả về kết quả với ApiResponse
+        return new ApiResponse<>(true, "Summary retrieved successfully", summary);
+    }
+
 }

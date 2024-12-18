@@ -12,8 +12,17 @@ public class InvoiceRequest {
     private List<InvoiceDetailRequest> order_Details;
     private String note;
     private Long warehouseId;
+    private Long  contactId;
 
     public InvoiceRequest() {
+    }
+
+    public Long getContactId() {
+        return contactId;
+    }
+
+    public void setContactId(Long contactId) {
+        this.contactId = contactId;
     }
 
     public Long getCustomer() {

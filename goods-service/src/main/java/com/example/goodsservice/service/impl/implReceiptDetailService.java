@@ -7,7 +7,6 @@ import com.example.goodsservice.dto.response.ProductQuantity;
 import com.example.goodsservice.dto.response.ReceiptDetailResponse;
 import com.example.goodsservice.entity.Receipt;
 import com.example.goodsservice.entity.ReceiptDetail;
-import com.example.goodsservice.repository.DeliveryDetailRepository;
 import com.example.goodsservice.repository.ReceiptDetailRepository;
 import com.example.goodsservice.repository.ReceiptRepository;
 import com.example.goodsservice.service.IDeliveryDetailService;
@@ -64,13 +63,19 @@ public class implReceiptDetailService implements IReceiptDetailService {
 //        return receiptDetailRepository.findProductQuantitiesForCurrentMonth(startOfMonth, endOfMonth);
 //
 //    }
+    // type 1: nhập hàng NCC, type 2-> nhập kho
     @Override
-    public List<ProductQuantity> getProductQuantitiesForMonthYear(int month, int year, Long warehouseId) {
+    public List<ProductQuantity> getProductQuantitiesForMonthYearImportWarehouse(int month, int year, Long warehouseId, Integer type) {
         YearMonth specifiedMonth = YearMonth.of(year, month);
         LocalDateTime startOfMonth = specifiedMonth.atDay(1).atStartOfDay();
         LocalDateTime endOfMonth = specifiedMonth.atEndOfMonth().atTime(23, 59, 59);
+        if (type == 1)
+        {
+            return receiptDetailRepository.findProductQuantitiesForCurrentMonth(startOfMonth, endOfMonth, warehouseId);
 
-        return receiptDetailRepository.findProductQuantitiesForCurrentMonth(startOfMonth, endOfMonth, warehouseId);
+        }
+        return receiptDetailRepository.findProductQuantitiesForCurrentMonthTransfer(startOfMonth, endOfMonth, warehouseId);
+
     }
 
 
@@ -89,6 +94,7 @@ public class implReceiptDetailService implements IReceiptDetailService {
         for (ReceiptDetail detail : receiptDetails){
             ReceiptDetailResponse response = modelMapper.map(detail,ReceiptDetailResponse.class);
             try{
+                System.out.println("Gia tri productiD: "+detail.getProductId());
                 String name = productClient.getNameProductByID(detail.getProductId());
                 BathRequest bathRequest = inventoryClient.getBathByDetail(detail.getBatchDetail_Id());
                 response.setNameProduct(name);
@@ -172,4 +178,6 @@ public class implReceiptDetailService implements IReceiptDetailService {
     public boolean existsByProductId(Long productId) {
         return receiptDetailRepository.existsByProductId(productId);
     }
+
+
 }

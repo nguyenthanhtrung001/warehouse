@@ -1,6 +1,7 @@
 package com.example.orderservice.repository;
 
 import com.example.orderservice.dto.response.ProductQuantity;
+import com.example.orderservice.dto.response.SalesData;
 import com.example.orderservice.entity.InvoiceDetail;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -71,4 +72,13 @@ public interface InvoiceDetailRepository extends JpaRepository<InvoiceDetail, Lo
 
     @Query("SELECT SUM(i.quantity) FROM InvoiceDetail i WHERE i.productId = :productId AND i.invoiceId.printDate BETWEEN :startDate AND :endDate")
     Integer sumQuantityByProductIdAndDateRange(Long productId, LocalDateTime startDate, LocalDateTime endDate);
+
+    @Query("SELECT new com.example.orderservice.dto.response.SalesData(i.printDate, d.productId, SUM(d.quantity)) " +
+            "FROM InvoiceDetail d JOIN d.invoiceId i " +
+            "WHERE i.printDate > :startDate " +
+            "GROUP BY i.printDate, d.productId " +
+            "ORDER BY i.printDate ASC, d.productId ASC")
+    List<SalesData> findTotalSalesByDateAndProduct(@Param("startDate") LocalDateTime startDate);
+
+
 }

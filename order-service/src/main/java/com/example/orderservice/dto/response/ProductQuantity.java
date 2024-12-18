@@ -4,11 +4,20 @@ public class ProductQuantity {
 
     private Long productId;
     private Long quantity;
+    private String productName;
 
     // Constructor
     public ProductQuantity(Long productId, Long quantity) {
         this.productId = productId;
         this.quantity = quantity;
+    }
+
+    public String getProductName() {
+        return productName;
+    }
+
+    public void setProductName(String productName) {
+        this.productName = productName;
     }
 
     public ProductQuantity() {

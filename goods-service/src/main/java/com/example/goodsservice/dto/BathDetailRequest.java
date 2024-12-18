@@ -3,7 +3,7 @@ package com.example.goodsservice.dto;
 public class BathDetailRequest {
 
     private Long id;
-    private Bath batch;
+    private Batch batch;
 
     private Long productId;
     private Integer quantity;
@@ -19,11 +19,11 @@ public class BathDetailRequest {
         this.id = id;
     }
 
-    public Bath getBatch() {
+    public Batch getBatch() {
         return batch;
     }
 
-    public void setBatch(Bath batch) {
+    public void setBatch(Batch batch) {
         this.batch = batch;
     }
 

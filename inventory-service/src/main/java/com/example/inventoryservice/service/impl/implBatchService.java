@@ -2,6 +2,7 @@ package com.example.inventoryservice.service.impl;
 
 import com.example.inventoryservice.client.ProductClient;
 import com.example.inventoryservice.dto.ProductResponse;
+import com.example.inventoryservice.dto.response.BatchDetailInfo;
 import com.example.inventoryservice.dto.response.BatchLocation;
 import com.example.inventoryservice.dto.response.ProductQuantity;
 import com.example.inventoryservice.entity.Batch;
@@ -45,6 +46,11 @@ public class implBatchService implements IBatchService {
     }
 
     @Override
+    public List<Batch> getAllBatchesForWarehouseId(Long warehouseId) {
+        return batchRepository.findByWarehouseId(warehouseId);
+    }
+
+    @Override
     public boolean updateBatch(Long id, Batch batch) {
         return false;
     }
@@ -59,21 +65,23 @@ public class implBatchService implements IBatchService {
     }
 
 
-    public List<String> getBatchNamesByProductId(Long productId) {
+    public List<String> getBatchNamesByProductId(Long productId, Long warehouseId) {
         List<BatchDetail> batchDetails = batchDetailRepository.findByProductId(productId);
         return batchDetails.stream()
                 .map(detail -> batchRepository.findById(detail.getBatch().getId()))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
+                .filter(batch -> batch.getWarehouseId().equals(warehouseId))
                 .map(Batch::getBatchName)
                 .distinct()
                 .collect(Collectors.toList());
     }
-    public List<Long> getExpiredProductIds() {
+    public List<Long> getExpiredProductIds(Long warehouseId) {
         // Lấy ngày hiện tại
         Date currentDate = new Date();
         // Tìm tất cả các batch có expiryDate <= ngày hiện tại
         List<Batch> expiredBatches = batchRepository.findAll().stream()
+                .filter(batch -> batch.getWarehouseId() == warehouseId)
                 .filter(batch -> batch.getExpiryDate() != null)
                 .filter(batch -> batch.getExpiryDate().compareTo(currentDate) <= 0)
                 .collect(Collectors.toList());
@@ -113,6 +121,22 @@ public class implBatchService implements IBatchService {
         return productResponses;
     }
 
+    @Override
+    public List<BatchDetailInfo> getBatchDetailsByWarehouseId(Long warehouseId) {
+        return batchRepository.findBatchDetailsByWarehouseId(warehouseId).stream()
+                .map(detailInfo -> {
+                    try {
+                        String name = productClient.getNameProductByID(detailInfo.getProductId());
+                        detailInfo.setProductName(name);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        // Log error or handle fallback, if necessary
+                    }
+                    return detailInfo;
+                })
+                .collect(Collectors.toList());
+    }
+
 
 
     public List<ProductQuantity> getProductQuantitiesByWarehouseId(Long warehouseId) {
@@ -148,22 +172,25 @@ public class implBatchService implements IBatchService {
                 .collect(Collectors.toList());
     }
 
-    public List<String> getWarehouseLocationsByProductId(Long productId) {
+    public List<String> getWarehouseLocationsByProductId(Long productId, Long warehouseId) {
         List<BatchDetail> batchDetails = batchDetailRepository.findByProductId(productId);
+
         return batchDetails.stream()
-                .map(detail -> Optional.ofNullable(detail.getLocation()))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .map(Location::getWarehouseLocation)
-                .distinct()
-                .collect(Collectors.toList());
+                .filter(detail -> detail.getBatch().getWarehouseId().equals(warehouseId)) // Lọc theo warehouseId
+                .map(detail -> Optional.ofNullable(detail.getLocation())) // Lấy Location nếu có
+                .filter(Optional::isPresent) // Chỉ giữ lại các Location không null
+                .map(Optional::get) // Lấy giá trị Location từ Optional
+                .map(Location::getWarehouseLocation) // Lấy warehouseLocation từ Location
+                .distinct() // Loại bỏ các giá trị trùng lặp
+                .collect(Collectors.toList()); // Chuyển kết quả thành List
     }
 
-    @Override
-    public BatchLocation getBatchLocatonForProduct(Long productId){
 
-        List<String> batchNames = getBatchNamesByProductId(productId);
-        List<String> warehouseLocations = getWarehouseLocationsByProductId(productId);
+    @Override
+    public BatchLocation getBatchLocatonForProduct(Long productId, Long warehouseId){
+
+        List<String> batchNames = getBatchNamesByProductId(productId,warehouseId );
+        List<String> warehouseLocations = getWarehouseLocationsByProductId(productId,warehouseId);
 
 
         String batchNamesStr = String.join(", ", batchNames);

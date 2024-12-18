@@ -18,6 +18,10 @@ public class Invoice {
     @Convert(converter = Jsr310JpaConverters.LocalDateTimeConverter.class) // Sử dụng converter
     private LocalDateTime printDate;
 
+    @Column(name = "payment_date")
+    @Convert(converter = Jsr310JpaConverters.LocalDateTimeConverter.class)
+    private LocalDateTime paymentDate;
+
     private Long price;
     private Long employeeId;
     private Integer status;
@@ -26,8 +30,8 @@ public class Invoice {
     @ManyToOne
     private Customer customer;
 
-    @ManyToOne
-    private ContactInfo contactInfo;
+
+    private String contactInfo;
 
     @JsonIgnore
     @OneToMany(mappedBy = "invoice")
@@ -40,6 +44,14 @@ public class Invoice {
 
     // Constructors
     public Invoice() {
+    }
+
+    public LocalDateTime getPaymentDate() {
+        return paymentDate;
+    }
+
+    public void setPaymentDate(LocalDateTime paymentDate) {
+        this.paymentDate = paymentDate;
     }
 
     public Invoice(Long id) {
@@ -95,11 +107,11 @@ public class Invoice {
         this.customer = customer;
     }
 
-    public ContactInfo getContactInfo() {
+    public String getContactInfo() {
         return contactInfo;
     }
 
-    public void setContactInfo(ContactInfo contactInfo) {
+    public void setContactInfo(String contactInfo) {
         this.contactInfo = contactInfo;
     }
 

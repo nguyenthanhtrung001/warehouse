@@ -1,16 +1,17 @@
 package com.example.orderservice.service;
 
+import com.example.orderservice.dto.CustomerDTO;
 import com.example.orderservice.entity.Customer;
 
 import java.util.List;
 
 public interface  ICustomerService {
 
-    Customer createCustomer(Customer customer);
+    Customer createCustomer(CustomerDTO customer);
 
     Customer getCustomerById(Long id);
 
-    List<Customer> getAllCustomers();
+    List<CustomerDTO> getAllCustomers();
 
     boolean updateCustomer(Long id, Customer customer);
 

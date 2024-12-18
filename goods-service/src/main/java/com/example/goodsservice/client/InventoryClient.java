@@ -2,6 +2,7 @@ package com.example.goodsservice.client;
 
 import com.example.goodsservice.dto.BathDetailRequest;
 import com.example.goodsservice.dto.BathRequest;
+import com.example.goodsservice.dto.response.OrderQuantity;
 import com.example.goodsservice.dto.response.ProductQuantity;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
@@ -45,8 +46,19 @@ public interface InventoryClient {
    @PutMapping( value = "/api/batch-details/update-quantity-return-order/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
    String updateQuantityForDeleteDelivery(@PathVariable("id") Long id, @RequestParam("quantity") Integer quantity);
 
+   @PutMapping( value = "/api/batch-details/quantity/transfer", produces = MediaType.APPLICATION_JSON_VALUE)
+   List<OrderQuantity> updateQuantityTransfer(@RequestParam("productId") Long id, @RequestParam("quantity") Integer quantity, @RequestParam("warehouseId") Long warehouseId);
 
+   @GetMapping( value = "/api/locations/{warehouseId}/total-load", produces = MediaType.APPLICATION_JSON_VALUE)
+   Long getQuantityAllLocation(@PathVariable Long warehouseId);
+   @GetMapping( value = "/api/batch-details/quantity/{productId}/{warehouseId}", produces = MediaType.APPLICATION_JSON_VALUE)
+   Integer getQuantityByProductIdAndWarehouseId(@PathVariable Long productId, @PathVariable Long warehouseId);
 
+   @DeleteMapping(value = "/api/batches/{id}",produces = MediaType.APPLICATION_JSON_VALUE)
+   ResponseEntity<Void> deleteBatchById(@PathVariable Long id);
+
+   @DeleteMapping(value = "/api/batch-details/{id}",produces = MediaType.APPLICATION_JSON_VALUE)
+   ResponseEntity<Void> deleteBatchDetailById(@PathVariable Long id);
 
 }
 

@@ -1,6 +1,7 @@
 package com.example.orderservice.controller;
 
 import com.example.orderservice.dto.InvoiceRequest;
+import com.example.orderservice.dto.response.ApiResponse;
 import com.example.orderservice.entity.Invoice;
 import com.example.orderservice.service.IInvoiceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,14 +19,24 @@ public class InvoiceController {
     private  IInvoiceService invoiceService;
 
     @PostMapping
-    public ResponseEntity<Invoice> createInvoice(@RequestBody InvoiceRequest invoiceRequest) {
+    public ResponseEntity<ApiResponse<?>> createInvoice(@RequestBody InvoiceRequest invoiceRequest) {
         try {
             Invoice createdInvoice = invoiceService.createInvoice(invoiceRequest);
-            return ResponseEntity.status(HttpStatus.CREATED).body(createdInvoice);
+            // Trả về thông tin thành công cùng với đối tượng Invoice
+            ApiResponse<Invoice> response = new ApiResponse<>(true, "Invoice created successfully", createdInvoice);
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (IllegalArgumentException e) {
+            // Xử lý lỗi khi có ngoại lệ IllegalArgumentException
+            ApiResponse<String> errorResponse = new ApiResponse<>(false, "Invalid request", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+            // Xử lý lỗi chung và ghi log chi tiết lỗi
+            e.printStackTrace();
+            ApiResponse<String> errorResponse = new ApiResponse<>(false, "Internal server error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
     }
+
 
     @GetMapping("/{id}")
     public ResponseEntity<Invoice> getInvoiceById(@PathVariable Long id) {
@@ -71,8 +82,8 @@ public class InvoiceController {
         }
     }
     @PutMapping("/{invoiceId}/status")
-    public ResponseEntity<String> updateInvoiceStatus(@PathVariable("invoiceId") Long invoiceId){
-        boolean isUpdated = invoiceService.updateInvoiceStatus(invoiceId, 2);
+    public ResponseEntity<String> updateInvoiceStatusPayment(@PathVariable("invoiceId") Long invoiceId){
+        boolean isUpdated = invoiceService.updateInvoiceStatusPayment(invoiceId, 2);
         if (isUpdated) {
             return new ResponseEntity<>("Hóa đơn đã được cập nhật trạng thái thành công.", HttpStatus.OK);
         } else {

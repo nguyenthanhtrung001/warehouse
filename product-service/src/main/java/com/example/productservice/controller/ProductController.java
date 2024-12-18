@@ -22,10 +22,12 @@ public class ProductController {
     public List<ProductResponse> getAllProducts() {
         return productService.getAllProducts();
     }
-    @GetMapping("/has-batch-location")
-    public List<ProductResponse> getAllProductsHasLocationBatch() {
-        return productService.getAllProductsHasLocationBatch();
+
+    @GetMapping("/has-batch-location-warehouse/{warehouse}")
+    public List<ProductResponse> getAllProductsHasLocationBatch(@PathVariable("warehouse") Long warehouse) {
+        return productService.getAllProductsHasLocationBatch(warehouse);
     }
+
     @GetMapping("/count")
     public int getProductCount() {
         return productService.getProductCount();
@@ -33,6 +35,10 @@ public class ProductController {
     @GetMapping("/{id}")
     public Product getProductById(@PathVariable Long id) {
         return productService.getProductById(id);
+    }
+    @GetMapping("/has-quantity-by/{id}")
+    public ProductResponse getProductQuantityById(@PathVariable Long id, @RequestParam Long warehouseId ){
+        return productService.getProductQuantityById(id,warehouseId);
     }
     @GetMapping("/nameproduct/{id}")
     public String getNameProductById(@PathVariable Long id) {
@@ -82,8 +88,8 @@ public class ProductController {
         return productService.getProposeProduct();
     }
     @GetMapping("/expired")
-    public List<ProductResponse> getExpiredProduct() {
-        return productService.getExpiredProduct();
+    public List<ProductResponse> getExpiredProduct(@RequestParam Long warehouseId) {
+        return productService.getExpiredProduct(warehouseId);
     }
     @GetMapping("/notify-lowest")
     public ResponseEntity<List<ProductResponse>> getNotifyTopLowestProduct(

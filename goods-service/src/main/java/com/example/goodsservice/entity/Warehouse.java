@@ -38,6 +38,7 @@ public class Warehouse implements Serializable {
     @OneToMany(mappedBy = "warehouse")
     private List<Receipt> receipts;
 
+
     @JsonIgnore
     @OneToMany(mappedBy = "warehouseSource")
     private List<DeliveryNote> outgoingDeliveries;

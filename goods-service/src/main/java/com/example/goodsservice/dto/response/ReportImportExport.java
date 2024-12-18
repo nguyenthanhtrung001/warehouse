@@ -12,6 +12,9 @@ public class ReportImportExport {
     Integer export_check;
     Integer inventory;
 
+    Integer transfer;
+    Integer import_transfer;
+
     public ReportImportExport() {
     }
 
@@ -45,6 +48,22 @@ public class ReportImportExport {
 
     public void setImport_check_inventory(Integer import_check_inventory) {
         this.import_check_inventory = import_check_inventory;
+    }
+
+    public Integer getTransfer() {
+        return transfer;
+    }
+
+    public void setTransfer(Integer transfer) {
+        this.transfer = transfer;
+    }
+
+    public Integer getImport_transfer() {
+        return import_transfer;
+    }
+
+    public void setImport_transfer(Integer import_transfer) {
+        this.import_transfer = import_transfer;
     }
 
     public Integer getImport_return_order() {

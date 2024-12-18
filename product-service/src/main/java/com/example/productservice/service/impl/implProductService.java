@@ -77,9 +77,8 @@ public class implProductService implements IProductService {
         }
         return productResponses;
     }
-
     @Override
-    public List<ProductResponse> getAllProductsHasLocationBatch() {
+    public List<ProductResponse> getAllProductsInWarehouse( Long wareHouseId) {
         List<Product> productList = productRepository.findByStatus(1);
         List<ProductResponse> productResponses = new ArrayList<>();
         for (Product product : productList)
@@ -90,7 +89,7 @@ public class implProductService implements IProductService {
                 response.setPrice(price.getPrice());
             }else response.setPrice(0l);
             try{
-                Integer quantity = inventoryClient.getQuantityByProductId(product.getId());
+                Integer quantity = inventoryClient.getQuantityByProductId(product.getId(),wareHouseId);
                 if (quantity!=null) response.setQuantity(quantity);
                 else response.setQuantity(0);
             }catch (Exception e){
@@ -101,7 +100,36 @@ public class implProductService implements IProductService {
             if (images != null && !images.isEmpty()) {
                 response.setImage(images.get(0));
             }
-            BatchLocation batchLocation = inventoryClient.getBatchLocationForProductId(response.getId());
+            productResponses.add(response);
+
+        }
+        return productResponses;
+    }
+
+    @Override
+    public List<ProductResponse> getAllProductsHasLocationBatch(Long wareHouseId) {
+        List<Product> productList = productRepository.findByStatus(1);
+        List<ProductResponse> productResponses = new ArrayList<>();
+        for (Product product : productList)
+        {
+            ProductResponse response = modelMapper.map(product,ProductResponse.class);
+            Price price = priceRepository.findFirstByProductIdOrderByEffectiveDateDesc(response.getId());
+            if (price!=null) {
+                response.setPrice(price.getPrice());
+            }else response.setPrice(0l);
+            try{
+                Integer quantity = inventoryClient.getQuantityByProductId(product.getId(),wareHouseId);
+                if (quantity!=null) response.setQuantity(quantity);
+                else response.setQuantity(0);
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+
+            List<String> images = imageRepository.findLinksByProductId(response.getId());
+            if (images != null && !images.isEmpty()) {
+                response.setImage(images.get(0));
+            }
+            BatchLocation batchLocation = inventoryClient.getBatchLocationForProductId(response.getId(), wareHouseId);
             response.setBatchLocation(batchLocation);
             productResponses.add(response);
 
@@ -230,9 +258,9 @@ public class implProductService implements IProductService {
     }
 
     @Override
-    public List<ProductResponse> getExpiredProduct() {
-        List<Long> ListProductID = inventoryClient.getExpiredProductIds();
-        System.out.println("SLllll:"+ ListProductID.size());
+    public List<ProductResponse> getExpiredProduct(Long warehouseId) {
+        List<Long> ListProductID = inventoryClient.getExpiredProductIds(warehouseId);
+
         List<ProductResponse> productResponses = new ArrayList<>();
 
         for (Long id : ListProductID)
@@ -288,6 +316,15 @@ public class implProductService implements IProductService {
     }
 
     @Override
+    public ProductResponse getProductQuantityById(Long id, Long warehouseId) {
+        Product product =  productRepository.findById(id).orElse(null);
+        Integer quantity = inventoryClient.getQuantityByProductId(product.getId(),warehouseId);
+        if (quantity == null) quantity =0;
+        return new ProductResponse(product.getId(), product.getProductName(), quantity);
+
+    }
+
+    @Override
     public String getNameProductById(Long id) {
         Product product = productRepository.findById(id).orElse(null);
         if (product!=null){
@@ -327,9 +364,9 @@ public class implProductService implements IProductService {
         Product productSave = productRepository.save(productNew);
 
         Price price = new Price();
-        price.setPrice(product.getPrices()==null?product.getPrices():0);
+        price.setPrice(product.getPrices()!=null?product.getPrices():0);
         price.setProduct(productSave);
-      //  price.setEmployeeId(product.getEmployeeId());
+//        price.setEmployeeId(product.getEmployeeId());
         price.setEmployeeId(1L);
         LocalDateTime now = LocalDateTime.now();
         price.setEffectiveDate(now);

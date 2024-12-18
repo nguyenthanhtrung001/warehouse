@@ -14,11 +14,12 @@ import java.util.Optional;
 @Repository
 public interface ReturnNoteRepository extends JpaRepository<ReturnNote, Long> {
     List<ReturnNote> findByReturnDateBetweenAndInvoice_WarehouseId(LocalDate startOfWeek, LocalDate endOfWeek, Long warehouseId);
-
+    List<ReturnNote> findByReturnDateBetween(LocalDate startOfWeek, LocalDate endOfWeek);
 
     long countByReturnDateBetweenAndInvoice_WarehouseId(LocalDate startDate, LocalDate endDate, Long warehouseId);
 
-
     @Query("SELECT rn FROM ReturnNote rn WHERE rn.invoice.id = :invoiceId")
     ReturnNote findByInvoiceId(@Param("invoiceId") Long invoiceId);
+    @Query("SELECT rn FROM ReturnNote rn WHERE rn.invoice.warehouseId = :warehouseId")
+    List<ReturnNote> findByWarehouseId(Long warehouseId);
 }

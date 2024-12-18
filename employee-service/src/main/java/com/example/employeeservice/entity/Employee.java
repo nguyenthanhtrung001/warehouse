@@ -2,11 +2,14 @@ package com.example.employeeservice.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-
 import java.util.Date;
 import java.util.List;
 
 @Entity
+@Table(uniqueConstraints = {
+        @UniqueConstraint(columnNames = "email"),
+        @UniqueConstraint(columnNames = "phone_number")
+})
 public class Employee {
 
     @Id
@@ -45,7 +48,7 @@ public class Employee {
     @Column(name = "email", nullable = false, unique = true)
     private String email;
 
-    @Column(name = "account_id", unique = true)
+    @Column(name = "account_id",  nullable = true)
     private String accountId;
 
     @Column(name = "status")

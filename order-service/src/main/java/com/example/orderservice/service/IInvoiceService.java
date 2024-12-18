@@ -14,7 +14,8 @@ public interface  IInvoiceService {
     public long getTotalPriceForCurrentWeek();
     public List<Invoice> getInvoicesByCustomerId(Long customerId);
 
-    public long getTotalPriceForCurrentMonth(Long wareHouseId);
+    public long getTotalPriceForMonth(Long wareHouseId);
+    public long getTotalPriceForMonth(int month, int year);
 
     Invoice getInvoiceById(Long id);
 
@@ -25,6 +26,7 @@ public interface  IInvoiceService {
     public boolean updateInvoice(Long id, Invoice invoice);
 
     public boolean updateInvoiceStatus(Long invoiceId, Integer newStatus);
+    public boolean updateInvoiceStatusPayment(Long invoiceId, Integer newStatus);
 
     public Invoice updateInvoice(Long invoiceId, InvoiceRequest invoiceRequest);
 

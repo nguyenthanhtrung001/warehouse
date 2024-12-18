@@ -7,6 +7,8 @@ import com.example.employeeservice.dto.response.UserResponse;
 import com.example.employeeservice.entity.Employee;
 import com.example.employeeservice.repository.EmployeeRepository;
 import com.example.employeeservice.service.IEmployeeService;
+import jakarta.transaction.Transactional;
+import jakarta.validation.constraints.Null;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,8 +24,9 @@ public class implEmployeeService implements IEmployeeService {
     private IdentityClient identityClient;
 
 
-    @Override
+    @Transactional
     public Employee createEmployee(Employee employee) {
+        System.out.println("vi tri:"+ employee.getPosition());
         UserCreationRequest userCreationRequest = new UserCreationRequest();
         if(employee.getAccountId().equals("false"))
         {
@@ -32,19 +35,57 @@ public class implEmployeeService implements IEmployeeService {
         Employee  em = employeeRepository.save(employee);
         if (employee.getAccountId()==null) return  em;
         if (employee.getAccountId().equals("true")){
-            try{
+
                 String us = "NV000"+em.getId();
+               em.setAccountId(us);
                 userCreationRequest.setUsername(us);
                 userCreationRequest.setPassword("123456");
+            if (em.getPosition().toLowerCase().contains("nhân viên")){
+                userCreationRequest.setType(1);
                 ApiResponse<UserResponse> response= identityClient.createUser(userCreationRequest);
-                System.out.println("Response: " + response);
+                employeeRepository.save(em);
+            }
+            if (em.getPosition().toLowerCase().contains("quản lý")){
+                userCreationRequest.setType(2);
+                ApiResponse<UserResponse> response= identityClient.createUser(userCreationRequest);
+                employeeRepository.save(em);
+            }
+
+                return  em;
+
+        }
+        return null;
+    }
+
+    @Transactional
+    public Employee createAccountEmployee(Long employeeId) {
+        Employee em = getEmployeeById(employeeId);
+        UserCreationRequest userCreationRequest = new UserCreationRequest();
+        if ( em!=null ){
+            String us = "NV000"+em.getId();
+            userCreationRequest.setUsername(us);
+            userCreationRequest.setPassword("123456");
+            if (em.getPosition().toLowerCase().contains("nhân viên"))
+            {
+                System.out.println("Tạo nhân viên");
+                userCreationRequest.setType(1);
+                ApiResponse<UserResponse> response= identityClient.createUser(userCreationRequest);
                 em.setAccountId(us);
                 updateEmployee(em.getId(),em);
-            }catch (Exception e){
-                e.printStackTrace();
             }
+            if (em.getPosition().toLowerCase().contains("quản lý"))
+            {
+                System.out.println("Tạ oquản lý");
+                userCreationRequest.setType(2);
+                ApiResponse<UserResponse> response= identityClient.createUser(userCreationRequest);
+                em.setAccountId(us);
+                updateEmployee(em.getId(),em);
+            }
+            return em;
+
         }
-        return em;
+        return null;
+
     }
 
     @Override
@@ -92,6 +133,16 @@ public class implEmployeeService implements IEmployeeService {
         return false;
     }
 
+    public boolean updateAccountEmployee(Long id) {
+        Optional<Employee> existingEmployeeOpt = employeeRepository.findById(id);
+        if (existingEmployeeOpt.isPresent()) {
+            Employee existingEmployee = existingEmployeeOpt.get();
+            existingEmployee.setAccountId(null); // Set AccountId to null
+            employeeRepository.save(existingEmployee);
+            return true;
+        }
+        return false;
+    }
     @Override
     public boolean deleteEmployee(Long id) {
         if (employeeRepository.existsById(id)) {
@@ -104,5 +155,10 @@ public class implEmployeeService implements IEmployeeService {
     @Override
     public Employee getEmployeeByAccountId(String accountId) {
         return employeeRepository.findByAccountId(accountId);
+    }
+
+    @Override
+    public List<String> getAccountIdsByWarehouseId(Long warehouseId) {
+        return employeeRepository.findAccountIdsByWarehouseId(warehouseId);
     }
 }

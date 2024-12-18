@@ -10,6 +10,7 @@ import java.util.List;
 public class Import_Export_Request {
 
     private Long receipt;
+    private Long deliveryNote;
     private Long supplier;
     private Integer status;
     private Long price;
@@ -27,6 +28,15 @@ public class Import_Export_Request {
 
     private Integer quantity;
     private Long location;
+    private Long warehouseDestination;
+
+    public Long getDeliveryNote() {
+        return deliveryNote;
+    }
+
+    public void setDeliveryNote(Long deliveryNote) {
+        this.deliveryNote = deliveryNote;
+    }
 
     public Long getWarehouseId() {
         return warehouseId;
@@ -38,6 +48,14 @@ public class Import_Export_Request {
 
     public Long getBatchID() {
         return batchID;
+    }
+
+    public Long getWarehouseDestination() {
+        return warehouseDestination;
+    }
+
+    public void setWarehouseDestination(Long warehouseDestination) {
+        this.warehouseDestination = warehouseDestination;
     }
 
     public void setBatchID(Long batchID) {

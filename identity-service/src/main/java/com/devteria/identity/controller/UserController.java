@@ -2,13 +2,11 @@ package com.devteria.identity.controller;
 
 import java.util.List;
 
+import com.devteria.identity.dto.request.*;
 import jakarta.validation.Valid;
 
 import org.springframework.web.bind.annotation.*;
 
-import com.devteria.identity.dto.request.ApiResponse;
-import com.devteria.identity.dto.request.UserCreationRequest;
-import com.devteria.identity.dto.request.UserUpdateRequest;
 import com.devteria.identity.dto.response.UserResponse;
 import com.devteria.identity.service.UserService;
 
@@ -37,11 +35,23 @@ public class UserController {
                 .result(userService.createEmployee(request))
                 .build();
     }
+    @PostMapping("/createEmployeeAuto")
+    ApiResponse<UserResponse> createEmployee(@RequestParam @Valid Long employeeId) {
+        return ApiResponse.<UserResponse>builder()
+                .result(userService.createEmployeeAuto(employeeId))
+                .build();
+    }
 
     @GetMapping
     ApiResponse<List<UserResponse>> getUsers() {
         return ApiResponse.<List<UserResponse>>builder()
                 .result(userService.getUsers())
+                .build();
+    }
+    @GetMapping("/employee/warehouse/{warehouseId}")
+    ApiResponse<List<UserResponse>> getUsersEmployee(@PathVariable("warehouseId") Long warehouseId) {
+        return ApiResponse.<List<UserResponse>>builder()
+                .result(userService.getUsersEmployee(warehouseId))
                 .build();
     }
 
@@ -71,4 +81,45 @@ public class UserController {
                 .result(userService.updateUser(userId, request))
                 .build();
     }
+    @PutMapping("/{userId}/reset-password")
+    public ApiResponse<String> resetPassword(@PathVariable String userId, @RequestBody ResetPasswordRequest request) {
+        userService.resetPassword(userId, request.getNewPassword());
+        return ApiResponse.<String>builder()
+                .result("Password reset successfully")
+                .build();
+    }
+
+    @PutMapping("/{userId}/lock")
+    public ApiResponse<String> lockUser(@PathVariable String userId) {
+        userService.lockUser(userId);
+        return ApiResponse.<String>builder()
+                .result("User account locked successfully")
+                .build();
+    }
+
+    // API để mở tài khoản
+    @PutMapping("/{userId}/unlock")
+    public ApiResponse<String> unlockUser(@PathVariable String userId) {
+        userService.unlockUser(userId);
+        return ApiResponse.<String>builder()
+                .result("User account unlocked successfully")
+                .build();
+    }
+    // API cập nhật quyền.
+    @PutMapping("/{userId}/roles")
+    public ApiResponse<String> updateUserRoles(@PathVariable String userId, @RequestBody UpdateUserRolesRequest request) {
+        try {
+            userService.updateUserRoles(userId, request.getRoles());
+        } catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        return ApiResponse.<String>builder()
+                .result("User roles updated successfully")
+                .build();
+    }
+
+
+
 }

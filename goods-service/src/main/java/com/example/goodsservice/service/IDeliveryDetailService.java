@@ -2,11 +2,8 @@ package com.example.goodsservice.service;
 
 import com.example.goodsservice.dto.response.NoteDetailResponse;
 import com.example.goodsservice.dto.response.ProductQuantity;
-import com.example.goodsservice.dto.response.ReceiptDetailResponse;
-import com.example.goodsservice.entity.DeliveryDetail;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface IDeliveryDetailService {
 
@@ -17,4 +14,5 @@ public interface IDeliveryDetailService {
     public List<ProductQuantity> getProductQuantitiesForMonthYearAndType(int month, int year, int type, Long warehouseId);
     public Integer getTotalQuantity(Long receiptId, Long batchDetailId);
     public Integer getTotalQuantityByReceiptId(Long receiptId);
+
 }

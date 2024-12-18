@@ -6,6 +6,8 @@ import java.util.List;
 
 public interface IEmployeeService {
     Employee createEmployee(Employee employee);
+    Employee createAccountEmployee(Long employeeId);
+    public boolean updateAccountEmployee(Long employeeId);
 
     Employee getEmployeeById(Long id);
     public String getEmployeeNameById(Long id);
@@ -17,4 +19,5 @@ public interface IEmployeeService {
 
     boolean deleteEmployee(Long id);
     public Employee getEmployeeByAccountId(String accountId);
+    List<String> getAccountIdsByWarehouseId(Long warehouseId);
 }

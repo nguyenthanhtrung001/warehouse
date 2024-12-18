@@ -35,6 +35,12 @@ public class ProductResponse {
     public ProductResponse() {
     }
 
+    public ProductResponse(Long id, String productName, Integer quantity) {
+        this.id = id;
+        this.productName = productName;
+        this.quantity = quantity;
+    }
+
     public Integer getQuantity() {
         return quantity;
     }

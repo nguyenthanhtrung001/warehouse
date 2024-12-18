@@ -1,8 +1,10 @@
 package com.example.orderservice.service.impl;
 
+import com.example.orderservice.client.MlClient;
 import com.example.orderservice.client.ProductClient;
 import com.example.orderservice.dto.response.InvoiceDetailResponse;
 import com.example.orderservice.dto.response.ProductQuantity;
+import com.example.orderservice.dto.response.SalesData;
 import com.example.orderservice.entity.InvoiceDetail;
 import com.example.orderservice.repository.InvoiceDetailRepository;
 
@@ -11,15 +13,16 @@ import com.example.orderservice.service.IInvoiceDetailService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.YearMonth;
+import java.io.*;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,6 +37,8 @@ public class implInvoiceDetailService implements IInvoiceDetailService {
     private ReturnDetailRepository returnDetailRepository;
     @Autowired
     private ProductClient productClient;
+    @Autowired
+    private MlClient mlClient;
 
     private ModelMapper modelMapper  = new ModelMapper();
     @Override
@@ -121,8 +126,18 @@ public class implInvoiceDetailService implements IInvoiceDetailService {
         LocalDateTime startOfMonth = currentMonth.atDay(1).atStartOfDay();
         LocalDateTime endOfMonth = currentMonth.atEndOfMonth().atTime(23, 59, 59);
 
-        return invoiceDetailRepository.findProductQuantitiesForMonth(startOfMonth, endOfMonth);
+        List<ProductQuantity> ProductQuantity= invoiceDetailRepository.findProductQuantitiesForMonth(startOfMonth, endOfMonth);
+        for (ProductQuantity productQuantity :ProductQuantity) {
+            try{
+                String name = productClient.getNameProductByID(productQuantity.getProductId());
+                productQuantity.setProductName(name);
+            }catch (Exception e)
+            {
+                e.printStackTrace();
+            }
 
+        }
+        return ProductQuantity;
     }
 
     // hệ thống
@@ -132,7 +147,9 @@ public class implInvoiceDetailService implements IInvoiceDetailService {
         LocalDateTime startOfMonth = specifiedMonth.atDay(1).atStartOfDay();
         LocalDateTime endOfMonth = specifiedMonth.atEndOfMonth().atTime(23, 59, 59);
 
-        return invoiceDetailRepository.findProductQuantitiesForMonth(startOfMonth, endOfMonth);
+        List<ProductQuantity> ProductQuantity= invoiceDetailRepository.findProductQuantitiesForMonth(startOfMonth, endOfMonth);
+
+        return ProductQuantity;
     }
     @Override
     public List<ProductQuantity> getProductQuantitiesForMonthYear(int month, int year, Long warehouseId) {
@@ -194,4 +211,113 @@ public class implInvoiceDetailService implements IInvoiceDetailService {
         return totalSold - totalReturned;
     }
 
+    @Override
+    public String exportSalesToCsv(String filePath) {
+        // Lấy ngày bắt đầu từ file CSV
+        LocalDateTime startDate = getMaxDateFromCsv(filePath);
+
+        // Nếu không có ngày bắt đầu, sử dụng một ngày mặc định (ví dụ: 30 ngày trước)
+        if (startDate == null) {
+            startDate = LocalDateTime.now().minusDays(30);
+        }
+
+        System.out.println("Ngày bắt đầu: " + startDate.toString());
+
+        // Lấy dữ liệu từ repository
+        List<SalesData> salesDataList = invoiceDetailRepository.findTotalSalesByDateAndProduct(startDate);
+
+        if (salesDataList.isEmpty()) {
+            return "No sales data found after " + startDate.toString();
+        }
+
+        try {
+            // 1. Xuất dữ liệu ra file CSV
+            writeSalesToCsv(salesDataList, filePath);
+            // 2. Gọi Feign Client để upload file lên ml-service
+            ResponseEntity<String> response = mlClient.uploadFile(filePath);
+            // Kiểm tra phản hồi từ Feign Client
+            if (response.getStatusCode().is2xxSuccessful()) {
+                return "Sales data exported to " + filePath + " and uploaded to BigQuery successfully!";
+            } else {
+                return "Error uploading file to BigQuery: " + response.getBody();
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            return "Error exporting sales data: " + e.getMessage();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "Error: " + e.getMessage();
+        }
+    }
+
+    private LocalDateTime getMaxDateFromCsv(String filePath) {
+        LocalDateTime maxDate = null;
+
+        // Định dạng thời gian đầy đủ ISO 8601
+        DateTimeFormatter isoDateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+
+        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            br.readLine(); // Bỏ qua dòng header
+
+            while ((line = br.readLine()) != null) {
+                String[] values = line.split(",");
+                if (values.length > 0) {
+                    String timestampStr = values[0];
+
+                    // Thêm giây nếu thiếu
+                    if (timestampStr.length() == 16) { // yyyy-MM-dd'T'HH:mm
+                        timestampStr += ":00";
+                    }
+
+                    try {
+                        LocalDateTime currentDate = LocalDateTime.parse(timestampStr, isoDateTimeFormatter);
+
+                        // Cập nhật ngày lớn nhất
+                        if (maxDate == null || currentDate.isAfter(maxDate)) {
+                            maxDate = currentDate;
+                        }
+                    } catch (DateTimeParseException e) {
+                        // Ghi log nếu có lỗi và tiếp tục
+                        System.err.println("Lỗi định dạng thời gian: " + timestampStr);
+                    }
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return maxDate;
+    }
+
+    private void writeSalesToCsv(List<SalesData> salesDataList, String filePath) throws IOException {
+        // Định dạng thời gian ISO 8601
+        DateTimeFormatter isoDateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+
+        File file = new File(filePath);
+        boolean isNewFile = !file.exists() || file.length() == 0; // Kiểm tra xem file có tồn tại hoặc rỗng không
+
+        try (FileWriter writer = new FileWriter(filePath, true)) { // Mở file ở chế độ append
+            // Viết header nếu file rỗng
+            if (isNewFile) {
+                writer.append("timestamp,item_id,demand\n");
+            }
+
+            for (SalesData salesData : salesDataList) {
+                LocalDateTime printDate = salesData.getPrintDate();
+
+                // Chuyển đổi printDate sang định dạng đầy đủ ISO 8601
+                String formattedTimestamp = printDate.format(isoDateTimeFormatter);
+
+                // Ghi dữ liệu cần thiết vào file CSV
+                writer.append(formattedTimestamp)
+                        .append(",")
+                        .append(String.valueOf(salesData.getProductId()))
+                        .append(",")
+                        .append(String.valueOf(salesData.getTotalDemand()))
+                        .append("\n");
+            }
+        }
+    }
 }

@@ -4,6 +4,8 @@ public class Location {
     Long id;
     String nameLocation;
 
+    Long warehouseId;
+
     public String getNameLocation() {
         return nameLocation;
     }
@@ -13,6 +15,14 @@ public class Location {
     }
 
     public Location() {
+    }
+
+    public Long getWarehouseId() {
+        return warehouseId;
+    }
+
+    public void setWarehouseId(Long warehouseId) {
+        this.warehouseId = warehouseId;
     }
 
     public Long getId() {

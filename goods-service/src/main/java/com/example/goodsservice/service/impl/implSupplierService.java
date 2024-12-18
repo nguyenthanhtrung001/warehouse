@@ -4,6 +4,7 @@ import com.example.goodsservice.entity.Supplier;
 import com.example.goodsservice.repository.SupplierRepository;
 import com.example.goodsservice.service.ISupplierService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,6 +18,15 @@ public class implSupplierService implements ISupplierService {
 
     @Override
     public Supplier createSupplier(Supplier supplier) {
+        // Kiểm tra nếu số điện thoại đã tồn tại
+        if (supplierRepository.existsByPhoneNumber(supplier.getPhoneNumber())) {
+            throw new DataIntegrityViolationException("Số điện thoại đã tồn tại trong hệ thống.");
+        }
+
+        // Kiểm tra nếu email đã tồn tại
+        if (supplierRepository.existsByEmail(supplier.getEmail())) {
+            throw new DataIntegrityViolationException("Email đã tồn tại trong hệ thống.");
+        }
         return supplierRepository.save(supplier);
     }
 

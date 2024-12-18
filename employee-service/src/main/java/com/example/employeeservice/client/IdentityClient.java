@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 @FeignClient(name = "identity-service", url = "http://localhost:8089/identity")
 public interface IdentityClient {
-    @PostMapping(value = "/users/registration",produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/users/createEmployee",produces = MediaType.APPLICATION_JSON_VALUE)
     ApiResponse<UserResponse> createUser(@RequestBody UserCreationRequest request);
 
 }

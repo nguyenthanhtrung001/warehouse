@@ -23,4 +23,4 @@ jwt:
 
 app:
   services:
-    profile: http://localhost:8081/profile
+    employee: http://localhost:8085

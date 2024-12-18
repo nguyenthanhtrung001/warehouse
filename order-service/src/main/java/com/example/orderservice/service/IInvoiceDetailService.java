@@ -4,6 +4,7 @@ import com.example.orderservice.dto.response.InvoiceDetailResponse;
 import com.example.orderservice.dto.response.ProductQuantity;
 import com.example.orderservice.entity.InvoiceDetail;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface IInvoiceDetailService {
@@ -28,4 +29,5 @@ public interface IInvoiceDetailService {
     public String getNoteReturnByInvoiceIdAndProductId(Long invoiceId, Long productId);
 
     public Integer getTotalSoldProductForLastWeek(Long productId);
+    public String exportSalesToCsv(String filePath);
 }

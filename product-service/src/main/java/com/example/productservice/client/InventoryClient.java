@@ -20,10 +20,13 @@ public interface InventoryClient {
    List<ProductQuantity> getTopNLowestQuantity(@RequestParam("limit") Integer limit, @RequestParam("warehouseId") Long warehouseId);
    @GetMapping (value = "/api/batch-details/quantity/{productId}", produces = MediaType.APPLICATION_JSON_VALUE)
    Integer getQuantityByProductId(@PathVariable("productId") Long id);
-   @GetMapping (value = "/api/batches/batch-location/{productId}", produces = MediaType.APPLICATION_JSON_VALUE)
-   BatchLocation getBatchLocationForProductId(@PathVariable("productId") Long id);
+   @GetMapping (value = "/api/batch-details/quantity/{productId}/{warehouseId}", produces = MediaType.APPLICATION_JSON_VALUE)
+   Integer getQuantityByProductId(@PathVariable("productId") Long id, @PathVariable("warehouseId") Long warehouseId );
+
+   @GetMapping (value = "/api/batches/batch-location/{productId}/{warehouseId}", produces = MediaType.APPLICATION_JSON_VALUE)
+   BatchLocation getBatchLocationForProductId(@PathVariable("productId") Long id,  @PathVariable Long warehouseId);
 
    @GetMapping( value = "/api/batches/expired", produces = MediaType.APPLICATION_JSON_VALUE)
-   List<Long> getExpiredProductIds();
+   List<Long> getExpiredProductIds(@RequestParam Long warehouseId);
 }
 
