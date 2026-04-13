@@ -94,6 +94,12 @@ public class ReceiptController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new ApiResponse<>(false, e.getMessage(), null));
 
+        }catch (RuntimeException e) {
+            // Ghi log lỗi chi tiết và trả về phản hồi với thông báo từ RuntimeException
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ApiResponse<>(false, e.getMessage(), null));
+
         } catch (Exception e) {
             // Ghi log lỗi và trả về phản hồi lỗi hệ thống
             e.printStackTrace();
@@ -103,12 +109,38 @@ public class ReceiptController {
     }
 
     @PostMapping("/transfer")
-    public ResponseEntity<Receipt> createImportTransfer(@RequestBody Import_Export_Request importExportRequest) {
+    public ResponseEntity<?> createImportTransfer(@RequestBody Import_Export_Request importExportRequest) {
         try {
+            // Kiểm tra dữ liệu đầu vào
+//            List<String> validationErrors = ImportExportRequestValidator.validateRequest(importExportRequest);
+//            if (!validationErrors.isEmpty()) {
+//                return ResponseEntity.badRequest()
+//                        .body(new ApiResponse<>(false, "Dữ liệu không hợp lệ", validationErrors));
+//            }
+
+            // Tạo Receipt với chi tiết
             Receipt createdReceipt = receiptService.createImportTransfer(importExportRequest);
-            return ResponseEntity.status(HttpStatus.CREATED).body(createdReceipt);
+
+            // Trả về thành công
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(new ApiResponse<>(true, "Phiếu nhập được tạo thành công", createdReceipt));
+
+        } catch (IllegalArgumentException e) {
+            // Trả về lỗi với thông báo chi tiết
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ApiResponse<>(false, e.getMessage(), null));
+
+        }catch (RuntimeException e) {
+            // Ghi log lỗi chi tiết và trả về phản hồi với thông báo từ RuntimeException
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ApiResponse<>(false, e.getMessage(), null));
+
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+            // Ghi log lỗi và trả về phản hồi lỗi hệ thống
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse<>(false, "Đã xảy ra lỗi không xác định", null));
         }
     }
     @GetMapping("/straightforwardness")

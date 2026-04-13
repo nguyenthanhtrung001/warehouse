@@ -90,6 +90,14 @@ public class implLocationService implements ILocationService {
 
         return locations;
     }
+    @Override
+    public Long getCurrentLoadForLocationId(Long locationId, Long warehouseId){
+        Location location = getLocationById(locationId);
+        Long currentLoad = batchDetailService.getTotalQuantityByWarehouseAndLocation(locationId, warehouseId);
+        Long inventory = location.getCapacity() - currentLoad;
+        return currentLoad != null ? inventory : 0;
+
+    }
 
 
 

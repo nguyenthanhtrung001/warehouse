@@ -60,5 +60,7 @@ public interface InventoryClient {
    @DeleteMapping(value = "/api/batch-details/{id}",produces = MediaType.APPLICATION_JSON_VALUE)
    ResponseEntity<Void> deleteBatchDetailById(@PathVariable Long id);
 
+   @GetMapping( value = "/api/locations/current-load", produces = MediaType.APPLICATION_JSON_VALUE)
+   Long getCurrentLoadForLocation(@RequestParam Long locationId, @RequestParam Long warehouseId);
 }
 

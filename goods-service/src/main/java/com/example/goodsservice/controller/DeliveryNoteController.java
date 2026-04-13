@@ -25,21 +25,31 @@ public class DeliveryNoteController {
     private IDeliveryDetailService deliveryDetailService;
 
     @PostMapping
-    public ResponseEntity<DeliveryNote> createDeliveryNoteWithDetails(@RequestBody Import_Export_Request importExportRequest) {
+    public ResponseEntity<ApiResponse<DeliveryNote>> createDeliveryNoteWithDetails(@RequestBody Import_Export_Request importExportRequest) {
         try {
-            DeliveryNote creatednote = deliveryNoteService.createDeliveryNoteWithDetails(importExportRequest);
-            return ResponseEntity.status(HttpStatus.CREATED).body(creatednote);
+            DeliveryNote transfer = deliveryNoteService.createDeliveryNoteWithDetails(importExportRequest);
+            ApiResponse<DeliveryNote> response = new ApiResponse<>(true, "Phiếu xuất tạo thành công", transfer);
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (RuntimeException e) {
+            ApiResponse<DeliveryNote> response = new ApiResponse<>(false, e.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+            ApiResponse<DeliveryNote> response = new ApiResponse<>(false, "Internal server error.", null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
     @PostMapping("/transfer")
-    public ResponseEntity<DeliveryNote> createTransfer(@RequestBody Import_Export_Request importExportRequest) {
+    public ResponseEntity<ApiResponse<DeliveryNote>> createTransfer(@RequestBody Import_Export_Request importExportRequest) {
         try {
             DeliveryNote transfer = deliveryNoteService.createTransfer(importExportRequest);
-            return ResponseEntity.status(HttpStatus.CREATED).body(transfer);
+            ApiResponse<DeliveryNote> response = new ApiResponse<>(true, "Phiếu chuyển kho tạo thành công", transfer);
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (RuntimeException e) {
+            ApiResponse<DeliveryNote> response = new ApiResponse<>(false, e.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+            ApiResponse<DeliveryNote> response = new ApiResponse<>(false, "Internal server error.", null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
     @PostMapping("/cancel")
@@ -117,6 +127,17 @@ public class DeliveryNoteController {
         }
         return ResponseEntity.notFound().build();
     }
+    @PatchMapping("complete-transfer/{id}")
+    public ResponseEntity<ApiResponse<String>> completeTransfer(@PathVariable Long id) {
+        boolean isUpdated = deliveryNoteService.updateDeliveryNoteStatus(id, 3);
+        if (isUpdated) {
+            ApiResponse<String> response = new ApiResponse<>(true, "Chuyển kho đã được hoàn tất.", null);
+            return ResponseEntity.ok(response);
+        }
+        ApiResponse<String> response = new ApiResponse<>(false, "Không tìm thấy phiếu chuyển kho với ID: " + id, null);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+
     @GetMapping("/{noteId}/details")
     public ResponseEntity<List<NoteDetailResponse>> getNoteDetails(@PathVariable Long noteId) {
         List<NoteDetailResponse> noteDetails = deliveryDetailService.getNoteDetails(noteId);

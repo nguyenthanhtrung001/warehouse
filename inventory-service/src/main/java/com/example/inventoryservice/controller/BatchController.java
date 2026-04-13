@@ -11,6 +11,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -93,5 +96,28 @@ public class BatchController {
     @GetMapping("/batches/details")
     public List<BatchDetailInfo> getBatchDetailsByWarehouseId(@RequestParam Long warehouseId) {
         return batchService.getBatchDetailsByWarehouseId(warehouseId);
+    }
+    @PutMapping("/{id}/expiry-date")
+    public ResponseEntity<String> updateExpiryDate(
+            @PathVariable Long id,
+            @RequestParam String expiryDate) {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+
+        try {
+            // Chuyển chuỗi sang kiểu Date
+            Date parsedDate = formatter.parse(expiryDate);
+
+            // Gọi service để cập nhật
+            boolean isUpdated = batchService.updateExpiryDate(id, parsedDate);
+
+            if (isUpdated) {
+                return ResponseEntity.ok("Expiry date updated successfully.");
+            } else {
+                return ResponseEntity.badRequest().body("Failed to update expiry date. Batch not found.");
+            }
+        } catch (ParseException e) {
+            // Trả về lỗi nếu không parse được
+            return ResponseEntity.badRequest().body("Invalid date format. Expected format is yyyy-MM-dd.");
+        }
     }
 }

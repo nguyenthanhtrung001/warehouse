@@ -208,9 +208,10 @@ public class implInvoiceService implements IInvoiceService {
         List<Invoice> invoices = invoiceRepository.findByPrintDateBetweenAndWarehouseId(startDateTime, endDateTime, wareHouseId);
 
         return invoices.stream()
-                .filter(invoice -> invoice.getPrice() != null) // Kiểm tra null
+                .filter(invoice -> invoice.getPrice() != null && invoice.getStatus() != 1) // Kiểm tra null và status = 2
                 .mapToLong(Invoice::getPrice)
                 .sum();
+
 
     }
 
@@ -232,7 +233,7 @@ public class implInvoiceService implements IInvoiceService {
 
         // Tính tổng giá trị của các hóa đơn, bỏ qua các hóa đơn có giá trị null
         return invoices.stream()
-                .filter(invoice -> invoice.getPrice() != null)
+                .filter(invoice -> invoice.getPrice() != null && invoice.getStatus() != 1)
                 .mapToLong(Invoice::getPrice)
                 .sum();
     }

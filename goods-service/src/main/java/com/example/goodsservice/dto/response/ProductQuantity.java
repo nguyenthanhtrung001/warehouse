@@ -4,6 +4,9 @@ public class ProductQuantity {
     private Long productId;
     private Long quantity;
 
+    public ProductQuantity() {
+    }
+
     // Constructor
     public ProductQuantity(Long productId, Long quantity) {
         this.productId = productId;

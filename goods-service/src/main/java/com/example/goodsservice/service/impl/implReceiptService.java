@@ -68,6 +68,7 @@ public class implReceiptService implements IReceiptService {
 
         long totalReceipts = receipts.size();
         long totalPurchasePrice = receipts.stream()
+                .filter(receipt -> receipt.getStatus() != 0)
                 .mapToLong(receipt -> receipt.getPurchasePrice() != null ? receipt.getPurchasePrice() : 0)
                 .sum();
 
@@ -83,6 +84,7 @@ public class implReceiptService implements IReceiptService {
 
         long totalReceipts = receipts.size();
         long totalPurchasePrice = receipts.stream()
+                .filter(receipt -> receipt.getStatus() != 0)
                 .mapToLong(receipt -> receipt.getPurchasePrice() != null ? receipt.getPurchasePrice() : 0)
                 .sum();
 
@@ -172,10 +174,73 @@ public class implReceiptService implements IReceiptService {
         }
         return receipt.getDeliveryNotes();
     }
+    public List<ProductQuantity> getProductQuantities(List<Import_Export_DetailRequest> details) {
+        List<ProductQuantity> productQuantities = new ArrayList<>();
+
+        for (Import_Export_DetailRequest detail : details) {
+            ProductQuantity productQuantity = new ProductQuantity();
+            productQuantity.setProductId(detail.getProduct_Id());
+            productQuantity.setQuantity(detail.getQuantity().longValue());
+            productQuantities.add(productQuantity);
+        }
+
+        return productQuantities;
+    }
+    public boolean checkInventory(Long locationId, Long warehouseId,Long quantityProduct){
+        Long currentLoad = inventoryClient.getCurrentLoadForLocation(locationId,warehouseId);
+        System.out.println("SLSS: "+quantityProduct + ":"+currentLoad);
+        if (quantityProduct <= currentLoad) {
+            return true;
+        }
+        return false;
+    }
+    public void processProductQuantities(Import_Export_Request importExportRequest) {
+        List<ProductQuantity> productQuantities = getProductQuantities(importExportRequest.getImport_Export_Details());
+
+        // Tính tổng số lượng
+        Long totalQuantity = productQuantities.stream()
+                .mapToLong(ProductQuantity::getQuantity)
+                .sum();
+
+        // Kiểm tra khả dụng
+        boolean isAvailable = checkInventory(
+                importExportRequest.getLocation(),
+                importExportRequest.getWarehouseId(),
+                totalQuantity
+        );
+
+
+        if (!isAvailable) {
+            String errorMessage = "Tổng Số lượng mặt hàng vượt quá sức chứa của vị trí bạn chọn.";
+            throw new RuntimeException(errorMessage);
+        }
+    }
+    public void processProductQuantitiesTransfer(Import_Export_Request importExportRequest) {
+        List<ProductQuantity> productQuantities = getProductQuantities(importExportRequest.getImport_Export_Details());
+
+        // Tính tổng số lượng
+        Long totalQuantity = productQuantities.stream()
+                .mapToLong(ProductQuantity::getQuantity)
+                .sum();
+
+        // Kiểm tra khả dụng
+        boolean isAvailable = checkInventory(
+                importExportRequest.getLocation(),
+                importExportRequest.getWarehouseDestination(),
+                totalQuantity
+        );
+
+
+        if (!isAvailable) {
+            String errorMessage = "Tổng Số lượng mặt hàng vượt quá sức chứa của vị trí bạn chọn.";
+            throw new RuntimeException(errorMessage);
+        }
+    }
 
     @Transactional
     public Receipt createReceiptWithDetails(Import_Export_Request importExportRequest) {
         // Khởi tạo Receipt
+        processProductQuantities(importExportRequest);
         Receipt savedReceipt = null;
         Long bathId = -1L;
         try {
@@ -226,6 +291,7 @@ public class implReceiptService implements IReceiptService {
 
     // Hàm phụ trợ để tạo ReceiptDetail
     private void createReceiptDetail(Import_Export_DetailRequest detailRequest, Import_Export_Request importExportRequest, BathRequest bath, Receipt savedReceipt) {
+
         Long bathDetailId =-1L;
         try {
             // Tạo BatchDetail thông qua API
@@ -285,12 +351,14 @@ public class implReceiptService implements IReceiptService {
 
     @Transactional
     public Receipt createImportTransfer(Import_Export_Request importExportRequest) {
+        // check số lượng kho trống
+        processProductQuantitiesTransfer(importExportRequest);
         // gọi API tạo lô hàng và cập nhật số lượng cho lô hàng
         BathRequest bathRequest = bathMapper.toBathRequest(importExportRequest);
         bathRequest.setStatus(1);
         bathRequest.setWarehouseId(importExportRequest.getWarehouseDestination());
         bathRequest.setBatchName(createBatchName(importExportRequest.getWarehouseId(), importExportRequest.getExpiryDate()));
-        BathRequest bath= new BathRequest();
+        BathRequest bath = new BathRequest();
         bath = inventoryClient.createBath(bathRequest);
         System.out.println("ID bath:"+bath.getBatchName());
         Receipt savedReceipt = null;

@@ -1,6 +1,7 @@
 package com.example.orderservice.controller;
 
 import com.example.orderservice.dto.ContactInfoDTO;
+import com.example.orderservice.dto.response.ApiResponse;
 import com.example.orderservice.entity.ContactInfo;
 import com.example.orderservice.service.IContactInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +44,21 @@ public class ContactInfoController {
         } catch (Exception e) {
             // Xử lý trường hợp ngoại lệ, trả về lỗi 500
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteContactInfo(@PathVariable Long id) {
+        try {
+            boolean deleted = IContactInfoService.deleteContactInfo(id);
+            if (deleted) {
+                return ResponseEntity.noContent().build(); // Xóa thành công
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(new ApiResponse<>(false, "Địa chỉ không tồn tại", null));
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse<>(false, "Có lỗi xảy ra khi xóa địa chỉ", e.getMessage()));
         }
     }
 }

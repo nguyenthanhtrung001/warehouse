@@ -366,8 +366,8 @@ public class implProductService implements IProductService {
         Price price = new Price();
         price.setPrice(product.getPrices()!=null?product.getPrices():0);
         price.setProduct(productSave);
-//        price.setEmployeeId(product.getEmployeeId());
-        price.setEmployeeId(1L);
+        price.setEmployeeId(product.getEmployeeId());
+//        price.setEmployeeId(1L);
         LocalDateTime now = LocalDateTime.now();
         price.setEffectiveDate(now);
         priceRepository.save(price);

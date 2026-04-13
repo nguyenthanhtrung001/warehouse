@@ -1,0 +1,28 @@
+services:
+  employee:
+    build: ./employee-service
+    ports:
+      - "8085:8085"
+    networks:
+      - micro-net
+
+  identity:
+    build: ./identity-service
+    ports:
+      - "8089:8089"
+    networks:
+      - micro-net
+
+  api-gateway:
+    build: ./api-gateway
+    ports:
+      - "8888:8888"
+    depends_on:
+      - employee
+      - identity
+    networks:
+      - micro-net
+
+networks:
+  micro-net:
+    driver: bridge

@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -82,6 +83,14 @@ public class LocationController {
         }
     }
 
+    @GetMapping("/current-load")
+    public Long getCurrentLoadForLocation(@RequestParam Long locationId, @RequestParam Long warehouseId) {
+        try {
+            return locationService.getCurrentLoadForLocationId(locationId, warehouseId);
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error retrieving current load.", e);
+        }
+    }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteLocation(@PathVariable Long id) {

@@ -66,5 +66,14 @@ public class implContactInfoService implements IContactInfoService {
             throw new EntityNotFoundException("Contact info not found for id: " + id);
         }
     }
+    @Override
+    public boolean deleteContactInfo(Long id) {
+        Optional<ContactInfo> contactInfoOptional = contactInfoRepository.findById(id);
+        if (contactInfoOptional.isPresent()) {
+            contactInfoRepository.delete(contactInfoOptional.get());
+            return true;
+        }
+        return false;
+    }
 
 }

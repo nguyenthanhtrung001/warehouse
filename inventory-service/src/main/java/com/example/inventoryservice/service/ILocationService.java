@@ -15,4 +15,5 @@ public interface ILocationService {
 
     boolean deleteLocation(Long id);
     public  Long getQuantityAllLocation(Long warehouseId);
+    public Long getCurrentLoadForLocationId(Long locationId, Long warehouseId);
 }

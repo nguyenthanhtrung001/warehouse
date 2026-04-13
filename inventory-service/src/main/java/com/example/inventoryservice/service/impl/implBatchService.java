@@ -137,6 +137,17 @@ public class implBatchService implements IBatchService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public boolean updateExpiryDate(Long id, Date expiryDate) {
+        Optional<Batch> optionalBatch = batchRepository.findById(id);
+        if (optionalBatch.isPresent()) {
+            Batch batch = optionalBatch.get();
+            batch.setExpiryDate(expiryDate);
+            batchRepository.save(batch);
+            return true;
+        }
+        return false;
+    }
 
 
     public List<ProductQuantity> getProductQuantitiesByWarehouseId(Long warehouseId) {
@@ -201,6 +212,7 @@ public class implBatchService implements IBatchService {
 
 
     }
+
 
 
 }

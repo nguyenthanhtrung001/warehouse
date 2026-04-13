@@ -165,7 +165,21 @@ public class UserService {
         userRepository.deleteById(userId);
     }
 
-//    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
+
+    public void deleteUserByUsername(String username) {
+        // Tìm người dùng theo username
+        Optional<User> user = userRepository.findByUsername(username);
+        if (user.isPresent()) {
+            // Xóa người dùng khỏi cơ sở dữ liệu
+            userRepository.delete(user.get());
+            System.out.println("Người dùng với username '" + username + "' đã bị xóa.");
+        } else {
+            throw new RuntimeException("Không tìm thấy người dùng với username: " + username);
+        }
+    }
+
+
+    //    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
 //    public List<UserResponse> getUsers() {
 //        log.info("In method get Users");
 //        return userRepository.findAll().stream().map(userMapper::toUserResponse).toList();

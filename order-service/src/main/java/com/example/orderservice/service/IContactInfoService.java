@@ -10,4 +10,5 @@ public interface IContactInfoService {
     public ContactInfo getContactInfoById(Long id);
     public ContactInfo createContactInfo(ContactInfoDTO contactInfoDTO);
     public ContactInfo updateContactInfo(Long id, ContactInfoDTO contactInfoDTO);
+    public boolean deleteContactInfo(Long id);
 }

@@ -27,6 +27,15 @@ public class implEmployeeService implements IEmployeeService {
     @Transactional
     public Employee createEmployee(Employee employee) {
         System.out.println("vi tri:"+ employee.getPosition());
+
+        if (employeeRepository.existsByPhoneNumber(employee.getPhoneNumber())) {
+            throw new RuntimeException("Số điện thoại đã tồn tại trong hệ thống.");
+        }
+        if (employee.getEmail() != null && !employee.getEmail().trim().isEmpty()) {
+            if (employeeRepository.existsByEmail(employee.getEmail())) {
+                throw new RuntimeException("Email đã tồn tại trong hệ thống.");
+            }
+        }
         UserCreationRequest userCreationRequest = new UserCreationRequest();
         if(employee.getAccountId().equals("false"))
         {
@@ -143,14 +152,25 @@ public class implEmployeeService implements IEmployeeService {
         }
         return false;
     }
-    @Override
-    public boolean deleteEmployee(Long id) {
-        if (employeeRepository.existsById(id)) {
-            employeeRepository.deleteById(id);
-            return true;
+    @Transactional
+    public void deleteEmployee(Long id) {
+        // Tìm nhân viên theo ID
+        Employee employee = employeeRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Nhân viên không tồn tại với ID: " + id));
+
+        // Xóa tài khoản liên kết từ hệ thống khác qua `identityClient`
+        if (employee.getAccountId() != null) {
+//            identityClient.deleteUserByUsername(employee.getAccountId());
+            employee.setAccountId(null); // Loại bỏ liên kết tài khoản
         }
-        return false;
+
+        // Cập nhật trạng thái nhân viên về 0
+        employee.setStatus(0);
+        employeeRepository.save(employee);
+
+        System.out.println("Nhân viên đã được cập nhật trạng thái về 0.");
     }
+
 
     @Override
     public Employee getEmployeeByAccountId(String accountId) {

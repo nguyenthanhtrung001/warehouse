@@ -32,10 +32,12 @@ public class implCustomerService implements ICustomerService {
         if (customerRepository.existsByPhoneNumber(customerDTO.getPhoneNumber())) {
             throw new RuntimeException("Số điện thoại đã tồn tại trong hệ thống.");
         }
-
-        if (customerRepository.existsByEmail(customerDTO.getEmail())) {
-            throw new RuntimeException("Email đã tồn tại trong hệ thống.");
+        if (customerDTO.getEmail() != null && !customerDTO.getEmail().trim().isEmpty()) {
+            if (customerRepository.existsByEmail(customerDTO.getEmail())) {
+                throw new RuntimeException("Email đã tồn tại trong hệ thống.");
+            }
         }
+
 
         Customer cus = CustomerMapper.toEntity(customerDTO);
 

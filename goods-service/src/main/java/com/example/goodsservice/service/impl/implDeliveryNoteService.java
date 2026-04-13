@@ -4,6 +4,7 @@ import com.example.goodsservice.client.InventoryClient;
 import com.example.goodsservice.dto.*;
 import com.example.goodsservice.dto.response.DeliverySummaryResponse;
 import com.example.goodsservice.dto.response.OrderQuantity;
+import com.example.goodsservice.dto.response.ProductQuantity;
 import com.example.goodsservice.entity.DeliveryDetail;
 import com.example.goodsservice.entity.DeliveryNote;
 import com.example.goodsservice.entity.Receipt;
@@ -122,8 +123,12 @@ public class implDeliveryNoteService implements IDeliveryNoteService {
         }
         return false;
     }
+
     @Transactional
     public DeliveryNote createDeliveryNoteWithDetails(Import_Export_Request importExportRequest) {
+        // kiểm tra số lượng tồn kho của phiếu chuyển kho
+        processProductQuantities( importExportRequest.getImport_Export_Details(),importExportRequest.getWarehouseId());
+
         DeliveryNote savedNote=null;
 
         try {
@@ -164,8 +169,41 @@ public class implDeliveryNoteService implements IDeliveryNoteService {
         }
         return false;
     }
+    public List<ProductQuantity> getProductQuantities(List<Import_Export_DetailRequest> details) {
+        List<ProductQuantity> productQuantities = new ArrayList<>();
+
+        for (Import_Export_DetailRequest detail : details) {
+            ProductQuantity productQuantity = new ProductQuantity();
+            productQuantity.setProductId(detail.getProduct_Id());
+            productQuantity.setQuantity(detail.getQuantity().longValue());
+            productQuantities.add(productQuantity);
+        }
+
+        return productQuantities;
+    }
+    public void processProductQuantities(List<Import_Export_DetailRequest> details, Long warehouseId) {
+        List<ProductQuantity> productQuantities = getProductQuantities(details);
+
+        for (ProductQuantity productQuantity : productQuantities) {
+            boolean isAvailable = checkInventory(
+                    productQuantity.getProductId(),
+                    warehouseId,
+                    productQuantity.getQuantity().intValue()
+            );
+
+            if (!isAvailable) {
+                String errorMessage = "Sản phẩm với mã MH000" + productQuantity.getProductId() + " không đủ số lượng tồn kho.";
+                System.out.println("Lỗi: "+errorMessage);
+                throw new RuntimeException(errorMessage);
+            }
+        }
+    }
     @Transactional
     public DeliveryNote createTransfer(Import_Export_Request importExportRequest) {
+
+        // kiểm tra số lượng tồn kho của phiếu chuyển kho
+        processProductQuantities( importExportRequest.getImport_Export_Details(),importExportRequest.getWarehouseId());
+
         DeliveryNote savedNote = null;
 
             DeliveryNote deliveryNote = new DeliveryNote();

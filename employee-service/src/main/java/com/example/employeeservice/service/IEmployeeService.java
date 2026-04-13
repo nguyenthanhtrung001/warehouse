@@ -17,7 +17,7 @@ public interface IEmployeeService {
 
     boolean updateEmployee(Long id, Employee employee);
 
-    boolean deleteEmployee(Long id);
+    public void deleteEmployee(Long id);
     public Employee getEmployeeByAccountId(String accountId);
     List<String> getAccountIdsByWarehouseId(Long warehouseId);
 }

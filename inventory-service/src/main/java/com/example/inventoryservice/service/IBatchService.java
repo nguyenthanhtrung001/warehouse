@@ -6,6 +6,7 @@ import com.example.inventoryservice.dto.response.BatchLocation;
 import com.example.inventoryservice.dto.response.ProductQuantity;
 import com.example.inventoryservice.entity.Batch;
 
+import java.util.Date;
 import java.util.List;
 
 public interface  IBatchService {
@@ -25,6 +26,6 @@ public interface  IBatchService {
     public List<Long> getExpiredProductIds(Long warehouseId);
     public List<ProductResponse> getProductsByWarehouseId(Long id);
     public List<BatchDetailInfo> getBatchDetailsByWarehouseId(Long warehouseId);
-
+    public boolean updateExpiryDate(Long id, Date expiryDate);
 
     }

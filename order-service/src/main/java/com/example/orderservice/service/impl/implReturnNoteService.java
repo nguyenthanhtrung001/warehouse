@@ -58,8 +58,9 @@ public class implReturnNoteService implements IReturnNoteService {
 
         returnNote.setInvoice(invoice);
         returnNote.setEmployeeId(returnNoteRequest.getEmployeeId());
-        returnNote.setStatus(returnNoteRequest.getStatus());
+
         returnNote.setPrice(returnNoteRequest.getPrice());
+        returnNote.setStatus(1);
 
         // Save the ReturnNote to get the generated ID
         ReturnNote savedReturnNote = returnNoteRepository.save(returnNote);

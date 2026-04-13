@@ -39,7 +39,10 @@ public class CustomerMapper {
         customer.setCustomerName(customerDTO.getCustomerName());
         customer.setPhoneNumber(customerDTO.getPhoneNumber());
         customer.setDateOfBirth(customerDTO.getDateOfBirth());
-        customer.setEmail(customerDTO.getEmail());
+        if ((!customerDTO.getEmail().isEmpty() || !customerDTO.getEmail().equals(""))){
+            customer.setEmail(customerDTO.getEmail());
+        }
+
         customer.setNote(customerDTO.getNote());
 
 

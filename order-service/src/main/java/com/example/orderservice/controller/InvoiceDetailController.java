@@ -56,6 +56,12 @@ public class InvoiceDetailController {
 
         return response;
     }
+    @GetMapping("/invoice-not-decode/{invoiceId}")
+    public List<InvoiceDetailResponse> getInvoiceDetailsNoteDecodeByInvoiceId(@PathVariable Long invoiceId) {
+        List<InvoiceDetailResponse> response = invoiceDetailService.getInvoiceDetailsByInvoiceId(invoiceId);
+
+        return response;
+    }
     private String processNoteReturn(String noteReturn) {
         List<OrderQuantity> bathQuantity = EncoderDecoder.decodeFromJsonBase64(noteReturn);
         StringBuilder bath = new StringBuilder();
