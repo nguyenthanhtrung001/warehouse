@@ -130,4 +130,16 @@ public class QCService implements IQCService {
 
         return qcRepo.getLeaderboard(start, end);
     }
+    @Override
+    public void updateTypeByQcCode(String qcCode, String type) {
+        QC qc = qcRepo.findByQcCodeAndDeletedFalse(qcCode)
+                .orElseThrow(() -> new RuntimeException("QC code not found"));
+
+        qc.setType(type);
+        qcRepo.save(qc);
+    }
+    @Override
+    public List<QC> getByType(String type) {
+        return qcRepo.findByTypeAndDeletedFalseOrderByScanTimeDesc(type);
+    }
 }

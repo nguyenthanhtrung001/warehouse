@@ -54,4 +54,8 @@ public interface QCRepository extends JpaRepository<QC, Long> {
             LocalDateTime start,
             LocalDateTime end
     );
+    Optional<QC> findByQcCodeAndDeletedFalse(String qcCode);
+
+    List<QC> findByTypeAndDeletedFalseOrderByScanTimeDesc(String type);
+
 }

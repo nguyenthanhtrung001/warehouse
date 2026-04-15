@@ -23,7 +23,7 @@ spring:
           filters:
             - StripPrefix=1
         - id: employee_service
-          uri: http://employee:8085
+          uri: http://localhost:8085
           predicates:
             - Path=${app.api-prefix}/api/attendances/**, ${app.api-prefix}/api/employees/**, ${app.api-prefix}/api/payrolls/**, ${app.api-prefix}/api/wage-configurations/**, ${app.api-prefix}/api/workshifts/**,${app.api-prefix}/api/qc/**
           filters:
@@ -41,7 +41,7 @@ spring:
           filters:
             - StripPrefix=1
         - id: identity_service
-          uri: http://identity:8089
+          uri: http://localhost:8089
           predicates:
             - Path=${app.api-prefix}/identity/**
           filters:

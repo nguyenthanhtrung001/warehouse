@@ -2,6 +2,7 @@ package com.example.employeeservice.controller;
 
 import com.example.employeeservice.dto.request.QCKPIRequest;
 import com.example.employeeservice.dto.request.QCRequest;
+import com.example.employeeservice.dto.request.UpdateQCTypeRequest;
 import com.example.employeeservice.dto.response.ApiResponse;
 import com.example.employeeservice.dto.response.QCDashboardResponse;
 import com.example.employeeservice.dto.response.QCLeaderboardDTO;
@@ -134,6 +135,29 @@ public class QCController {
                 ApiResponse.<List<QCLeaderboardDTO>>builder()
                         .message("Get leaderboard success")
                         .result(qcService.getLeaderboard(LocalDate.parse(date)))
+                        .build()
+        );
+    }
+
+    @PutMapping("/update-type")
+    public ResponseEntity<ApiResponse<Void>> updateType(
+            @RequestBody UpdateQCTypeRequest request
+    ) {
+        qcService.updateTypeByQcCode(request.getQcCode(), request.getType());
+
+        return ResponseEntity.ok(
+                ApiResponse.<Void>builder()
+                        .message("Update QC type success")
+                        .build()
+        );
+    }
+
+    @GetMapping("/type/{type}")
+    public ResponseEntity<ApiResponse<List<QC>>> getByType(@PathVariable String type) {
+        return ResponseEntity.ok(
+                ApiResponse.<List<QC>>builder()
+                        .message("Get QC by type success")
+                        .result(qcService.getByType(type))
                         .build()
         );
     }

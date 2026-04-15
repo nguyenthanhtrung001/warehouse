@@ -27,5 +27,6 @@ public interface IQCService {
     QCKPIConfig getKPI(Long employeeId, LocalDate date);
     //qc
     List<QCLeaderboardDTO> getLeaderboard(LocalDate date);
-
+    void updateTypeByQcCode(String qcCode, String type);
+    List<QC> getByType(String type);
 }
